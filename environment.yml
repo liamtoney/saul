@@ -1,6 +1,7 @@
 name: saul
 dependencies:
   - multitaper
+  - obspy
   - pip
   - pip:
       - --editable .
