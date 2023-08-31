@@ -20,6 +20,9 @@ from scipy.fft import next_fast_len
 # This file downloaded from the supplementary material of Macpherson et al. (2022)
 AK_INFRA_NOISE = Path(__file__).with_name('alaska_ambient_infrasound_noise_models.txt')
 
+SEISMIC_DB_REF_VAL = 1  # [m/s] Reference value for seismic PSDs
+INFRASOUND_DB_REF_VAL = 20e-6  # [Pa] Reference value for infrasound PSDs
+
 
 def get_ak_infra_noise():
     """Returns the Alaska ambient infrasound noise models from Macpherson et al. (2022).
@@ -56,6 +59,12 @@ class PSD:
                 'Could not determine whether data are infrasound or seismic — or both data kinds are present.'
             )
 
+        # Set reference value for PSD from data kind
+        if self.data_kind == 'infrasound':
+            self.db_ref_val = INFRASOUND_DB_REF_VAL
+        else:  # self.data_kind == 'seismic'
+            self.db_ref_val = SEISMIC_DB_REF_VAL
+
         # Calculate PSD
         self.psd = []
         for tr in self.st:
@@ -87,10 +96,9 @@ class PSD:
         p.text(self.__str__())
 
     def plot(self, show_noise_models=False, infra_noise_model='ak'):
-        ref_val = 20e-6 if self.data_kind == 'infrasound' else 1
         fig, ax = plt.subplots()
         for tr, (f, pxx) in zip(self.st, self.psd):
-            pxx_db = 10 * np.log10(pxx / (ref_val**2))
+            pxx_db = 10 * np.log10(pxx / (self.db_ref_val**2))
             ax.semilogx(f, pxx_db, label=tr.id)
         if show_noise_models:
             if self.data_kind == 'infrasound':
@@ -106,7 +114,9 @@ class PSD:
                 # These are all given relative to 1 Pa, so need to convert to `ref_val`
                 for i, noise_model in enumerate(noise_models):
                     period, pxx_db_rel_1_pa = noise_model
-                    pxx_db_rel_ref_val = pxx_db_rel_1_pa - 10 * np.log10(ref_val**2)
+                    pxx_db_rel_ref_val = pxx_db_rel_1_pa - 10 * np.log10(
+                        self.db_ref_val**2
+                    )
                     noise_models[i] = period, pxx_db_rel_ref_val
             else:  # self.data_kind == 'seismic'
                 noise_models = [get_nlnm(), get_nhnm()]
