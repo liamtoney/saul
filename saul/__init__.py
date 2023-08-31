@@ -1,9 +1,2 @@
+from .shortcuts import psd, spectrogram
 from .spectral import PSD, Spectrogram
-
-
-def psd():
-    pass
-
-
-def spectrogram():
-    pass
