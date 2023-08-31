@@ -20,8 +20,8 @@ from scipy.fft import next_fast_len
 # This file downloaded from the supplementary material of Macpherson et al. (2022)
 AK_INFRA_NOISE = Path(__file__).with_name('alaska_ambient_infrasound_noise_models.txt')
 
-SEISMIC_DB_REF_VAL = 1  # [m/s] Reference value for seismic PSDs
-INFRASOUND_DB_REF_VAL = 20e-6  # [Pa] Reference value for infrasound PSDs
+REFERENCE_VELOCITY = 1  # [m/s] Reference value for seismic PSDs
+REFERENCE_PRESSURE = 20e-6  # [Pa] Reference value for infrasound PSDs
 
 
 def get_ak_infra_noise():
@@ -61,9 +61,9 @@ class PSD:
 
         # Set reference value for PSD from data kind
         if self.data_kind == 'infrasound':
-            self.db_ref_val = INFRASOUND_DB_REF_VAL
+            self.db_ref_val = REFERENCE_PRESSURE
         else:  # self.data_kind == 'seismic'
-            self.db_ref_val = SEISMIC_DB_REF_VAL
+            self.db_ref_val = REFERENCE_VELOCITY
 
         # Calculate PSD
         self.psd = []
