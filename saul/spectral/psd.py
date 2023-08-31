@@ -43,11 +43,27 @@ def get_ak_infra_noise():
 
 @cache
 def _mtspec(tr_data_tuple, **kwargs):
+    """Wrapper around MTSpec to facilitate tuple input (needed for memoization)."""
     return MTSpec(np.array(tr_data_tuple), **kwargs)
 
 
 class PSD:
+    """A class for calculating and plotting PSDs of one or more waveforms."""
+
     def __init__(self, tr_or_st, time_bandwidth_product=4, number_of_tapers=7):
+        """Create a PSD object.
+
+        The PSDs of the input waveforms are estimated in this method. See the
+        documentation for `multitaper.mtspec.MTSpec` for details on some of the input
+        arguments here.
+
+        Args:
+            tr_or_st (Trace or Stream): Input waveforms (response is expected to be
+                removed; SAUL expects units of pressure [Pa] for infrasound data and
+                velocity [m/s] for seismic data!)
+            time_bandwidth_product (float): Time-bandwidth product
+            number_of_tapers (int): Number of tapers to use
+        """
         # Pre-processing and checks
         self.st = Stream(tr_or_st).copy()  # Always use *copied* Stream objects
         if np.all([tr.stats.channel[1:3] == 'DF' for tr in self.st]):
@@ -65,7 +81,7 @@ class PSD:
         else:  # self.data_kind == 'seismic'
             self.db_ref_val = REFERENCE_VELOCITY
 
-        # Calculate PSD
+        # KEY: Calculate PSD
         self.psd = []
         for tr in self.st:
             mtspec = _mtspec(
@@ -87,15 +103,25 @@ class PSD:
             self.peak_frequency.append(f[np.argmax(pxx)])
 
     def __str__(self):
+        """A custom string representation of the PSD object."""
         text = f'{len(self.psd)} PSD(s):'
         for tr, peak_f in zip(self.st, self.peak_frequency):
             text += f'\n{tr.id} | {peak_f:.3f} Hz peak frequency'
         return text
 
     def _repr_pretty_(self, p, cycle):
+        """Pretty-printing for IPython usage."""
         p.text(self.__str__())
 
     def plot(self, show_noise_models=False, infra_noise_model='ak'):
+        """Plot the calculated PSDs.
+
+        Args:
+            show_noise_models (bool): Whether to plot reference noise models
+            infra_noise_model (str): Which infrasound noise model to use (only used if
+                `show_noise_models` is True and `self.data_kind` is 'infrasound'), one
+                of 'ak' (Alaska noise model) or 'idc' (IMS array noise model)
+        """
         fig, ax = plt.subplots()
         for tr, (f, pxx) in zip(self.st, self.psd):
             pxx_db = 10 * np.log10(pxx / (self.db_ref_val**2))
