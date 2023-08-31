@@ -84,7 +84,7 @@ class PSD:
     def _repr_pretty_(self, p, cycle):
         p.text(self.__str__())
 
-    def plot(self, show_noise_models=False):
+    def plot(self, show_noise_models=False, infra_noise_model='ak'):
         ref_val = 20e-6 if self.data_kind == 'infrasound' else 1
         fig, ax = plt.subplots()
         for tr, (f, pxx) in zip(self.st, self.psd):
@@ -92,15 +92,23 @@ class PSD:
             ax.semilogx(f, pxx_db, label=tr.id)
         if show_noise_models:
             if self.data_kind == 'infrasound':
-                noise_models = [get_idc_infra_low_noise(), get_idc_infra_hi_noise()]
-                # These are natively relative to 1 Pa, so need to convert to `ref_val`
+                if infra_noise_model == 'ak':
+                    period, *nms = get_ak_infra_noise()
+                    noise_models = [(period, nm) for nm in nms]
+                elif infra_noise_model == 'idc':
+                    noise_models = [get_idc_infra_low_noise(), get_idc_infra_hi_noise()]
+                else:
+                    raise ValueError(
+                        'Infrasound noise model must be either \'ak\' or \'idc\''
+                    )
+                # These are all given relative to 1 Pa, so need to convert to `ref_val`
                 for i, noise_model in enumerate(noise_models):
                     period, pxx_db_rel_1_pa = noise_model
                     pxx_db_rel_ref_val = pxx_db_rel_1_pa - 10 * np.log10(ref_val**2)
                     noise_models[i] = period, pxx_db_rel_ref_val
-            else:
+            else:  # self.data_kind == 'seismic'
                 noise_models = [get_nlnm(), get_nhnm()]
-            xlim, ylim = ax.get_xlim(), ax.get_ylim()
+            xlim, ylim = ax.get_xlim(), ax.get_ylim()  # Store these to restore limits
             for i, noise_model in enumerate(noise_models):
                 period, pxx_db = noise_model
                 ax.plot(
@@ -109,7 +117,7 @@ class PSD:
                     color='tab:gray',
                     linestyle=':',
                     zorder=-5,
-                    label='Noise model' if i else None,  # Only plot one line
+                    label='Noise model' if not i else None,  # Only label one line
                 )
             ax.set_xlim(xlim)
             ax.set_ylim(ylim)
