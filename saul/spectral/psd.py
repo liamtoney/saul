@@ -71,13 +71,25 @@ class PSD:
             ax.semilogx(f, pxx_db, label=tr.id)
         if show_noise_models:
             if self.data_kind == 'infrasound':
-                noise_models = get_idc_infra_low_noise(), get_idc_infra_hi_noise()
+                noise_models = [get_idc_infra_low_noise(), get_idc_infra_hi_noise()]
+                # These are natively relative to 1 Pa, so need to convert to `ref_val`
+                for i, noise_model in enumerate(noise_models):
+                    period, pxx_db_rel_1_pa = noise_model
+                    pxx_db_rel_ref_val = pxx_db_rel_1_pa - 10 * np.log10(ref_val**2)
+                    noise_models[i] = period, pxx_db_rel_ref_val
             else:
-                noise_models = get_nlnm(), get_nhnm()
+                noise_models = [get_nlnm(), get_nhnm()]
             xlim, ylim = ax.get_xlim(), ax.get_ylim()
-            for noise_model in noise_models:
+            for i, noise_model in enumerate(noise_models):
                 period, pxx_db = noise_model
-                ax.plot(1 / period, pxx_db, color='tab:gray', linestyle=':', zorder=-5)
+                ax.plot(
+                    1 / period,
+                    pxx_db,
+                    color='tab:gray',
+                    linestyle=':',
+                    zorder=-5,
+                    label='Noise model' if i else None,  # Only plot one line
+                )
             ax.set_xlim(xlim)
             ax.set_ylim(ylim)
         ax.legend()
