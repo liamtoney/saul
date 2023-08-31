@@ -3,6 +3,7 @@ Contains the definition of the PSD class.
 """
 
 from functools import cache
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -15,6 +16,26 @@ from obspy.signal.spectral_estimation import (
     get_nlnm,
 )
 from scipy.fft import next_fast_len
+
+# This file downloaded from the supplementary material of Macpherson et al. (2022)
+AK_INFRA_NOISE = Path(__file__).with_name('alaska_ambient_infrasound_noise_models.txt')
+
+
+def get_ak_infra_noise():
+    """Returns the Alaska ambient infrasound noise models from Macpherson et al. (2022).
+
+    Macpherson, K. A., Coffey, J. R., Witsil, A. J., Fee, D., Holtkamp, S., Dalton, S.,
+        McFarlin, H., & West, M. (2022). Ambient infrasound noise, station performance,
+        and their relation to land cover across Alaska. *Seismological Research
+        Letters*, *93*(4), 2239–2258. https://doi.org/10.1785/0220210365
+
+    Returns:
+        tuple: Period [s], high noise model [dB rel. 1 Pa^2 Hz^-1], median noise model
+        [dB rel. 1 Pa^2 Hz^-1], low noise model [dB rel. 1 Pa^2 Hz^-1]
+    """
+    f, hnm, mnm, lnm = np.loadtxt(AK_INFRA_NOISE, delimiter=',', skiprows=12).T
+    # We convert frequency to period to match the ObsPy functions
+    return 1 / f, hnm, mnm, lnm
 
 
 @cache
