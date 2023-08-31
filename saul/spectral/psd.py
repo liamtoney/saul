@@ -52,7 +52,9 @@ class PSD:
         elif np.all([tr.stats.channel[1] == 'H' for tr in self.st]):
             self.data_kind = 'seismic'
         else:
-            raise ValueError()
+            raise ValueError(
+                'Could not determine whether data are infrasound or seismic — or both data kinds are present.'
+            )
 
         # Calculate PSD
         self.psd = []
