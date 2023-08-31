@@ -1,0 +1,6 @@
+name: saul
+dependencies:
+  - multitaper
+  - pip
+  - pip:
+      - --editable .
