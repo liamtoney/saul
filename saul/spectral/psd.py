@@ -13,7 +13,12 @@ from obspy.signal.spectral_estimation import (
 )
 from scipy.fft import next_fast_len
 
-from .helpers import REFERENCE_PRESSURE, REFERENCE_VELOCITY, _mtspec, get_ak_infra_noise
+from saul.spectral.helpers import (
+    REFERENCE_PRESSURE,
+    REFERENCE_VELOCITY,
+    _mtspec,
+    get_ak_infra_noise,
+)
 
 
 class PSD:
