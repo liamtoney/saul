@@ -135,6 +135,15 @@ class PSD:
             ax.set_ylim(ylim)
         ax.legend()
         ax.set_xlabel('Frequency (Hz)')
-        ax.set_ylabel('dB')
+        if self.data_kind == 'infrasound':
+            # Convert Pa to µPa
+            ylabel = f'Power (dB rel. [{self.db_ref_val * 1e6:g} μPa]$^2$ Hz$^{{-1}}$)'
+        else:  # self.data_kind == 'seismic'
+            if self.db_ref_val == 1:
+                # Special formatting case since 1^2 = 1
+                ylabel = f'Power (dB rel. {self.db_ref_val:g} [m s$^{{-1}}$]$^2$ Hz$^{{-1}}$)'
+            else:
+                ylabel = f'Power (dB rel. [{self.db_ref_val:g} m s$^{{-1}}$]$^2$ Hz$^{{-1}}$)'
+        ax.set_ylabel(ylabel)
         fig.tight_layout()
         fig.show()
