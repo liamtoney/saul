@@ -41,6 +41,7 @@ class PSD:
             [tr1, tr2, ...]
         peak_frequency (list): List of peak frequencies calculated from the PSDs
     """
+
     def __init__(
         self,
         tr_or_st,
