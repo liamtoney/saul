@@ -55,7 +55,7 @@ class PSD:
         else:  # self.data_kind == 'seismic'
             self.db_ref_val = REFERENCE_VELOCITY
 
-        # KEY: Calculate PSD
+        # KEY: Calculate PSD (in dB relative to `self.db_ref_val`)
         self.psd = []
         for tr in self.st:
             mtspec = _mtspec(
@@ -68,13 +68,14 @@ class PSD:
             f, pxx = mtspec.rspec()
             f, pxx = f.squeeze(), pxx.squeeze()
             f, pxx = f[1:], pxx[1:]  # Remove DC component
-            self.psd.append((f, pxx))
+            pxx_db = 10 * np.log10(pxx / (self.db_ref_val**2))  # Convert to dB
+            self.psd.append((f, pxx_db))
 
         # Calculate peak frequency of PSD
         self.peak_frequency = []
         for psd in self.psd:
-            f, pxx = psd
-            self.peak_frequency.append(f[np.argmax(pxx)])
+            f, pxx_db = psd
+            self.peak_frequency.append(f[np.argmax(pxx_db)])
 
     def __str__(self):
         """A custom string representation of the PSD object."""
@@ -87,19 +88,33 @@ class PSD:
         """Pretty-printing for IPython usage."""
         p.text(self.__str__())
 
-    def plot(self, show_noise_models=False, infra_noise_model='ak'):
+    def plot(
+        self,
+        db_lim='smart',
+        use_period=False,
+        log_x=True,
+        show_noise_models=False,
+        infra_noise_model='ak',
+    ):
         """Plot the calculated PSDs.
 
         Args:
+            db_lim (tuple, str, or None): Tuple defining min and max dB cutoffs, 'smart'
+                for a sensible automatic choice, or None for no clipping
+            use_period (bool): If True, x-axis will be period [s] instead of frequency
+                [Hz]
+            log_x (bool): If True, use log scaling for x-axis
             show_noise_models (bool): Whether to plot reference noise models
             infra_noise_model (str): Which infrasound noise model to use (only used if
                 `show_noise_models` is True and `self.data_kind` is 'infrasound'), one
                 of 'ak' (Alaska noise model) or 'idc' (IMS array noise model)
         """
+        assert not (use_period and not log_x), 'Cannot use period with linear x-scale!'
         fig, ax = plt.subplots()
-        for tr, (f, pxx) in zip(self.st, self.psd):
-            pxx_db = 10 * np.log10(pxx / (self.db_ref_val**2))
-            ax.semilogx(f, pxx_db, label=tr.id)
+        for tr, (f, pxx_db) in zip(self.st, self.psd):
+            ax.plot(1 / f if use_period else f, pxx_db, label=tr.id)
+        if log_x:
+            ax.set_xscale('log')
         if show_noise_models:
             if self.data_kind == 'infrasound':
                 if infra_noise_model == 'ak':
@@ -124,7 +139,7 @@ class PSD:
             for i, noise_model in enumerate(noise_models):
                 period, pxx_db = noise_model
                 ax.plot(
-                    1 / period,
+                    period if use_period else 1 / period,
                     pxx_db,
                     color='tab:gray',
                     linestyle=':',
@@ -137,7 +152,21 @@ class PSD:
         # For every ID in the legend, use monospace font (ignore noise model label!)
         for label in legend.get_texts()[: len(self.psd)]:
             label.set_family('monospace')
-        ax.set_xlabel('Frequency (Hz)')
+        fmax = max([tr.stats.sampling_rate for tr in self.st]) / 2  # [Hz] Max. Nyquist
+        if use_period:
+            xlabel = 'Period (s)'
+            ax.set_xlim(left=1 / fmax)  # Follow convention (increasing period)
+        else:
+            xlabel = 'Frequency (Hz)'
+            ax.set_xlim(right=fmax)
+        # Pick smart limits "ceiled" to nearest 10 dB
+        if db_lim == 'smart':
+            pxx_db_all = [pxx_db for _, pxx_db in self.psd]
+            db_min = np.percentile(pxx_db_all, 5)  # Percentile across all PSDs
+            db_max = np.max(pxx_db_all)  # Max value across all PSDs
+            db_lim = np.ceil(db_min / 10) * 10, np.ceil(db_max / 10) * 10
+        ax.set_ylim(db_lim)
+        ax.set_xlabel(xlabel)
         if self.data_kind == 'infrasound':
             # Convert Pa to µPa
             ylabel = f'Power (dB rel. [{self.db_ref_val * 1e6:g} μPa]$^2$ Hz$^{{-1}}$)'
