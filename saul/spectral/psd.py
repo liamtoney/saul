@@ -21,15 +21,22 @@ from saul.spectral.helpers import (
     get_ak_infra_noise,
 )
 
-
 # Minimum number of cycles a wave must make within `win_dur` in order to be
 # considered "resolvable"
 CYCLES_PER_WINDOW = 4
 
+
 class PSD:
     """A class for calculating and plotting PSDs of one or more waveforms."""
 
-    def __init__(self, tr_or_st, method='welch', win_dur=60, time_bandwidth_product=4, number_of_tapers=7):
+    def __init__(
+        self,
+        tr_or_st,
+        method='welch',
+        win_dur=60,
+        time_bandwidth_product=4,
+        number_of_tapers=7,
+    ):
         """Create a PSD object.
 
         The PSDs of the input waveforms are estimated in this method. Two spectral
