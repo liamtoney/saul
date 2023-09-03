@@ -8,8 +8,13 @@ from pathlib import Path
 import numpy as np
 from multitaper import MTSpec
 
-REFERENCE_VELOCITY = 1  # [m/s] Reference value for seismic PSD
-REFERENCE_PRESSURE = 20e-6  # [Pa] Reference value for infrasound PSD
+# Reference values for PSD dB units
+REFERENCE_VELOCITY = 1  # [m/s] For seismic data
+REFERENCE_PRESSURE = 20e-6  # [Pa] For infrasound data
+
+# Minimum number of cycles a wave must make within a given time window in order to be
+# considered "resolvable"
+CYCLES_PER_WINDOW = 4
 
 # This file downloaded from the supplementary material of Macpherson et al. (2022)
 AK_INFRA_NOISE = Path(__file__).with_name('alaska_ambient_infrasound_noise_models.txt')

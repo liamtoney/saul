@@ -15,15 +15,12 @@ from scipy.fft import next_fast_len
 from scipy.signal import welch
 
 from saul.spectral.helpers import (
+    CYCLES_PER_WINDOW,
     REFERENCE_PRESSURE,
     REFERENCE_VELOCITY,
     _mtspec,
     get_ak_infra_noise,
 )
-
-# Minimum number of cycles a wave must make within `win_dur` in order to be
-# considered "resolvable"
-CYCLES_PER_WINDOW = 4
 
 
 class PSD:
