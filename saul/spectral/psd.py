@@ -24,8 +24,23 @@ from saul.spectral.helpers import (
 
 
 class PSD:
-    """A class for calculating and plotting PSDs of one or more waveforms."""
+    """A class for calculating and plotting PSDs of one or more waveforms.
 
+    Attributes:
+        method (str): See __init__()
+        win_dur (int or float): See __init__(); only defined if method='welch'
+        time_bandwidth_product (float): See __init__(); only defined if
+            method='multitaper'
+        number_of_tapers (int): See __init__(); only defined if method='multitaper'
+        st (Stream): Input waveforms (single Trace input is converted to Stream)
+        data_kind (str): Input waveform data kind; 'infrasound' or 'seismic' (inferred
+            from channel code)
+        db_ref_val (int or float): dB reference value for PSD (data kind dependent)
+        psd (list): List of PSDs (in dB) calculated from input waveforms; of the form
+            [(f1, pxx_db1), (f2, pxx_db2), ...] given a Stream consisting of Traces
+            [tr1, tr2, ...]
+        peak_frequency (list): List of peak frequencies calculated from the PSDs
+    """
     def __init__(
         self,
         tr_or_st,
