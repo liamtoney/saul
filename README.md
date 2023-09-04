@@ -33,7 +33,7 @@ mamba env update --name <existing_environment>
 ## Using
 
 Be sure that the environment you've installed SAUL into is activated. Here's a simple
-usage example that highlights SAUL's object-oriented interface:
+[usage example](psd_example.py) which highlights SAUL's object-oriented interface:
 ```python
 from saul import PSD, Stream
 
