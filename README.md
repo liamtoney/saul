@@ -1,6 +1,17 @@
 # SAUL
 
-**SAUL** is the **S**eismo**A**coustic **U**tilities **L**ibrary.
+**SAUL** is the **S**eismo**A**coustic **U**tilities **L**ibrary. It's my take on the
+collection of tools that I imagine exist, in some form, on every seismoacoustican's
+computer — utilities for gathering waveform data, plotting waveforms in the time and
+frequency domain, visualizing key metadata such as station locations, _et cetera._ SAUL
+is my attempt, using Python, to make these fundamental data exploration tools
+
+1. easy and quick to **use**, and (importantly)
+2. easy to **maintain**.
+
+SAUL aims to accomplish this by implementing an object-oriented interface which uses
+existing dependencies as much as possible. This modular approach has distinct advantages
+when it comes to compartmentalization and expansion (I hope! 🤞).
 
 ## Installing
 
@@ -21,7 +32,8 @@ mamba env update --name <existing_environment>
 
 ## Using
 
-Here's a simple usage example that highlights SAUL's object-oriented interface:
+Be sure that the environment you've installed SAUL into is activated. Here's a simple
+usage example that highlights SAUL's object-oriented interface:
 ```python
 from saul import PSD, Stream
 
