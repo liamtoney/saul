@@ -25,7 +25,7 @@ have navigated to the root directory.
 mamba env create
 ```
 
-**Option 2:** Install into an existing environment of your choosing.
+**Option 2:** Install SAUL into an existing environment of your choosing.
 ```
 mamba env update --name <existing_environment>
 ```
