@@ -46,8 +46,8 @@ PSD(st, method='multitaper').plot(show_noise_models=True)
 ## Developing
 
 To install the development packages for SAUL, run the following command from the root
-directory of this repository, with your environment (see [Installing](#installing))
-activated.
+directory of this repository, with your environment containing SAUL (see
+[Installing](#installing)) activated.
 ```
 pip install --requirement requirements.txt
 ```
