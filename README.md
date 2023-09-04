@@ -23,13 +23,13 @@ mamba env update --name <existing_environment>
 
 Here's a simple usage example that highlights SAUL's object-oriented interface:
 ```python
-from saul import Stream, PSD
+from saul import PSD, Stream
 
 st = Stream.from_server('AK', 'HOM', 'BDF', (2023, 9, 1, 0, 5), (2023, 9, 1, 0, 15))
 st.detrend().taper(0.05).remove_response()  # SAUL Stream objects behave like ObsPy's
 PSD(st, method='multitaper').plot(show_noise_models=True)
 ```
-<img src="https://github.com/liamtoney/saul/assets/38269494/c2f49376-4df2-45d1-a4bc-3815cbc168ee" width=550>
+<img src="psd_example.png" width=550>
 
 ## Developing
 
