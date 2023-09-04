@@ -17,8 +17,8 @@ class Stream(obspy.Stream):
     """
 
     @classmethod
-    def from_server(cls, network, station, channel, starttime, endtime, location='*'):
-        """Create a saul.Stream object containing waveforms obtained from a server.
+    def from_iris(cls, network, station, channel, starttime, endtime, location='*'):
+        """Create a saul.Stream object containing waveforms obtained from IRIS servers.
 
         This class method wraps waveform_collection.server.gather_waveforms() with the
         source argument set to 'IRIS'; for documentation of that function see:
