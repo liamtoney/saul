@@ -76,7 +76,10 @@ class PSD:
             number_of_tapers (int): [M] Number of tapers to use
         """
         # Pre-processing and checks
-        assert method in ['welch', 'multitaper'], 'Method must be either \'welch\' or \'multitaper\''
+        assert method in [
+            'welch',
+            'multitaper',
+        ], 'Method must be either \'welch\' or \'multitaper\''
         self.method = method
         if self.method == 'welch':
             self.win_dur = win_dur
@@ -162,7 +165,10 @@ class PSD:
                 of 'ak' (Alaska noise model) or 'idc' (IMS array noise model)
         """
         assert not (use_period and not log_x), 'Cannot use period with linear x-scale!'
-        assert infra_noise_model in ['ak', 'idc'], 'Infrasound noise model must be either \'ak\' or \'idc\''
+        assert infra_noise_model in [
+            'ak',
+            'idc',
+        ], 'Infrasound noise model must be either \'ak\' or \'idc\''
         fig, ax = plt.subplots()
         for tr, (f, pxx_db) in zip(self.st, self.psd):
             ax.plot(1 / f if use_period else f, pxx_db, label=tr.id)
