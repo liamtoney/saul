@@ -58,10 +58,10 @@ class PSD:
         Welch's method and an "[M]" for the multitaper method. Arguments corresponding
         to the non-selected method are ignored.
 
-        Documentation for `scipy.signal.welch`:
+        Documentation for scipy.signal.welch:
         https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.welch.html
 
-        Documentation for `multitaper.mtspec.MTSpec`:
+        Documentation for multitaper.mtspec.MTSpec:
         https://multitaper.readthedocs.io/en/latest/mtspec.html#mtspec.MTSpec
 
         Args:
@@ -99,7 +99,7 @@ class PSD:
         else:  # self.data_kind == 'seismic'
             self.db_ref_val = REFERENCE_VELOCITY
 
-        # KEY: Calculate PSD (in dB relative to `self.db_ref_val`)
+        # KEY: Calculate PSD (in dB relative to self.db_ref_val)
         self.psd = []
         for tr in self.st:
             if method == 'welch':
@@ -158,7 +158,7 @@ class PSD:
             log_x (bool): If True, use log scaling for x-axis
             show_noise_models (bool): Whether to plot reference noise models
             infra_noise_model (str): Which infrasound noise model to use (only used if
-                `show_noise_models` is True and `self.data_kind` is 'infrasound'), one
+                show_noise_models is True and self.data_kind is 'infrasound'), one
                 of 'ak' (Alaska noise model) or 'idc' (IMS array noise model)
         """
         assert not (use_period and not log_x), 'Cannot use period with linear x-scale!'
@@ -175,7 +175,7 @@ class PSD:
                     noise_models = [(period, nm) for nm in nms]
                 else:  # infra_noise_model == 'idc':
                     noise_models = [get_idc_infra_low_noise(), get_idc_infra_hi_noise()]
-                # These are all given relative to 1 Pa, so need to convert to `ref_val`
+                # These are all given relative to 1 Pa, so need to convert to ref_val
                 for i, noise_model in enumerate(noise_models):
                     period, pxx_db_rel_1_pa = noise_model
                     pxx_db_rel_ref_val = pxx_db_rel_1_pa - 10 * np.log10(
