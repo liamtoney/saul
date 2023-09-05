@@ -18,6 +18,7 @@ from saul.spectral.helpers import (
     REFERENCE_PRESSURE,
     REFERENCE_VELOCITY,
     _data_kind,
+    _format_power_label,
     _mtspec,
     get_ak_infra_noise,
 )
@@ -203,15 +204,6 @@ class PSD:
             db_lim = np.ceil(db_min / 10) * 10, np.ceil(db_max / 10) * 10
         ax.set_ylim(db_lim)
         ax.set_xlabel(xlabel)
-        if self.data_kind == 'infrasound':
-            # Convert Pa to µPa
-            ylabel = f'Power (dB rel. [{self.db_ref_val * 1e6:g} μPa]$^2$ Hz$^{{-1}}$)'
-        else:  # self.data_kind == 'seismic'
-            if self.db_ref_val == 1:
-                # Special formatting case since 1^2 = 1
-                ylabel = f'Power (dB rel. {self.db_ref_val:g} [m s$^{{-1}}$]$^2$ Hz$^{{-1}}$)'
-            else:
-                ylabel = f'Power (dB rel. [{self.db_ref_val:g} m s$^{{-1}}$]$^2$ Hz$^{{-1}}$)'
-        ax.set_ylabel(ylabel)
+        ax.set_ylabel(_format_power_label(self.data_kind, self.db_ref_val))
         fig.tight_layout()
         fig.show()

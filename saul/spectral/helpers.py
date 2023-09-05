@@ -53,3 +53,16 @@ def _data_kind(st):
         raise ValueError(
             'Could not determine whether data are infrasound or seismic — or both data kinds are present.'
         )
+
+
+def _format_power_label(data_kind, db_ref_val):
+    """Format the axis / colorbar label for spectral power quantities."""
+    if data_kind == 'infrasound':
+        # Convert Pa to µPa
+        return f'Power (dB rel. [{db_ref_val * 1e6:g} μPa]$^2$ Hz$^{{-1}}$)'
+    else:  # data_kind == 'seismic'
+        if db_ref_val == 1:
+            # Special formatting case since 1^2 = 1
+            return f'Power (dB rel. {db_ref_val:g} [m s$^{{-1}}$]$^2$ Hz$^{{-1}}$)'
+        else:
+            return f'Power (dB rel. [{db_ref_val:g} m s$^{{-1}}$]$^2$ Hz$^{{-1}}$)'

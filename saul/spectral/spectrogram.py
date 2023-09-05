@@ -13,6 +13,7 @@ from saul.spectral.helpers import (
     REFERENCE_PRESSURE,
     REFERENCE_VELOCITY,
     _data_kind,
+    _format_power_label,
 )
 from saul.waveform.stream import Stream
 
@@ -162,18 +163,14 @@ class Spectrogram:
             extend = 'max'
         else:
             extend = 'neither'
-        # Get proper label for colorbar
-        if self.data_kind == 'infrasound':
-            # Convert Pa to µPa
-            clab = f'Power (dB rel. [{self.db_ref_val * 1e6:g} μPa]$^2$ Hz$^{{-1}}$)'
-        else:  # self.data_kind == 'seismic'
-            if self.db_ref_val == 1:
-                # Special formatting case since 1^2 = 1
-                clab = f'Power (dB rel. {self.db_ref_val:g} [m s$^{{-1}}$]$^2$ Hz$^{{-1}}$)'
-            else:
-                clab = f'Power (dB rel. [{self.db_ref_val:g} m s$^{{-1}}$]$^2$ Hz$^{{-1}}$)'
         extendfrac = 0.04
-        fig.colorbar(im, cax, extend=extend, extendfrac=extendfrac, label=clab)
+        fig.colorbar(
+            im,
+            cax,
+            extend=extend,
+            extendfrac=extendfrac,
+            label=_format_power_label(self.data_kind, self.db_ref_val),
+        )
         spec_ax.set_title(self.tr.id, family='monospace')
         # Layout adjustment
         gs.tight_layout(fig)
