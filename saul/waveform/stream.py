@@ -20,6 +20,14 @@ class Stream(obspy.Stream):
         """Slightly modify this method so that the type of Stream is obvious."""
         return super().__str__(*args, **kwargs).replace('Stream', 'saul.Stream')
 
+    def plot(self, *args, **kwargs):
+        """Slightly modify this method to ALWAYS plot into a new figure."""
+        if 'fig' not in kwargs:
+            from matplotlib.pyplot import figure
+
+            kwargs['fig'] = figure()
+        return super().plot(*args, **kwargs)
+
     @classmethod
     def from_iris(cls, network, station, channel, starttime, endtime, location='*'):
         """Create a saul.Stream object containing waveforms obtained from IRIS servers.
