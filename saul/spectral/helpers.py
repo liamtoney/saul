@@ -41,3 +41,15 @@ def get_ak_infra_noise():
 def _mtspec(tr_data_tuple, **kwargs):
     """Wrapper around MTSpec to facilitate tuple input (needed for memoization)."""
     return MTSpec(np.array(tr_data_tuple), **kwargs)
+
+
+def _data_kind(st):
+    """Determine whether an input Stream contains infrasound or seismic data."""
+    if np.all([tr.stats.channel[1:3] == 'DF' for tr in st]):
+        return 'infrasound'
+    elif np.all([tr.stats.channel[1] == 'H' for tr in st]):
+        return 'seismic'
+    else:
+        raise ValueError(
+            'Could not determine whether data are infrasound or seismic — or both data kinds are present.'
+        )

@@ -19,6 +19,7 @@ from saul.spectral.helpers import (
     REFERENCE_PRESSURE,
     REFERENCE_VELOCITY,
     _mtspec,
+    _data_kind,
     get_ak_infra_noise,
 )
 
@@ -87,14 +88,7 @@ class PSD:
             self.time_bandwidth_product = time_bandwidth_product
             self.number_of_tapers = number_of_tapers
         self.st = Stream(tr_or_st).copy()  # Always use *copied* Stream objects
-        if np.all([tr.stats.channel[1:3] == 'DF' for tr in self.st]):
-            self.data_kind = 'infrasound'
-        elif np.all([tr.stats.channel[1] == 'H' for tr in self.st]):
-            self.data_kind = 'seismic'
-        else:
-            raise ValueError(
-                'Could not determine whether data are infrasound or seismic — or both data kinds are present.'
-            )
+        self.data_kind = _data_kind(self.st)
 
         # Set reference value for PSD from data kind
         if self.data_kind == 'infrasound':
