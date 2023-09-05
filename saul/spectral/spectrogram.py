@@ -146,9 +146,15 @@ class Spectrogram:
         # Tick locating and formatting
         locator = mdates.AutoDateLocator()
         wf_ax.xaxis.set_major_locator(locator)
-        wf_ax.xaxis.set_major_formatter(mdates.AutoDateFormatter(locator))
+        formatter = mdates.AutoDateFormatter(locator)
+        formatter.scaled[30.0] = '%b. %Y'
+        formatter.scaled[1]: '%-d %b. %Y'
+        formatter.scaled[1 / mdates.HOURS_PER_DAY] = '%H:%M'
+        formatter.scaled[1 / mdates.MINUTES_PER_DAY] = '%H:%M'
+        formatter.scaled[1 / mdates.MUSECONDS_PER_DAY] = '%H:%M:%S.%f'
+        wf_ax.xaxis.set_major_formatter(formatter)
         fig.autofmt_xdate()
-        start_date = self.tr.stats.starttime.strftime('%Y-%m-%d')
+        start_date = self.tr.stats.starttime.strftime('%-d %B %Y')
         wf_ax.set_xlabel(f'UTC time starting on {start_date}')
         # Pick smart limits rounded to nearest 10 dB
         if db_lim == 'smart':
