@@ -41,7 +41,6 @@ class PSD:
         psd (list): List of PSDs (in dB) calculated from input waveforms; of the form
             [(f1, pxx_db1), (f2, pxx_db2), ...] given a saul.Stream consisting of Traces
             [tr1, tr2, ...]
-        peak_frequency (list): List of peak frequencies calculated from the PSDs
     """
 
     def __init__(
@@ -120,12 +119,6 @@ class PSD:
             # Convert to dB [dB rel. (db_ref_val <db_ref_val_unit>)^2 Hz^-1]
             pxx_db = 10 * np.log10(pxx / (self.db_ref_val**2))
             self.psd.append((f, pxx_db))
-
-        # Calculate peak frequency of PSD
-        self.peak_frequency = []
-        for psd in self.psd:
-            f, pxx_db = psd
-            self.peak_frequency.append(f[np.argmax(pxx_db)])
 
     def plot(
         self,
