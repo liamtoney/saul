@@ -127,18 +127,6 @@ class PSD:
             f, pxx_db = psd
             self.peak_frequency.append(f[np.argmax(pxx_db)])
 
-    def __str__(self):
-        """A custom string representation of the PSD object."""
-        method_str = 'Welch\'s' if self.method == 'welch' else 'the multitaper'
-        text = f'{len(self.psd)} PSD(s) using {method_str} method:'
-        for tr, peak_f in zip(self.st, self.peak_frequency):
-            text += f'\n{tr.id} | {peak_f:.3f} Hz peak frequency'
-        return text
-
-    def _repr_pretty_(self, p, cycle):
-        """Pretty-printing for IPython usage."""
-        p.text(self.__str__())
-
     def plot(
         self,
         db_lim='smart',
