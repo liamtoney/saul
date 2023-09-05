@@ -21,7 +21,11 @@ class Stream(obspy.Stream):
         return super().__str__(*args, **kwargs).replace('Stream', 'saul.Stream')
 
     def plot(self, *args, **kwargs):
-        """Slightly modify this method to ALWAYS plot into a new figure."""
+        """Slightly modify this method to ALWAYS plot into a new figure.
+
+        Note:
+            Can obtain standard obspy.Stream.plot() behavior by setting fig=None.
+        """
         if 'fig' not in kwargs:
             from matplotlib.pyplot import figure
 
