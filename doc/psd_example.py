@@ -6,6 +6,9 @@ PSD(st, method='multitaper').plot(show_noise_models=True)
 
 # Below code not to be shown in README.md
 if False:
+    from pathlib import Path
+
     import matplotlib.pyplot as plt
 
-    plt.gcf().savefig('psd_example.png', dpi=300, bbox_inches='tight')
+    output_file = Path(__file__).with_name('psd_example.png')
+    plt.gcf().savefig(output_file, dpi=300, bbox_inches='tight')
