@@ -148,7 +148,7 @@ class Spectrogram:
         wf_ax.xaxis.set_major_locator(locator)
         formatter = mdates.AutoDateFormatter(locator)
         formatter.scaled[30.0] = '%b. %Y'
-        formatter.scaled[1]: '%-d %b. %Y'
+        formatter.scaled[1] = '%-d %b. %Y'
         formatter.scaled[1 / mdates.HOURS_PER_DAY] = '%H:%M'
         formatter.scaled[1 / mdates.MINUTES_PER_DAY] = '%H:%M'
         formatter.scaled[1 / mdates.MUSECONDS_PER_DAY] = '%H:%M:%S.%f'
