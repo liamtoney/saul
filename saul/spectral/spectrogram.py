@@ -101,10 +101,10 @@ class Spectrogram:
         spec_ax = fig.add_subplot(gs[0, 0])
         wf_ax = fig.add_subplot(gs[1, 0], sharex=spec_ax)  # Common time axis
         cax = fig.add_subplot(gs[0, 1])
-        data = self.tr.data
-        if self.data_kind == 'seismic':
-            data *= 1e6  # Convert to μm/s
-        wf_ax.plot(self.tr.times('matplotlib'), data, 'black', linewidth=0.5)
+        rescale = 1e6 if self.data_kind == 'seismic' else 1  # Convert seismic to μm/s
+        wf_ax.plot(
+            self.tr.times('matplotlib'), self.tr.data * rescale, 'black', linewidth=0.5
+        )
         wf_ax.set_ylabel(
             'Velocity (μm s$^{-1}$)' if self.data_kind == 'seismic' else 'Pressure (Pa)'
         )
