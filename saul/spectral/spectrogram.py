@@ -50,6 +50,7 @@ class Spectrogram:
         """
         # Pre-processing and checks
         st = Stream(tr_or_st)  # Cast input to saul.Stream
+        assert st.count() > 0, 'No waveforms provided!'
         assert st.count() == 1, 'Must provide only a single Trace!'
         self.data_kind = _data_kind(st)
         self.tr = st[0].copy()  # Always use *copied* saul.Stream objects

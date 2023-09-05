@@ -89,6 +89,7 @@ class PSD:
             self.time_bandwidth_product = time_bandwidth_product
             self.number_of_tapers = number_of_tapers
         self.st = Stream(tr_or_st).copy()  # Always use *copied* saul.Stream objects
+        assert self.st.count() > 0, 'No waveforms provided!'
         self.data_kind = _data_kind(self.st)
 
         # Set reference value for PSD from data kind
