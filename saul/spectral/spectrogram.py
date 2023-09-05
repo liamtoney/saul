@@ -6,7 +6,6 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.gridspec import GridSpec
-from obspy import Stream
 from scipy.signal import spectrogram
 
 from saul.spectral.helpers import (
@@ -15,6 +14,7 @@ from saul.spectral.helpers import (
     REFERENCE_VELOCITY,
     _data_kind,
 )
+from saul.waveform.stream import Stream
 
 
 class Spectrogram:
@@ -49,10 +49,10 @@ class Spectrogram:
                 that the longest-period signals of interest are included
         """
         # Pre-processing and checks
-        st = Stream(tr_or_st)  # Cast input to Stream
+        st = Stream(tr_or_st)  # Cast input to saul.Stream
         assert st.count() == 1, 'Must provide only a single Trace!'
         self.data_kind = _data_kind(st)
-        self.tr = st[0].copy()  # Always use *copied* Stream objects
+        self.tr = st[0].copy()  # Always use *copied* saul.Stream objects
         self.win_dur = win_dur
 
         # Set reference value for spectrogram from data kind

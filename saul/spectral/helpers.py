@@ -44,7 +44,7 @@ def _mtspec(tr_data_tuple, **kwargs):
 
 
 def _data_kind(st):
-    """Determine whether an input Stream contains infrasound or seismic data."""
+    """Determine whether an input saul.Stream contains infrasound or seismic data."""
     if np.all([tr.stats.channel[1:3] == 'DF' for tr in st]):
         return 'infrasound'
     elif np.all([tr.stats.channel[1] == 'H' for tr in st]):

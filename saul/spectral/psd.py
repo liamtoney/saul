@@ -4,7 +4,6 @@ Contains the definition of the PSD class.
 
 import matplotlib.pyplot as plt
 import numpy as np
-from obspy import Stream
 from obspy.signal.spectral_estimation import (
     get_idc_infra_hi_noise,
     get_idc_infra_low_noise,
@@ -22,6 +21,7 @@ from saul.spectral.helpers import (
     _mtspec,
     get_ak_infra_noise,
 )
+from saul.waveform.stream import Stream
 
 
 class PSD:
@@ -33,12 +33,13 @@ class PSD:
         time_bandwidth_product (float): See __init__(); only defined if
             method='multitaper'
         number_of_tapers (int): See __init__(); only defined if method='multitaper'
-        st (Stream): Input waveforms (single Trace input is converted to Stream)
+        st (saul.Stream): Input waveforms (single Trace input is converted to
+            saul.Stream)
         data_kind (str): Input waveform data kind; 'infrasound' or 'seismic' (inferred
             from channel code)
         db_ref_val (int or float): dB reference value for PSD (data kind dependent)
         psd (list): List of PSDs (in dB) calculated from input waveforms; of the form
-            [(f1, pxx_db1), (f2, pxx_db2), ...] given a Stream consisting of Traces
+            [(f1, pxx_db1), (f2, pxx_db2), ...] given a saul.Stream consisting of Traces
             [tr1, tr2, ...]
         peak_frequency (list): List of peak frequencies calculated from the PSDs
     """
@@ -87,7 +88,7 @@ class PSD:
         else:  # self.method == 'multitaper'
             self.time_bandwidth_product = time_bandwidth_product
             self.number_of_tapers = number_of_tapers
-        self.st = Stream(tr_or_st).copy()  # Always use *copied* Stream objects
+        self.st = Stream(tr_or_st).copy()  # Always use *copied* saul.Stream objects
         self.data_kind = _data_kind(self.st)
 
         # Set reference value for PSD from data kind
