@@ -16,6 +16,10 @@ class Stream(obspy.Stream):
     inherited by this class.
     """
 
+    def __str__(self, *args, **kwargs):
+        """Slightly modify this method so that the type of Stream is obvious."""
+        return super().__str__(*args, **kwargs).replace('Stream', 'saul.Stream')
+
     @classmethod
     def from_iris(cls, network, station, channel, starttime, endtime, location='*'):
         """Create a saul.Stream object containing waveforms obtained from IRIS servers.

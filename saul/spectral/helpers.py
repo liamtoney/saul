@@ -41,3 +41,28 @@ def get_ak_infra_noise():
 def _mtspec(tr_data_tuple, **kwargs):
     """Wrapper around MTSpec to facilitate tuple input (needed for memoization)."""
     return MTSpec(np.array(tr_data_tuple), **kwargs)
+
+
+def _data_kind(st):
+    """Determine whether an input saul.Stream contains infrasound or seismic data."""
+    if np.all([tr.stats.channel[1:3] == 'DF' for tr in st]):
+        return 'infrasound'
+    elif np.all([tr.stats.channel[1] == 'H' for tr in st]):
+        return 'seismic'
+    else:
+        raise ValueError(
+            'Could not determine whether data are infrasound or seismic — or both data kinds are present.'
+        )
+
+
+def _format_power_label(data_kind, db_ref_val):
+    """Format the axis / colorbar label for spectral power quantities."""
+    if data_kind == 'infrasound':
+        # Convert Pa to µPa
+        return f'Power (dB rel. [{db_ref_val * 1e6:g} μPa]$^2$ Hz$^{{-1}}$)'
+    else:  # data_kind == 'seismic'
+        if db_ref_val == 1:
+            # Special formatting case since 1^2 = 1
+            return f'Power (dB rel. {db_ref_val:g} [m s$^{{-1}}$]$^2$ Hz$^{{-1}}$)'
+        else:
+            return f'Power (dB rel. [{db_ref_val:g} m s$^{{-1}}$]$^2$ Hz$^{{-1}}$)'
