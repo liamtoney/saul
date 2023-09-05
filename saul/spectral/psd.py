@@ -93,10 +93,9 @@ class PSD:
         self.data_kind = _data_kind(self.st)
 
         # Set reference value for PSD from data kind
-        if self.data_kind == 'infrasound':
-            self.db_ref_val = REFERENCE_PRESSURE
-        else:  # self.data_kind == 'seismic'
-            self.db_ref_val = REFERENCE_VELOCITY
+        self.db_ref_val = (
+            REFERENCE_PRESSURE if self.data_kind == 'infrasound' else REFERENCE_VELOCITY
+        )
 
         # KEY: Calculate PSD (in dB relative to self.db_ref_val)
         self.psd = []

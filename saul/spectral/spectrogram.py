@@ -58,10 +58,9 @@ class Spectrogram:
         self.win_dur = win_dur
 
         # Set reference value for spectrogram from data kind
-        if self.data_kind == 'infrasound':
-            self.db_ref_val = REFERENCE_PRESSURE
-        else:  # self.data_kind == 'seismic'
-            self.db_ref_val = REFERENCE_VELOCITY
+        self.db_ref_val = (
+            REFERENCE_PRESSURE if self.data_kind == 'infrasound' else REFERENCE_VELOCITY
+        )
 
         # KEY: Calculate spectrogram (in dB relative to self.db_ref_val)
         fs = self.tr.stats.sampling_rate
