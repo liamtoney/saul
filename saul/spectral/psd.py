@@ -18,8 +18,8 @@ from saul.spectral.helpers import (
     CYCLES_PER_WINDOW,
     REFERENCE_PRESSURE,
     REFERENCE_VELOCITY,
-    _mtspec,
     _data_kind,
+    _mtspec,
     get_ak_infra_noise,
 )
 
