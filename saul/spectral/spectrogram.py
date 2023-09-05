@@ -18,7 +18,36 @@ from saul.spectral.helpers import (
 
 
 class Spectrogram:
+    """A class for calculating and plotting spectrograms of waveforms.
+
+    Attributes:
+        win_dur (int or float): See __init__()
+        tr (Trace): Input waveform
+        data_kind (str): Input waveform data kind; 'infrasound' or 'seismic' (inferred
+            from channel code)
+        db_ref_val (int or float): dB reference value for PSD (data kind dependent)
+        spectrogram (tuple): Spectrogram (in dB) calculated from the input waveform; of
+            the form (f, t, sxx_db) where f and t are 1D arrays and sxx_db is a 2D array
+            with shape (f.size, t.size)
+    """
+
     def __init__(self, tr_or_st, win_dur=8):
+        """Create a Spectrogram object.
+
+        The spectrogram of the input waveform is estimated in this method (only a single
+        waveform may be provided).
+
+        Documentation for scipy.signal.spectrogram:
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.spectrogram.html
+
+        Args:
+            tr_or_st (Trace or Stream): Input waveforms (response is expected to be
+                removed; SAUL expects units of pressure [Pa] for infrasound data and
+                velocity [m/s] for seismic data!)
+            win_dur (int or float): Segment length in seconds. This usually must be
+                adjusted, within the constraints of the total signal duration, to ensure
+                that the longest-period signals of interest are included
+        """
         # Pre-processing and checks
         st = Stream(tr_or_st)  # Cast input to Stream
         assert st.count() == 1, 'Must provide only a single Trace!'
@@ -55,6 +84,15 @@ class Spectrogram:
         use_period=False,
         log_y=False,
     ):
+        """Plot the calculated spectrogram.
+
+        Args:
+            db_lim (tuple, str, or None): Tuple defining min and max dB cutoffs, 'smart'
+                for a sensible automatic choice, or None for no clipping
+            use_period (bool): If True, spectrogram y-axis will be period [s] instead of
+                frequency [Hz]
+            log_y (bool): If True, use log scaling for spectrogram y-axis
+        """
         assert not (use_period and not log_y), 'Cannot use period with linear y-scale!'
         fig = plt.figure(figsize=(7, 5))
         # width_ratios effectively controls the colorbar width
