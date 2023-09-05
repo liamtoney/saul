@@ -112,13 +112,23 @@ class Spectrogram:
         wf_ax.grid(linestyle=':', zorder=-5)
         f, t, sxx_db = self.spectrogram
         t_mpl = self.tr.stats.starttime.matplotlib_date + (t / mdates.SEC_PER_DAY)
-        im = spec_ax.pcolormesh(
-            t_mpl,
-            1 / f if use_period else f,
+        x = t_mpl
+        dx = np.diff(x)[0]
+        y = 1 / f if use_period else f
+        dy = np.diff(y)[0]
+        im = spec_ax.imshow(
             sxx_db,
             cmap='inferno',
+            interpolation='none',
             rasterized=True,
-            shading='nearest',
+            aspect='auto',
+            origin='lower',
+            extent=(  # Carefully handling the registration here
+                x.min() - dx / 2,
+                x.max() + dx / 2,
+                y.min() - dy / 2,
+                y.max() + dy / 2,
+            ),
         )
         spec_ax.set_ylabel('Period (s)' if use_period else 'Frequency (Hz)')
         spec_ax.grid(linestyle=':', zorder=5)
