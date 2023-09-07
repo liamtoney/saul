@@ -95,9 +95,7 @@ class Spectrogram:
         if method == 'scipy':
             fs = self.tr.stats.sampling_rate
             nperseg = int(win_dur * fs)  # Samples
-            nfft = np.power(
-                2, int(np.ceil(np.log2(nperseg))) + 1
-            )  # Pad fft with zeroes
+            nfft = np.power(2, int(np.ceil(np.log2(nperseg))) + 1)  # Pad FFT
             f, t, sxx = spectrogram(
                 self.tr.data,
                 fs,
