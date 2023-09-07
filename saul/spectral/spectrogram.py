@@ -76,15 +76,15 @@ class Spectrogram:
             'multitaper',
         ], 'Method must be either \'scipy\' or \'multitaper\''
         self.method = method
+        self.win_dur = win_dur
+        if method == 'multitaper':
+            self.time_bandwidth_product = time_bandwidth_product
+            self.number_of_tapers = number_of_tapers
         st = Stream(tr_or_st)  # Cast input to saul.Stream
         assert st.count() > 0, 'No waveforms provided!'
         assert st.count() == 1, 'Must provide only a single Trace!'
         self.data_kind = _data_kind(st)
         self.tr = st[0].copy()  # Always use *copied* saul.Stream objects
-        self.win_dur = win_dur
-        if self.method == 'multitaper':
-            self.time_bandwidth_product = time_bandwidth_product
-            self.number_of_tapers = number_of_tapers
 
         # Set reference value for spectrogram from data kind
         self.db_ref_val = (

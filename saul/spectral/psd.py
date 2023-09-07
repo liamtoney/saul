@@ -83,7 +83,7 @@ class PSD:
             'multitaper',
         ], 'Method must be either \'welch\' or \'multitaper\''
         self.method = method
-        if self.method == 'welch':
+        if method == 'welch':
             self.win_dur = win_dur
         else:  # self.method == 'multitaper'
             self.time_bandwidth_product = time_bandwidth_product
