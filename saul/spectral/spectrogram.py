@@ -155,7 +155,7 @@ class Spectrogram:
         t_mpl = self.tr.stats.starttime.matplotlib_date + (t / mdates.SEC_PER_DAY)
         x = t_mpl
         dx = np.diff(x)[0]
-        y = 1 / f if use_period else f
+        y = f
         dy = np.diff(y)[0]
         im = spec_ax.imshow(
             sxx_db,
@@ -171,18 +171,30 @@ class Spectrogram:
                 y.max() + dy / 2,
             ),
         )
-        spec_ax.set_ylabel('Period (s)' if use_period else 'Frequency (Hz)')
-        spec_ax.grid(linestyle=':', zorder=5)
-
+        if use_period:
+            grid_axis = 'x'  # Just place horizontal gridlines; we'll add vertical later
+        else:
+            grid_axis = 'both'
+            spec_ax.set_ylabel('Frequency (Hz)')  # Go ahead and set this now
+        spec_ax.grid(linestyle=':', zorder=5, axis=grid_axis)
         fmin = 1 / (self.win_dur / CYCLES_PER_WINDOW)  # [Hz] Min. resolvable freq.
         fmax = self.tr.stats.sampling_rate / 2  # [Hz] Nyquist
-        if use_period:
-            ylim = (1 / fmin, 1 / fmax)
-        else:
-            ylim = (fmin, fmax)
-        spec_ax.set_ylim(ylim)
+        spec_ax.set_ylim(fmin, fmax)
         if log_y:
             spec_ax.set_yscale('log')
+        if use_period:  # Overcome imshow() limitations by defining an axis overlay
+            # Set up overlay and scale it properly
+            spec_ax_overlay = spec_ax.twinx()
+            spec_ax_overlay.set_ylim(1 / fmin, 1 / fmax)
+            spec_ax_overlay.set_yscale('log')  # log_y is guaranteed to be True
+            # Remove the ticks and labels from the underlying plot
+            spec_ax.tick_params(axis='y', which='both', left=False, labelleft=False)
+            # Configure ticks and axis labels for the overlay
+            spec_ax_overlay.yaxis.tick_left()
+            spec_ax_overlay.set_ylabel('Period (s)')
+            spec_ax_overlay.yaxis.set_label_position('left')
+            # Finally, we add the y-axis grid (to the overlay to ensure correct ticking)
+            spec_ax_overlay.grid(linestyle=':', axis='y')
         wf_ax.set_xlim(t_mpl[0], t_mpl[-1])
         # Tick locating and formatting
         locator = mdates.AutoDateLocator()
