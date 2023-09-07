@@ -4,6 +4,7 @@ Contains the definition of the Stream class.
 
 from pathlib import Path
 
+import matplotlib.dates as mdates
 import obspy
 from obspy import UTCDateTime
 from waveform_collection import gather_waveforms, read_local
@@ -16,6 +17,19 @@ class Stream(obspy.Stream):
     inherited by this class.
     """
 
+    @staticmethod
+    def _duration_string(tr):
+        """Calculate and return a nicely-formatted string duration of a Trace."""
+        duration = tr.stats.endtime - tr.stats.starttime  # [s]
+        if duration < mdates.SEC_PER_MIN:
+            return f'{duration:.0f} s'
+        elif duration < mdates.SEC_PER_HOUR:
+            return f'{duration/mdates.SEC_PER_MIN:.1f} min'
+        elif duration < mdates.SEC_PER_DAY:
+            return f'{duration/mdates.SEC_PER_HOUR:.1f} hr'
+        else:  # duration >= mdates.SEC_PER_DAY
+            return f'{duration/mdates.SEC_PER_DAY:.1f} day(s)'
+
     def __mul__(self, *args, **kwargs):
         """Modify this method to return a saul.Stream instead of an obspy.Stream.
 
@@ -26,8 +40,23 @@ class Stream(obspy.Stream):
         return self.__class__(super().__mul__(*args, **kwargs))
 
     def __str__(self, *args, **kwargs):
-        """Slightly modify this method so that the type of Stream is obvious."""
-        return super().__str__(*args, **kwargs).replace('Stream', 'saul.Stream')
+        """Overwrite this method to always show all Traces, and to show durations.
+
+        The `extended` argument is ignored. Code below copied (and then modified) from
+        obspy.Stream.__str__(), from ObsPy v1.4.0.
+        """
+        if self.traces:
+            id_length = self and max(len(tr.id) for tr in self) or 0
+        else:
+            id_length = 0
+        out = str(len(self.traces)) + ' Trace(s) in saul.Stream:\n'
+        out = out + '\n'.join(
+            [
+                _i.__str__(id_length) + ' | ' + self._duration_string(_i)
+                for _i in self.traces
+            ]
+        )
+        return out
 
     def plot(self, *args, **kwargs):
         """Slightly modify this method to ALWAYS plot into a new figure.
