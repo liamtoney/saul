@@ -16,6 +16,15 @@ class Stream(obspy.Stream):
     inherited by this class.
     """
 
+    def __mul__(self, *args, **kwargs):
+        """Modify this method to return a saul.Stream instead of an obspy.Stream.
+
+        TODO:
+            Is this something in ObsPy that should be changed? Why don't they call
+            st = self.__class__() in their __mul__() method?
+        """
+        return self.__class__(super().__mul__(*args, **kwargs))
+
     def __str__(self, *args, **kwargs):
         """Slightly modify this method so that the type of Stream is obvious."""
         return super().__str__(*args, **kwargs).replace('Stream', 'saul.Stream')
