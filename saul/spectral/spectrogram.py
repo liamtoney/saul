@@ -6,6 +6,7 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.gridspec import GridSpec
+from multitaper import mtspec
 from scipy.signal import spectrogram
 
 from saul.spectral.helpers import (
@@ -22,7 +23,11 @@ class Spectrogram:
     """A class for calculating and plotting spectrograms of waveforms.
 
     Attributes:
+        method (str): See __init__()
         win_dur (int or float): See __init__()
+        time_bandwidth_product (float): See __init__(); only defined if
+            method='multitaper'
+        number_of_tapers (int): See __init__(); only defined if method='multitaper'
         tr (Trace): Input waveform
         data_kind (str): Input waveform data kind; 'infrasound' or 'seismic' (inferred
             from channel code)
@@ -32,30 +37,54 @@ class Spectrogram:
             with shape (f.size, t.size)
     """
 
-    def __init__(self, tr_or_st, win_dur=8):
+    def __init__(
+        self,
+        tr_or_st,
+        method='scipy',
+        win_dur=8,
+        time_bandwidth_product=4,
+        number_of_tapers=7,
+    ):
         """Create a Spectrogram object.
 
         The spectrogram of the input waveform is estimated in this method (only a single
-        waveform may be provided).
+        waveform may be provided). Two spectral estimation approaches are supported:
+        The method implemented by SciPy and the multitaper method. Additional input
+        arguments (below) relevant only for the multitaper method are marked with an
+        "[M]". These arguments are ignored when the SciPy method is selected.
 
         Documentation for scipy.signal.spectrogram:
         https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.spectrogram.html
+
+        Documentation for multitaper.mtspec.spectrogram:
+        https://multitaper.readthedocs.io/en/latest/mtspec.html#mtspec.spectrogram
 
         Args:
             tr_or_st (Trace or Stream): Input waveforms (response is expected to be
                 removed; SAUL expects units of pressure [Pa] for infrasound data and
                 velocity [m/s] for seismic data!)
+            method (str): Either 'scipy' or 'multitaper' [M]
             win_dur (int or float): Segment length in seconds. This usually must be
                 adjusted, within the constraints of the total signal duration, to ensure
                 that the longest-period signals of interest are included
+            time_bandwidth_product (float): [M] Time-bandwidth product
+            number_of_tapers (int): [M] Number of tapers to use
         """
         # Pre-processing and checks
+        assert method in [
+            'scipy',
+            'multitaper',
+        ], 'Method must be either \'scipy\' or \'multitaper\''
+        self.method = method
         st = Stream(tr_or_st)  # Cast input to saul.Stream
         assert st.count() > 0, 'No waveforms provided!'
         assert st.count() == 1, 'Must provide only a single Trace!'
         self.data_kind = _data_kind(st)
         self.tr = st[0].copy()  # Always use *copied* saul.Stream objects
         self.win_dur = win_dur
+        if self.method == 'multitaper':
+            self.time_bandwidth_product = time_bandwidth_product
+            self.number_of_tapers = number_of_tapers
 
         # Set reference value for spectrogram from data kind
         self.db_ref_val = (
@@ -63,17 +92,31 @@ class Spectrogram:
         )
 
         # KEY: Calculate spectrogram (in dB relative to self.db_ref_val)
-        fs = self.tr.stats.sampling_rate
-        nperseg = int(win_dur * fs)  # Samples
-        nfft = np.power(2, int(np.ceil(np.log2(nperseg))) + 1)  # Pad fft with zeroes
-        f, t, sxx = spectrogram(
-            self.tr.data,
-            fs,
-            window='hann',
-            nperseg=nperseg,
-            noverlap=nperseg // 2,
-            nfft=nfft,
-        )
+        if method == 'scipy':
+            fs = self.tr.stats.sampling_rate
+            nperseg = int(win_dur * fs)  # Samples
+            nfft = np.power(
+                2, int(np.ceil(np.log2(nperseg))) + 1
+            )  # Pad fft with zeroes
+            f, t, sxx = spectrogram(
+                self.tr.data,
+                fs,
+                window='hann',
+                nperseg=nperseg,
+                noverlap=nperseg // 2,  # 50 % overlap
+                nfft=nfft,
+            )
+        else:  # method == 'multitaper'
+            t, f, _, sxx = mtspec.spectrogram(
+                self.tr.data,
+                dt=self.tr.stats.delta,
+                twin=win_dur,
+                nw=time_bandwidth_product,
+                kspec=number_of_tapers,
+                olap=0.5,  # 50 % overlap
+                iadapt=0,  # "Adaptive multitaper" <- change?
+            )
+            f = f.squeeze()
         f, sxx = f[1:], sxx[1:, :]  # Remove DC component
         # Convert to dB [dB rel. (db_ref_val <db_ref_val_unit>)^2 Hz^-1]
         sxx_db = 10 * np.log10(sxx / (self.db_ref_val**2))
