@@ -6,7 +6,6 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.gridspec import GridSpec
-from multitaper import mtspec
 from scipy.signal import spectrogram
 
 from saul.spectral.helpers import (
@@ -15,6 +14,7 @@ from saul.spectral.helpers import (
     REFERENCE_VELOCITY,
     _data_kind,
     _format_power_label,
+    _spectrogram,
 )
 from saul.waveform.stream import Stream
 
@@ -107,8 +107,8 @@ class Spectrogram:
                 nfft=nfft,
             )
         else:  # method == 'multitaper'
-            t, f, _, sxx = mtspec.spectrogram(
-                self.tr.data,
+            t, f, _, sxx = _spectrogram(
+                tuple(self.tr.data),
                 dt=self.tr.stats.delta,
                 twin=win_dur,
                 nw=time_bandwidth_product,
