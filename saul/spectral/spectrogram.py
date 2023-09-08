@@ -159,7 +159,7 @@ class Spectrogram:
         dy = np.diff(y)[0]
         im = spec_ax.imshow(
             sxx_db,
-            cmap='inferno',
+            cmap='magma',
             interpolation='none',
             rasterized=True,
             aspect='auto',
