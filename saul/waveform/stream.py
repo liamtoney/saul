@@ -2,6 +2,8 @@
 Contains the definition of the Stream class.
 """
 
+import subprocess
+import sys
 from datetime import timedelta
 from pathlib import Path
 
@@ -9,6 +11,7 @@ import matplotlib.dates as mdates
 import numpy as np
 import obspy
 from obspy import UTCDateTime
+from obspy.clients.fdsn import Client
 from waveform_collection import gather_waveforms, read_local
 
 
@@ -76,6 +79,37 @@ class Stream(obspy.Stream):
 
             kwargs['fig'] = figure()
         return super().plot(*args, **kwargs)
+
+    def to_kml(self, filename='stream_stations.kml', open_file=False):
+        """Write the Stream station locations to a KML file and optionally open it.
+
+        Args:
+            filename (str): Output KML file name (including path)
+            open_file (bool): If True, immediately open the output KML file in Google
+                Earth Pro (only supported on macOS systems with Google Earth Pro
+                installed)
+        """
+        client = Client('IRIS')  # Since we have only used the IRIS server thus far
+        inv = client.get_stations(
+            network=','.join([tr.stats.network for tr in self.traces]),
+            station=','.join([tr.stats.station for tr in self.traces]),
+            location=','.join([tr.stats.location for tr in self.traces]),
+            channel=','.join([tr.stats.channel for tr in self.traces]),
+            starttime=np.min([tr.stats.starttime for tr in self.traces]),
+            endtime=np.max([tr.stats.endtime for tr in self.traces]),
+            level='channel',
+        )
+        filename = Path(filename).expanduser().resolve()
+        inv.write(str(filename), format='KML', timespans=False, cmap='Pastel1')
+        assert filename.is_file(), 'Issue saving KML file!'
+        print(f'KML file saved to `{filename}`')
+        if open_file:
+            if sys.platform == 'darwin':  # If we're on macOS
+                subprocess.run(
+                    ['open', '-a', '/Applications/Google Earth Pro.app', filename]
+                )
+            else:
+                raise NotImplementedError('`open_file` currently only works on macOS!')
 
     @classmethod
     def from_iris(cls, network, station, channel, starttime, endtime, location='*'):
