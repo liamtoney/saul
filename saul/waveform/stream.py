@@ -2,9 +2,11 @@
 Contains the definition of the Stream class.
 """
 
+from datetime import timedelta
 from pathlib import Path
 
 import matplotlib.dates as mdates
+import numpy as np
 import obspy
 from obspy import UTCDateTime
 from waveform_collection import gather_waveforms, read_local
@@ -21,14 +23,19 @@ class Stream(obspy.Stream):
     def _duration_string(tr):
         """Calculate and return a nicely-formatted string duration of a Trace."""
         duration = tr.stats.endtime - tr.stats.starttime  # [s]
-        if duration < mdates.SEC_PER_MIN:
-            return f'{duration:.0f} s'
-        elif duration < mdates.SEC_PER_HOUR:
-            return f'{duration/mdates.SEC_PER_MIN:.1f} min'
-        elif duration < mdates.SEC_PER_DAY:
-            return f'{duration/mdates.SEC_PER_HOUR:.1f} hr'
-        else:  # duration >= mdates.SEC_PER_DAY
-            return f'{duration/mdates.SEC_PER_DAY:.1f} day(s)'
+        assert (not np.isnan(duration)) and (duration >= 0), 'Invalid duration!'
+        # Take the ceil if duration is < 1 s; otherwise round to nearest second
+        td = timedelta(seconds=max(round(duration), 1))
+        days = td.days
+        hours, remainder = divmod(td.seconds, int(mdates.SEC_PER_HOUR))
+        minutes, seconds = divmod(remainder, int(mdates.SEC_PER_MIN))
+        out = f'{days} days' if days > 1 else f'{days} day' if days == 1 else ''
+        for increment, unit in zip((hours, minutes, seconds), ('hr', 'min', 's')):
+            if increment > 0:
+                out += f', {increment} {unit}'
+        if out == '':
+            out = '0 s'
+        return out.lstrip(', ')
 
     def __mul__(self, *args, **kwargs):
         """Modify this method to return a saul.Stream instead of an obspy.Stream.
