@@ -3,15 +3,15 @@
 **SAUL** is the **S**eismo**A**coustic **U**tilities **L**ibrary. It's my take on the
 collection of tools that I imagine exist, in some form, on every seismoacoustican's
 computer — utilities for gathering waveform data, plotting waveforms in the time and
-frequency domain, visualizing key metadata such as station locations, _et cetera._ SAUL
-is my attempt, using Python, to make these fundamental data exploration tools
+frequency domain, visualizing key metadata such as station locations, _et cetera._ The
+goal of SAUL is to make these fundamental data exploration tools as easy-to-use as
+possible. Thus, priority is placed upon straightforward (e.g., easily memorized)
+commands and time-saving helper functions — while attempting to leverage existing
+dependencies as much as possible to avoid duplicated effort.
 
-1. easy and quick to **use**, and (importantly)
-2. easy to **maintain**.
-
-SAUL aims to accomplish this by implementing an object-oriented interface which uses
-existing dependencies as much as possible. This modular approach has distinct advantages
-when it comes to compartmentalization and expansion (I hope! 🤞).
+> 🚧 **Disclaimer** 🚧  
+> As a workhorse "everyday tools" repository, SAUL is currently (perpetually?) under
+> rapid development. Expect to encounter breaking changes after a `git pull` update!
 
 ## Installing
 
@@ -42,6 +42,8 @@ st.detrend().taper(0.05).remove_response()  # SAUL Stream objects behave like Ob
 PSD(st, method='multitaper').plot(show_noise_models=True)
 ```
 <img src="doc/psd_example.png" width=550>
+SAUL documentation can be found in the docstrings for every public function, class, and
+method.
 
 ## Developing
 
