@@ -139,7 +139,7 @@ class Stream(obspy.Stream):
                     ).text = f'{tr.stats.longitude:.6f},{tr.stats.latitude:.6f},0'
                 else:
                     SubElement(placemark, 'description').text = 'No coordinates!'
-                    print('No coordinates for {tr.id}')
+                    print(f'No coordinates for {tr.id}')
 
         # Generate KML string and write to file
         kml_string = tostring(
