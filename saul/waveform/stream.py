@@ -93,7 +93,8 @@ class Stream(obspy.Stream):
             ge (bool): If True, immediately open the output KML file in Google Earth Pro
                 (only supported on macOS systems with Google Earth Pro installed)
         """
-        st_sort = self.copy().sort(keys=['network', 'station', 'location', 'channel'])
+        st_sort = self.copy()  # Work on a copy of the Stream, since we modify it!
+        st_sort.merge().sort(keys=['network', 'station', 'location', 'channel'])
         networks = list(set([tr.stats.network for tr in st_sort]))[::-1]  # Reverse?
 
         # Construct KML file
@@ -101,7 +102,8 @@ class Stream(obspy.Stream):
         kml.set('xmlns', 'http://www.opengis.net/kml/2.2')
 
         document = SubElement(kml, 'Document')
-        SubElement(document, 'name').text = self.__str__().split('\n')[0][:-1]  # Line 1
+        title = st_sort.__str__().split('\n')[0][:-1] + ' (merged)'
+        SubElement(document, 'name').text = title  # 1st line of __str__(), note merge
         SubElement(document, 'open').text = '1'
 
         # Style definition
