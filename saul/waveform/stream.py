@@ -82,7 +82,7 @@ class Stream(obspy.Stream):
             kwargs['fig'] = figure()
         return super().plot(*args, **kwargs)
 
-    def to_kml(self, filename='saul.Stream.kml', open_file=False):
+    def to_kml(self, filename='saul.Stream.kml', ge=False):
         """Write the Stream station locations to a KML file and optionally open it.
 
         Adopted from the code here:
@@ -90,9 +90,8 @@ class Stream(obspy.Stream):
 
         Args:
             filename (str): Output KML file name (including path)
-            open_file (bool): If True, immediately open the output KML file in Google
-                Earth Pro (only supported on macOS systems with Google Earth Pro
-                installed)
+            ge (bool): If True, immediately open the output KML file in Google Earth Pro
+                (only supported on macOS systems with Google Earth Pro installed)
         """
         st_sort = self.copy().sort(keys=['network', 'station', 'location', 'channel'])
         networks = list(set([tr.stats.network for tr in st_sort]))[::-1]  # Reverse?
@@ -153,7 +152,7 @@ class Stream(obspy.Stream):
         print(f'KML file saved to `{filename}`')
 
         # Optionally open file
-        if open_file:
+        if ge:
             if sys.platform == 'darwin':  # If we're on macOS
                 subprocess.run(
                     ['open', '-a', '/Applications/Google Earth Pro.app', filename]
