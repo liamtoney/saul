@@ -197,7 +197,9 @@ class PSD:
             ax.set_xlim(fmin, fmax)
         # Pick smart limits "ceiled" to nearest 10 dB
         if db_lim == 'smart':
-            pxx_db_all = [pxx_db for _, pxx_db in self.psd]
+            pxx_db_all = []
+            for _, pxx_db in self.psd:
+                pxx_db_all += pxx_db.tolist()
             db_min = np.percentile(pxx_db_all, 5)  # Percentile across all PSDs
             db_max = np.max(pxx_db_all)  # Max value across all PSDs
             db_lim = np.ceil(db_min / 10) * 10, np.ceil(db_max / 10) * 10
