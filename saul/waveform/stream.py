@@ -102,6 +102,7 @@ class Stream(obspy.Stream):
 
         document = SubElement(kml, 'Document')
         SubElement(document, 'name').text = self.__str__().split('\n')[0][:-1]  # Line 1
+        SubElement(document, 'open').text = '1'
 
         # Style definition
         cmap = get_cmap('Pastel1')
