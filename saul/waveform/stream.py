@@ -2,13 +2,18 @@
 Contains the definition of the Stream class.
 """
 
+import subprocess
+import sys
 from datetime import timedelta
 from pathlib import Path
 
 import matplotlib.dates as mdates
 import numpy as np
 import obspy
+from lxml.etree import Element, SubElement, tostring
+from matplotlib.cm import get_cmap
 from obspy import UTCDateTime
+from obspy.io.kml.core import _rgba_tuple_to_kml_color_code
 from waveform_collection import gather_waveforms, read_local
 
 
@@ -76,6 +81,85 @@ class Stream(obspy.Stream):
 
             kwargs['fig'] = figure()
         return super().plot(*args, **kwargs)
+
+    def to_kml(self, filename='saul.Stream.kml', ge=False):
+        """Write the Stream station locations to a KML file and optionally open it.
+
+        Adopted from the code here:
+        https://github.com/obspy/obspy/blob/master/obspy/io/kml/core.py#L21-L137
+
+        Args:
+            filename (str): Output KML file name (including path)
+            ge (bool): If True, immediately open the output KML file in Google Earth Pro
+                (only supported on macOS systems with Google Earth Pro installed)
+        """
+        st_sort = self.copy().sort(keys=['network', 'station', 'location', 'channel'])
+        networks = list(set([tr.stats.network for tr in st_sort]))[::-1]  # Reverse?
+
+        # Construct KML file
+        kml = Element('kml')
+        kml.set('xmlns', 'http://www.opengis.net/kml/2.2')
+
+        document = SubElement(kml, 'Document')
+        SubElement(document, 'name').text = self.__str__().split('\n')[0][:-1]  # Line 1
+        SubElement(document, 'open').text = '1'
+
+        # Style definition
+        cmap = get_cmap('Pastel1')
+        for i in range(len(networks)):
+            color = _rgba_tuple_to_kml_color_code(cmap(i))
+            style = SubElement(document, 'Style')
+            style.set('id', f'station_{i}')
+
+            iconstyle = SubElement(style, 'IconStyle')
+            SubElement(iconstyle, 'color').text = color
+            SubElement(iconstyle, 'scale').text = str(1.3)
+            icon = SubElement(iconstyle, 'Icon')
+            SubElement(
+                icon, 'href'
+            ).text = 'https://maps.google.com/mapfiles/kml/shapes/triangle.png'
+
+            labelstyle = SubElement(style, 'LabelStyle')
+            SubElement(labelstyle, 'color').text = color
+
+        for i, network in enumerate(networks):
+            folder = SubElement(document, 'Folder')
+            SubElement(folder, 'name').text = network
+            SubElement(folder, 'open').text = '1'
+
+            # Add marker for each Trace in Stream with this network code
+            for tr in st_sort.select(network=network):
+                placemark = SubElement(folder, 'Placemark')
+                SubElement(placemark, 'name').text = tr.id
+                SubElement(placemark, 'styleUrl').text = f'#station_{i}'
+                SubElement(placemark, 'color').text = color
+                if hasattr(tr.stats, 'longitude') and hasattr(tr.stats, 'latitude'):
+                    point = SubElement(placemark, 'Point')
+                    SubElement(
+                        point, 'coordinates'
+                    ).text = f'{tr.stats.longitude:.6f},{tr.stats.latitude:.6f},0'
+                else:
+                    SubElement(placemark, 'description').text = 'No coordinates!'
+                    print(f'No coordinates for {tr.id}')
+
+        # Generate KML string and write to file
+        kml_string = tostring(
+            kml, pretty_print=True, xml_declaration=True, encoding='UTF-8'
+        )
+        filename = Path(filename).expanduser().resolve()
+        with filename.open('wb') as f:
+            f.write(kml_string)
+        assert filename.is_file(), 'Issue saving KML file!'
+        print(f'KML file saved to `{filename}`')
+
+        # Optionally open file
+        if ge:
+            if sys.platform == 'darwin':  # If we're on macOS
+                subprocess.run(
+                    ['open', '-a', '/Applications/Google Earth Pro.app', filename]
+                )
+            else:
+                raise NotImplementedError('`open_file` currently only works on macOS!')
 
     @classmethod
     def from_iris(cls, network, station, channel, starttime, endtime, location='*'):
