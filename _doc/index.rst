@@ -11,5 +11,5 @@ background information about SAUL, see
    :maxdepth: 2
    :caption: API Reference:
 
-   _api/saul.spectral
-   _api/saul.waveform
+   api/saul.spectral
+   api/saul.waveform
