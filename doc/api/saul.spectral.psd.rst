@@ -1,5 +1,5 @@
-Class ``PSD``
-=============
+``saul.spectral.psd``
+=====================
 
 .. automodule:: saul.spectral.psd
    :members:
