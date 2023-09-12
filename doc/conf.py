@@ -17,11 +17,8 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
-    'sphinxcontrib.apidoc',
 ]
 napoleon_numpy_docstring = False  # We are using Google docstring style
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
-apidoc_module_dir = '../saul/'
 autodoc_mock_imports = [
     'lxml',
     'matplotlib',
@@ -32,9 +29,6 @@ autodoc_mock_imports = [
     'waveform_collection',
 ]
 autoclass_content = 'init'
-apidoc_separate_modules = True
-apidoc_toc_file = False  # Don't create `modules.rst` file
-apidoc_module_first = True  # Removes "Module contents"
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
