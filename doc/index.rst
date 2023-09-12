@@ -5,6 +5,8 @@ Welcome to SAUL's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   api/modules.rst
+
 
 
 Indices and tables

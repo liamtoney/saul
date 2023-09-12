@@ -27,7 +27,7 @@ def get_ak_infra_noise():
     Macpherson, K. A., Coffey, J. R., Witsil, A. J., Fee, D., Holtkamp, S., Dalton, S.,
         McFarlin, H., & West, M. (2022). Ambient infrasound noise, station performance,
         and their relation to land cover across Alaska. *Seismological Research
-        Letters*, *93*(4), 2239–2258. https://doi.org/10.1785/0220210365
+        Letters*, *93*\ (4), 2239–2258. https://doi.org/10.1785/0220210365
 
     Returns:
         tuple: Period [s], high noise model [dB rel. 1 Pa^2 Hz^-1], median noise model

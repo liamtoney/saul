@@ -171,7 +171,7 @@ class Stream(obspy.Stream):
         source argument set to 'IRIS'; for documentation of that function see:
         https://uaf-waveform-collection.readthedocs.io/en/master/api/waveform_collection.server.html
 
-        Wildcards (*, ?) are accepted for the network, station, channel, and location
+        Wildcards (\*, ?) are accepted for the network, station, channel, and location
         parameters.
 
         Args:
@@ -217,7 +217,7 @@ class Stream(obspy.Stream):
         documentation of that function see:
         https://uaf-waveform-collection.readthedocs.io/en/master/api/waveform_collection.local.local.html
 
-        Wildcards (*, ?) are accepted for the network, station, channel, and location
+        Wildcards (\*, ?) are accepted for the network, station, channel, and location
         parameters.
 
         Args:

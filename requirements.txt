@@ -3,3 +3,4 @@ ipython
 isort
 sphinx
 sphinx-rtd-theme
+sphinxcontrib-apidoc
