@@ -1,16 +1,10 @@
-saul package
-============
-
 .. automodule:: saul
    :members:
    :undoc-members:
    :show-inheritance:
 
-Subpackages
------------
-
 .. toctree::
-   :maxdepth: 4
-
+   :maxdepth: 2
+   
    saul.spectral
    saul.waveform

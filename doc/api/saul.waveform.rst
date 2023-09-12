@@ -1,15 +1,12 @@
-saul.waveform package
-=====================
+**Waveform data tools** — ``saul.waveform``
+===========================================
 
 .. automodule:: saul.waveform
    :members:
    :undoc-members:
    :show-inheritance:
 
-Submodules
-----------
-
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 1
 
    saul.waveform.stream

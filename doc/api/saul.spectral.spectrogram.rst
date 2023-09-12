@@ -1,5 +1,5 @@
-saul.spectral.spectrogram module
-================================
+Class ``Spectrogram``
+=====================
 
 .. automodule:: saul.spectral.spectrogram
    :members:

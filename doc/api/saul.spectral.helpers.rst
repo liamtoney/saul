@@ -1,5 +1,5 @@
-saul.spectral.helpers module
-============================
+``saul.spectral.helpers``
+=========================
 
 .. automodule:: saul.spectral.helpers
    :members:

@@ -1,5 +1,5 @@
-saul.waveform.stream module
-===========================
+Class ``Stream``
+================
 
 .. automodule:: saul.waveform.stream
    :members:
