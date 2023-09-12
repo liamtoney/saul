@@ -31,6 +31,8 @@ autodoc_mock_imports = [
     'scipy',
     'waveform_collection',
 ]
+autoclass_content = 'init'
+apidoc_separate_modules = True
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
