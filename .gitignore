@@ -1,4 +1,4 @@
-/doc/_build/
+/_doc/_build/
 /saul.egg-info/
 /.idea/
 .DS_Store

@@ -35,7 +35,7 @@ mamba env update --name <existing_environment>
 ## Using
 
 Be sure that the environment you've installed SAUL into is activated. Here's a simple
-[usage example](doc/psd_example.py) which highlights SAUL's object-oriented interface:
+[usage example](_doc/psd_example.py) which highlights SAUL's object-oriented interface:
 ```python
 from saul import PSD, Stream
 
@@ -43,7 +43,7 @@ st = Stream.from_iris('AK', 'HOM', 'BDF', (2023, 9, 1, 0, 5), (2023, 9, 1, 0, 15
 st.detrend().taper(0.05).remove_response()  # SAUL Stream objects behave like ObsPy's
 PSD(st, method='multitaper').plot(show_noise_models=True)
 ```
-<img src="doc/psd_example.png" width=550>
+<img src="_doc/psd_example.png" width=550>
 
 For detailed usage information, see the [API documentation](https://saul.rtfd.io/).
 
