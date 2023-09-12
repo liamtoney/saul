@@ -18,6 +18,7 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
     'sphinx.ext.intersphinx',
+    'sphinx.ext.todo',
 ]
 napoleon_numpy_docstring = False  # We are using Google docstring style
 autodoc_mock_imports = [
@@ -30,6 +31,7 @@ autodoc_mock_imports = [
     'waveform_collection',
 ]
 autoclass_content = 'init'
+todo_include_todos = True
 
 # These only need to cover the packages we reference from the docstrings
 intersphinx_mapping = dict(obspy=('https://docs.obspy.org/', None))
