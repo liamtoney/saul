@@ -17,6 +17,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
+    'sphinx.ext.intersphinx',
 ]
 napoleon_numpy_docstring = False  # We are using Google docstring style
 autodoc_mock_imports = [
@@ -29,6 +30,9 @@ autodoc_mock_imports = [
     'waveform_collection',
 ]
 autoclass_content = 'init'
+
+# These only need to cover the packages we reference from the docstrings
+intersphinx_mapping = dict(obspy=('https://docs.obspy.org/', None))
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

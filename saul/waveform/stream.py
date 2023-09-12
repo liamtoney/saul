@@ -18,7 +18,7 @@ from waveform_collection import gather_waveforms, read_local
 
 
 class Stream(obspy.Stream):
-    """A subclass of the obspy.Stream object with extra functionality.
+    """A subclass of ObsPy's :class:`~obspy.core.stream.Stream` class with extra functionality.
 
     See the docstring for that class for documentation on the attributes and methods
     inherited by this class.
