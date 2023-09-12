@@ -33,6 +33,8 @@ autodoc_mock_imports = [
 ]
 autoclass_content = 'init'
 apidoc_separate_modules = True
+apidoc_toc_file = False  # Don't create `modules.rst` file
+apidoc_module_first = True  # Removes "Module contents"
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

@@ -1,17 +1,10 @@
-Welcome to SAUL's documentation!
-================================
+SAUL
+====
+
+**SAUL** is the **S**\ eismo\ **A**\ coustic **U**\ tilities **L**\ ibrary.
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: -1
+   :caption: API Reference:
 
-   api/modules.rst
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   api/saul.rst
