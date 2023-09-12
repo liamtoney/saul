@@ -1,5 +1,7 @@
 # SAUL
 
+[![API documentation status](https://readthedocs.org/projects/saul/badge/?version=latest)](https://saul.rtfd.io/)
+
 **SAUL** is the **S**eismo**A**coustic **U**tilities **L**ibrary. It's my take on the
 collection of tools that I imagine exist, in some form, on every seismoacoustican's
 computer — utilities for gathering waveform data, plotting waveforms in the time and
@@ -42,8 +44,8 @@ st.detrend().taper(0.05).remove_response()  # SAUL Stream objects behave like Ob
 PSD(st, method='multitaper').plot(show_noise_models=True)
 ```
 <img src="doc/psd_example.png" width=550>
-SAUL documentation can be found in the docstrings for every public function, class, and
-method.
+
+For detailed usage information, see the [API documentation](https://saul.rtfd.io/).
 
 ## Developing
 
