@@ -1,5 +1,5 @@
 """
-Contains the definition of the Spectrogram class.
+Contains the definition of SAUL's :class:`Spectrogram` class.
 """
 
 import matplotlib.dates as mdates

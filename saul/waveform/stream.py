@@ -1,5 +1,5 @@
 """
-Contains the definition of the Stream class.
+Contains the definition of SAUL's :class:`Stream` class.
 """
 
 import subprocess

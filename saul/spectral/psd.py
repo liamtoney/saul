@@ -1,5 +1,5 @@
 """
-Contains the definition of the PSD class.
+Contains the definition of SAUL's :class:`PSD` class.
 """
 
 import matplotlib.pyplot as plt
