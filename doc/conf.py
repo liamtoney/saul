@@ -22,7 +22,7 @@ extensions = [
 napoleon_numpy_docstring = False  # We are using Google docstring style
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 apidoc_module_dir = '../saul/'
-autodoc_mock_imports = ['matplotlib', 'multitaper', 'numpy', 'obspy', 'scipy']
+autodoc_mock_imports = ['lxml', 'matplotlib', 'multitaper', 'numpy', 'obspy', 'scipy']
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
