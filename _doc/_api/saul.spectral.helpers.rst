@@ -4,4 +4,3 @@
 .. automodule:: saul.spectral.helpers
    :members:
    :undoc-members:
-   :show-inheritance:

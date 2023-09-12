@@ -2,13 +2,10 @@
 =================================================
 
 .. automodule:: saul.spectral
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 .. toctree::
    :maxdepth: 1
 
    saul.spectral.helpers
-   saul.spectral.psd
-   saul.spectral.spectrogram
+   saul.spectral.psd.PSD
+   saul.spectral.spectrogram.Spectrogram
