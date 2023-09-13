@@ -36,7 +36,7 @@ class PSD:
         number_of_tapers (int): See :meth:`__init__`; only defined if
             ``method='multitaper'``
         st (SAUL :class:`~saul.waveform.stream.Stream`): Input waveforms (single
-            :class:`~obspy.core.trace.Trace` input is converted to
+            :class:`~obspy.core.trace.Trace` input is converted to SAUL
             :class:`~saul.waveform.stream.Stream`)
         data_kind (str): Input waveform data kind; ``'infrasound'`` or ``'seismic'``
             (inferred from channel code)
