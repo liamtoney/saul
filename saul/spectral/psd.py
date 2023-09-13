@@ -55,7 +55,7 @@ class PSD:
         time_bandwidth_product=4,
         number_of_tapers=7,
     ):
-        """Create a PSD object.
+        """Create a :class:`PSD` object.
 
         The PSDs of the input waveforms are estimated in this method. Two spectral
         estimation approaches are supported: Welch's method (:func:`scipy.signal.welch`)
