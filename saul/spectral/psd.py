@@ -29,19 +29,22 @@ class PSD:
     """A class for calculating and plotting PSDs of one or more waveforms.
 
     Attributes:
-        method (str): See __init__()
-        win_dur (int or float): See __init__(); only defined if method='welch'
-        time_bandwidth_product (float): See __init__(); only defined if
-            method='multitaper'
-        number_of_tapers (int): See __init__(); only defined if method='multitaper'
-        st (saul.Stream): Input waveforms (single Trace input is converted to
-            saul.Stream)
-        data_kind (str): Input waveform data kind; 'infrasound' or 'seismic' (inferred
-            from channel code)
+        method (str): See :meth:`__init__`
+        win_dur (int or float): See :meth:`__init__`; only defined if ``method='welch'``
+        time_bandwidth_product (float): See :meth:`__init__`; only defined if
+            ``method='multitaper'``
+        number_of_tapers (int): See :meth:`__init__`; only defined if
+            ``method='multitaper'``
+        st (SAUL :class:`~saul.waveform.stream.Stream`): Input waveforms (single
+            :class:`~obspy.core.trace.Trace` input is converted to
+            :class:`~saul.waveform.stream.Stream`)
+        data_kind (str): Input waveform data kind; ``'infrasound'`` or ``'seismic'``
+            (inferred from channel code)
         db_ref_val (int or float): dB reference value for PSD (data kind dependent)
         psd (list): List of PSDs (in dB) calculated from input waveforms; of the form
-            [(f1, pxx_db1), (f2, pxx_db2), ...] given a saul.Stream consisting of Traces
-            [tr1, tr2, ...]
+            ``[(f1, pxx_db1), (f2, pxx_db2), ...]`` given a
+            :class:`~saul.waveform.stream.Stream` consisting of
+            :class:`~obspy.core.trace.Trace` entries ``[tr1, tr2, ...]``
     """
 
     def __init__(
@@ -55,27 +58,23 @@ class PSD:
         """Create a PSD object.
 
         The PSDs of the input waveforms are estimated in this method. Two spectral
-        estimation approaches are supported: Welch's method and the multitaper method.
-        The input arguments (below) relevant for each method are marked with a "[W]" for
-        Welch's method and an "[M]" for the multitaper method. Arguments corresponding
-        to the non-selected method are ignored.
-
-        Documentation for scipy.signal.welch:
-        https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.welch.html
-
-        Documentation for multitaper.mtspec.MTSpec:
-        https://multitaper.readthedocs.io/en/latest/mtspec.html#mtspec.MTSpec
+        estimation approaches are supported: Welch's method (:func:`scipy.signal.welch`)
+        and the multitaper method (:class:`mtspec.MTSpec`). The input arguments (below)
+        relevant for each method are marked with a **[W]** for Welch's method and an
+        **[M]** for the multitaper method. Arguments corresponding to the non-selected
+        method are ignored.
 
         Args:
-            tr_or_st (Trace or Stream): Input waveforms (response is expected to be
-                removed; SAUL expects units of pressure [Pa] for infrasound data and
-                velocity [m/s] for seismic data!)
-            method (str): Either 'welch' [W] or 'multitaper' [M]
-            win_dur (int or float): [W] Segment length in seconds. This usually must be
-                tweaked to obtain the cleanest-looking plot and to ensure that the
+            tr_or_st (:class:`~obspy.core.trace.Trace` or :class:`~saul.waveform.stream.Stream`):
+                Input waveforms (response is expected to be removed; SAUL expects units
+                of pressure [Pa] for infrasound data and velocity [m/s] for seismic
+                data!)
+            method (str): Either ``'welch'`` **[W]** or ``'multitaper'`` **[M]**
+            win_dur (int or float): **[W]** Segment length in seconds. This usually must
+                be tweaked to obtain the cleanest-looking plot and to ensure that the
                 longest-period signals of interest are included
-            time_bandwidth_product (float): [M] Time-bandwidth product
-            number_of_tapers (int): [M] Number of tapers to use
+            time_bandwidth_product (float): **[M]** Time-bandwidth product
+            number_of_tapers (int): **[M]** Number of tapers to use
         """
         # Pre-processing and checks
         assert method in [
@@ -131,15 +130,16 @@ class PSD:
         """Plot the calculated PSDs.
 
         Args:
-            db_lim (tuple, str, or None): Tuple defining min and max dB cutoffs, 'smart'
-                for a sensible automatic choice, or None for no clipping
-            use_period (bool): If True, x-axis will be period [s] instead of frequency
-                [Hz]
-            log_x (bool): If True, use log scaling for x-axis
+            db_lim (tuple, str, or None): Tuple defining min and max dB cutoffs,
+                ``'smart'`` for a sensible automatic choice, or ``None`` for no clipping
+            use_period (bool): If ``True``, *x*-axis will be period [s] instead of
+                frequency [Hz]
+            log_x (bool): If ``True``, use log scaling for *x*-axis
             show_noise_models (bool): Whether to plot reference noise models
             infra_noise_model (str): Which infrasound noise model to use (only used if
-                show_noise_models is True and self.data_kind is 'infrasound'), one
-                of 'ak' (Alaska noise model) or 'idc' (IMS array noise model)
+                ``show_noise_models`` is ``True`` and ``self.data_kind`` is
+                ``'infrasound'``), one of ``'ak'`` (Alaska noise model) or ``'idc'``
+                (IMS array noise model)
         """
         assert not (use_period and not log_x), 'Cannot use period with linear x-scale!'
         assert infra_noise_model in [

@@ -40,6 +40,7 @@ intersphinx_mapping = dict(
     waveform_collection=('https://uaf-waveform-collection.readthedocs.io/en/master/', None),
     python=('https://docs.python.org/3/', None),
     multitaper=('https://multitaper.readthedocs.io/en/latest/', None),
+    scipy=('https://docs.scipy.org/doc/scipy/', None),
 )
 # fmt: on
 
