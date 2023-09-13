@@ -37,8 +37,9 @@ todo_include_todos = True
 # fmt: off
 intersphinx_mapping = dict(
     obspy=('https://docs.obspy.org/', None),
-    waveform_collection=('https://uaf-waveform-collection.readthedocs.io/en/master', None),
+    waveform_collection=('https://uaf-waveform-collection.readthedocs.io/en/master/', None),
     python=('https://docs.python.org/3/', None),
+    multitaper=('https://multitaper.readthedocs.io/en/latest/', None),
 )
 # fmt: on
 
