@@ -25,6 +25,15 @@ class Stream(obspy.Stream):
     """
 
     @staticmethod
+    def _preprocess_time(starttime_or_endtime):
+        """Cast tuples of integers to :class:`~obspy.core.utcdatetime.UTCDateTime`"""
+        if isinstance(starttime_or_endtime, tuple):
+            starttime_or_endtime = UTCDateTime(*starttime_or_endtime)
+        elif not isinstance(starttime_or_endtime, UTCDateTime):
+            raise TypeError('Time must be either a tuple or a UTCDateTime!')
+        return starttime_or_endtime
+
+    @staticmethod
     def _duration_string(tr):
         """Calculate and return a nicely-formatted string duration of a :class:`~obspy.core.trace.Trace`."""
         duration = tr.stats.endtime - tr.stats.starttime  # [s]
@@ -177,10 +186,11 @@ class Stream(obspy.Stream):
             network (str): SEED network code
             station (str): SEED station code
             channel (str): SEED channel code
-            starttime (tuple): Start time for data request; format is a tuple of
-                integers: ``(year, month, day[, hour[, minute[, second[,
-                microsecond]]])``
-            endtime (tuple): End time for data request (same format as ``starttime``)
+            starttime (tuple or :class:`~obspy.core.utcdatetime.UTCDateTime`): Start
+                time for data request; for tuple input the format is integers: ``(year,
+                month, day[, hour[, minute[, second[, microsecond]]])``
+            endtime (tuple or :class:`~obspy.core.utcdatetime.UTCDateTime`): End time
+                for data request (same format as ``starttime``)
             location (str): SEED location code
 
         Returns:
@@ -192,8 +202,8 @@ class Stream(obspy.Stream):
             station=station,
             location=location,
             channel=channel,
-            starttime=UTCDateTime(*starttime),  # Convert from tuple
-            endtime=UTCDateTime(*endtime),  # Convert from tuple
+            starttime=self._preprocess_time(starttime),
+            endtime=self._preprocess_time(endtime),
             merge_fill_value=False,
             trim_fill_value=False,
         )
@@ -224,10 +234,11 @@ class Stream(obspy.Stream):
             network (str): SEED network code
             station (str): SEED station code
             channel (str): SEED channel code
-            starttime (tuple): Start time for data request; format is a tuple of
-                integers: ``(year, month, day[, hour[, minute[, second[,
-                microsecond]]])``
-            endtime (tuple): End time for data request (same format as ``starttime``)
+            starttime (tuple or :class:`~obspy.core.utcdatetime.UTCDateTime`): Start
+                time for data request; for tuple input the format is integers: ``(year,
+                month, day[, hour[, minute[, second[, microsecond]]])``
+            endtime (tuple or :class:`~obspy.core.utcdatetime.UTCDateTime`): End time
+                for data request (same format as ``starttime``)
             location (str): SEED location code
 
         Returns:
@@ -243,8 +254,8 @@ class Stream(obspy.Stream):
             station=station,
             location=location,
             channel=channel,
-            starttime=UTCDateTime(*starttime),  # Convert from tuple
-            endtime=UTCDateTime(*endtime),  # Convert from tuple
+            starttime=self._preprocess_time(starttime),
+            endtime=self._preprocess_time(endtime),
             merge=False,
         )
         return cls(traces=st.traces)
