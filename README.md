@@ -1,5 +1,7 @@
 # SAUL
 
+[![API documentation status](https://readthedocs.org/projects/saul/badge/?version=latest)](https://saul.rtfd.io/)
+
 **SAUL** is the **S**eismo**A**coustic **U**tilities **L**ibrary. It's my take on the
 collection of tools that I imagine exist, in some form, on every seismoacoustican's
 computer — utilities for gathering waveform data, plotting waveforms in the time and
@@ -33,7 +35,8 @@ mamba env update --name <existing_environment>
 ## Using
 
 Be sure that the environment you've installed SAUL into is activated. Here's a simple
-[usage example](doc/psd_example.py) which highlights SAUL's object-oriented interface:
+[usage example](examples/psd_example.py) which highlights SAUL's object-oriented
+interface:
 ```python
 from saul import PSD, Stream
 
@@ -41,9 +44,9 @@ st = Stream.from_iris('AK', 'HOM', 'BDF', (2023, 9, 1, 0, 5), (2023, 9, 1, 0, 15
 st.detrend().taper(0.05).remove_response()  # SAUL Stream objects behave like ObsPy's
 PSD(st, method='multitaper').plot(show_noise_models=True)
 ```
-<img src="doc/psd_example.png" width=550>
-SAUL documentation can be found in the docstrings for every public function, class, and
-method.
+<img src="examples/psd_example.png" width=550>
+
+For detailed usage information, see the [API documentation](https://saul.rtfd.io/).
 
 ## Developing
 
