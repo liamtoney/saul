@@ -36,11 +36,11 @@ todo_include_todos = True
 # These only need to cover the packages we reference from the docstrings
 # fmt: off
 intersphinx_mapping = dict(
-    obspy=('https://docs.obspy.org/', None),
-    waveform_collection=('https://uaf-waveform-collection.readthedocs.io/en/master/', None),
-    python=('https://docs.python.org/3/', None),
     multitaper=('https://multitaper.readthedocs.io/en/latest/', None),
+    obspy=('https://docs.obspy.org/', None),
+    python=('https://docs.python.org/3/', None),
     scipy=('https://docs.scipy.org/doc/scipy/', None),
+    waveform_collection=('https://uaf-waveform-collection.readthedocs.io/en/master/', None),
 )
 # fmt: on
 
