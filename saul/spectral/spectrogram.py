@@ -23,18 +23,19 @@ class Spectrogram:
     """A class for calculating and plotting spectrograms of waveforms.
 
     Attributes:
-        method (str): See __init__()
-        win_dur (int or float): See __init__()
-        time_bandwidth_product (float): See __init__(); only defined if
-            method='multitaper'
-        number_of_tapers (int): See __init__(); only defined if method='multitaper'
-        tr (Trace): Input waveform
-        data_kind (str): Input waveform data kind; 'infrasound' or 'seismic' (inferred
-            from channel code)
+        method (str): See :meth:`__init__`
+        win_dur (int or float): See :meth:`__init__`
+        time_bandwidth_product (float): See :meth:`__init__`; only defined if
+            ``method='multitaper'``
+        number_of_tapers (int): See :meth:`__init__`; only defined if
+            ``method='multitaper'``
+        tr (:class:`~obspy.core.trace.Trace`): Input waveform
+        data_kind (str): Input waveform data kind; ``'infrasound'`` or ``'seismic'``
+            (inferred from channel code)
         db_ref_val (int or float): dB reference value for PSD (data kind dependent)
         spectrogram (tuple): Spectrogram (in dB) calculated from the input waveform; of
-            the form (f, t, sxx_db) where f and t are 1D arrays and sxx_db is a 2D array
-            with shape (f.size, t.size)
+            the form ``(f, t, sxx_db)`` where ``f`` and ``t`` are 1D arrays and
+            ``sxx_db`` is a 2D array with shape ``(f.size, t.size)``
     """
 
     def __init__(
@@ -45,30 +46,26 @@ class Spectrogram:
         time_bandwidth_product=4,
         number_of_tapers=7,
     ):
-        """Create a Spectrogram object.
+        """Create a :class:`Spectrogram` object.
 
         The spectrogram of the input waveform is estimated in this method (only a single
         waveform may be provided). Two spectral estimation approaches are supported:
-        The method implemented by SciPy and the multitaper method. Additional input
-        arguments (below) relevant only for the multitaper method are marked with an
-        "[M]". These arguments are ignored when the SciPy method is selected.
-
-        Documentation for scipy.signal.spectrogram:
-        https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.spectrogram.html
-
-        Documentation for multitaper.mtspec.spectrogram:
-        https://multitaper.readthedocs.io/en/latest/mtspec.html#mtspec.spectrogram
+        The method implemented by SciPy (:func:`scipy.signal.spectrogram`) and the
+        multitaper method (:func:`mtspec.spectrogram`). Additional input arguments
+        (below) relevant only for the multitaper method are marked with an **[M]**.
+        These arguments are ignored when the SciPy method is selected.
 
         Args:
-            tr_or_st (Trace or Stream): Input waveforms (response is expected to be
-                removed; SAUL expects units of pressure [Pa] for infrasound data and
-                velocity [m/s] for seismic data!)
-            method (str): Either 'scipy' or 'multitaper' [M]
+            tr_or_st (:class:`~obspy.core.trace.Trace` or :class:`~saul.waveform.stream.Stream`):
+                Input waveforms (response is expected to be removed; SAUL expects units
+                of pressure [Pa] for infrasound data and velocity [m/s] for seismic
+                data!)
+            method (str): Either ``'scipy'`` or ``'multitaper'`` **[M]**
             win_dur (int or float): Segment length in seconds. This usually must be
                 adjusted, within the constraints of the total signal duration, to ensure
                 that the longest-period signals of interest are included
-            time_bandwidth_product (float): [M] Time-bandwidth product
-            number_of_tapers (int): [M] Number of tapers to use
+            time_bandwidth_product (float): **[M]** Time-bandwidth product
+            number_of_tapers (int): **[M]** Number of tapers to use
         """
         # Pre-processing and checks
         assert method in [
@@ -129,11 +126,11 @@ class Spectrogram:
         """Plot the calculated spectrogram.
 
         Args:
-            db_lim (tuple, str, or None): Tuple defining min and max dB cutoffs, 'smart'
-                for a sensible automatic choice, or None for no clipping
-            use_period (bool): If True, spectrogram y-axis will be period [s] instead of
-                frequency [Hz]
-            log_y (bool): If True, use log scaling for spectrogram y-axis
+            db_lim (tuple, str, or None): Tuple defining min and max dB cutoffs,
+                ``'smart'`` for a sensible automatic choice, or ``None`` for no clipping
+            use_period (bool): If ``True``, spectrogram *y*-axis will be period [s]
+                instead of frequency [Hz]
+            log_y (bool): If ``True``, use log scaling for spectrogram *y*-axis
         """
         assert not (use_period and not log_y), 'Cannot use period with linear y-scale!'
         fig = plt.figure(figsize=(7, 5))
