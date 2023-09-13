@@ -2,8 +2,11 @@
 Contains the definition of SAUL's :class:`PSD` class.
 """
 
+from functools import cache
+
 import matplotlib.pyplot as plt
 import numpy as np
+from multitaper import mtspec
 from obspy.signal.spectral_estimation import (
     get_idc_infra_hi_noise,
     get_idc_infra_low_noise,
@@ -19,7 +22,6 @@ from saul.spectral.helpers import (
     REFERENCE_VELOCITY,
     _data_kind,
     _format_power_label,
-    _mtspec,
     get_ak_infra_noise,
 )
 from saul.waveform.stream import Stream
@@ -105,7 +107,7 @@ class PSD:
                 nfft = np.power(2, int(np.ceil(np.log2(nperseg))) + 1)  # Pad FFT
                 f, pxx = welch(tr.data, fs, nperseg=nperseg, nfft=nfft)
             else:  # method == 'multitaper'
-                mtspec = _mtspec(
+                mtspec = self._mtspec(
                     tuple(tr.data),
                     nw=time_bandwidth_product,
                     kspec=number_of_tapers,  # After a certain point this saturates
@@ -118,6 +120,12 @@ class PSD:
             # Convert to dB [dB rel. (db_ref_val <db_ref_val_unit>)^2 Hz^-1]
             pxx_db = 10 * np.log10(pxx / (self.db_ref_val**2))
             self.psd.append((f, pxx_db))
+
+    @staticmethod
+    @cache
+    def _mtspec(tr_data_tuple, **kwargs):
+        """Wrapper around :class:`mtspec.MTSpec` to facilitate tuple input (needed for memoization)."""
+        return mtspec.MTSpec(np.array(tr_data_tuple), **kwargs)
 
     def plot(
         self,

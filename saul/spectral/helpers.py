@@ -2,12 +2,9 @@
 Contains helper functions and constants for tasks related to spectral estimation.
 """
 
-from functools import cache
 from pathlib import Path
 
 import numpy as np
-from multitaper import MTSpec
-from multitaper.mtspec import spectrogram
 
 # Reference values for PSD dB units
 REFERENCE_VELOCITY = 1  # [m/s] For seismic data
@@ -44,18 +41,6 @@ def get_ak_infra_noise():
     f, hnm, mnm, lnm = np.loadtxt(AK_INFRA_NOISE, delimiter=',', skiprows=12).T
     # We convert frequency to period to match the ObsPy functions
     return 1 / f, hnm, mnm, lnm
-
-
-@cache
-def _mtspec(tr_data_tuple, **kwargs):
-    """Wrapper around :class:`mtspec.MTSpec` to facilitate tuple input (needed for memoization)."""
-    return MTSpec(np.array(tr_data_tuple), **kwargs)
-
-
-@cache
-def _spectrogram(tr_data_tuple, **kwargs):
-    """Wrapper around :func:`mtspec.spectrogram` to facilitate tuple input (needed for memoization)."""
-    return spectrogram(np.array(tr_data_tuple), **kwargs)
 
 
 def _data_kind(st):

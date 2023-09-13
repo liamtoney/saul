@@ -2,10 +2,13 @@
 Contains the definition of SAUL's :class:`Spectrogram` class.
 """
 
+from functools import cache
+
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.gridspec import GridSpec
+from multitaper import mtspec
 from scipy.signal import spectrogram
 
 from saul.spectral.helpers import (
@@ -14,7 +17,6 @@ from saul.spectral.helpers import (
     REFERENCE_VELOCITY,
     _data_kind,
     _format_power_label,
-    _spectrogram,
 )
 from saul.waveform.stream import Stream
 
@@ -102,7 +104,7 @@ class Spectrogram:
                 nfft=nfft,
             )
         else:  # method == 'multitaper'
-            t, f, _, sxx = _spectrogram(
+            t, f, _, sxx = self._spectrogram(
                 tuple(self.tr.data),
                 dt=self.tr.stats.delta,
                 twin=win_dur,
@@ -116,6 +118,12 @@ class Spectrogram:
         # Convert to dB [dB rel. (db_ref_val <db_ref_val_unit>)^2 Hz^-1]
         sxx_db = 10 * np.log10(sxx / (self.db_ref_val**2))
         self.spectrogram = (f, t, sxx_db)
+
+    @staticmethod
+    @cache
+    def _spectrogram(tr_data_tuple, **kwargs):
+        """Wrapper around :func:`mtspec.spectrogram` to facilitate tuple input (needed for memoization)."""
+        return mtspec.spectrogram(np.array(tr_data_tuple), **kwargs)
 
     def plot(
         self,
