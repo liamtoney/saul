@@ -34,7 +34,13 @@ autoclass_content = 'init'
 todo_include_todos = True
 
 # These only need to cover the packages we reference from the docstrings
-intersphinx_mapping = dict(obspy=('https://docs.obspy.org/', None))
+# fmt: off
+intersphinx_mapping = dict(
+    obspy=('https://docs.obspy.org/', None),
+    waveform_collection=('https://uaf-waveform-collection.readthedocs.io/en/master', None),
+    python=('https://docs.python.org/3/', None),
+)
+# fmt: on
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
