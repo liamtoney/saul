@@ -202,8 +202,8 @@ class Stream(obspy.Stream):
             station=station,
             location=location,
             channel=channel,
-            starttime=self._preprocess_time(starttime),
-            endtime=self._preprocess_time(endtime),
+            starttime=cls._preprocess_time(starttime),
+            endtime=cls._preprocess_time(endtime),
             merge_fill_value=False,
             trim_fill_value=False,
         )
@@ -254,8 +254,8 @@ class Stream(obspy.Stream):
             station=station,
             location=location,
             channel=channel,
-            starttime=self._preprocess_time(starttime),
-            endtime=self._preprocess_time(endtime),
+            starttime=cls._preprocess_time(starttime),
+            endtime=cls._preprocess_time(endtime),
             merge=False,
         )
         return cls(traces=st.traces)
