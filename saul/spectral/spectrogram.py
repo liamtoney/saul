@@ -122,7 +122,13 @@ class Spectrogram:
     @staticmethod
     @cache
     def _spectrogram(tr_data_tuple, **kwargs):
-        """Wrapper around :func:`mtspec.spectrogram` to facilitate tuple input (needed for memoization)."""
+        """Wrapper around :func:`mtspec.spectrogram` to facilitate tuple input (needed for memoization).
+
+        Warning:
+            For large input arrays (many samples), conversion to tuple and then back to
+            :class:`numpy.ndarray` can be **slow**. In this case, memoization may not be
+            worth it.
+        """
         return mtspec.spectrogram(np.array(tr_data_tuple), **kwargs)
 
     def plot(

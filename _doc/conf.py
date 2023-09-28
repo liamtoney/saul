@@ -37,6 +37,7 @@ todo_include_todos = True
 # fmt: off
 intersphinx_mapping = dict(
     multitaper=('https://multitaper.readthedocs.io/en/latest/', None),
+    numpy=('https://numpy.org/doc/stable/', None),
     obspy=('https://docs.obspy.org/', None),
     python=('https://docs.python.org/3/', None),
     scipy=('https://docs.scipy.org/doc/scipy/', None),

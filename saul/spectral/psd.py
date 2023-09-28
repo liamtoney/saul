@@ -124,7 +124,13 @@ class PSD:
     @staticmethod
     @cache
     def _mtspec(tr_data_tuple, **kwargs):
-        """Wrapper around :class:`mtspec.MTSpec` to facilitate tuple input (needed for memoization)."""
+        """Wrapper around :class:`mtspec.MTSpec` to facilitate tuple input (needed for memoization).
+
+        Warning:
+            For large input arrays (many samples), conversion to tuple and then back to
+            :class:`numpy.ndarray` can be **slow**. In this case, memoization may not be
+            worth it.
+        """
         return mtspec.MTSpec(np.array(tr_data_tuple), **kwargs)
 
     def plot(
