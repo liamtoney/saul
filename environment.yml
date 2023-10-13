@@ -1,4 +1,6 @@
 name: saul
+channels:
+  - conda-forge
 dependencies:
   - multitaper
   - obspy
