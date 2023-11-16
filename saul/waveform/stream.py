@@ -205,6 +205,10 @@ class Stream(obspy.Stream):
         user can optionally choose to cache waveform data to avoid redundant data
         download for repeated identical requests (see ``cache`` argument).
 
+        Warning:
+            Caching (see ``cache`` argument), while convenient, is sketchy since data
+            are not guaranteed to be the same between calls!
+
         Args:
             network (str): SEED network code
             station (str): SEED station code
@@ -215,10 +219,9 @@ class Stream(obspy.Stream):
             endtime (tuple or :class:`~obspy.core.utcdatetime.UTCDateTime`): End time
                 for data request (same format as ``starttime``)
             location (str): SEED location code
-            cache (bool): 🚨 **CAREFUL!** 🚨 Toggle whether to cache the
+            cache (bool): Toggle whether to cache the
                 :func:`~waveform_collection.server.gather_waveforms` function call to
-                avoid downloading data again in subsequent calls — convenient, but
-                sketchy since data are not guaranteed to be the same between calls!
+                avoid downloading data again in subsequent calls
 
         Returns:
             SAUL :class:`Stream`: Newly-created object with the server-obtained waveforms
@@ -230,7 +233,7 @@ class Stream(obspy.Stream):
             starttime = cls._time_tuple(starttime)
             endtime = cls._time_tuple(endtime)
             gather_func = cls._gather_waveforms_cache
-            print('🚨 CAUTION: Caching enabled! 🚨')
+            print('\033[33m' + '[CACHING ENABLED]' + '\033[0m')
         else:
             gather_func = gather_waveforms
         st = gather_func(
