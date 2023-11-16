@@ -5,6 +5,7 @@ Contains the definition of SAUL's :class:`Stream` class.
 import subprocess
 import sys
 from datetime import timedelta
+from functools import cache
 from pathlib import Path
 
 import matplotlib.dates as mdates
@@ -26,12 +27,17 @@ class Stream(obspy.Stream):
 
     @staticmethod
     def _preprocess_time(starttime_or_endtime):
-        """Cast tuples of integers to :class:`~obspy.core.utcdatetime.UTCDateTime`"""
+        """Cast tuples of integers to :class:`~obspy.core.utcdatetime.UTCDateTime`."""
         if isinstance(starttime_or_endtime, tuple):
             starttime_or_endtime = UTCDateTime(*starttime_or_endtime)
         elif not isinstance(starttime_or_endtime, UTCDateTime):
             raise TypeError('Time must be either a tuple or a UTCDateTime!')
         return starttime_or_endtime
+
+    @staticmethod
+    def _time_tuple(t):
+        """Cast class:`~obspy.core.utcdatetime.UTCDateTime` to tuples of integers."""
+        return (t.year, t.month, t.day, t.hour, t.minute, t.second, t.microsecond)
 
     @staticmethod
     def _duration_string(tr):
@@ -50,6 +56,19 @@ class Stream(obspy.Stream):
         if out == '':
             out = '0 s'
         return out.lstrip(', ')
+
+    @staticmethod
+    @cache
+    def _gather_waveforms_cache(starttime, endtime, **kwargs):
+        """Wrapper around :func:`waveform_collection.server.gather_waveforms`.
+
+        The input ``starttime`` and ``endtime`` will always be tuples.
+        """
+        return gather_waveforms(
+            starttime=Stream._preprocess_time(starttime),
+            endtime=Stream._preprocess_time(endtime),
+            **kwargs,
+        )
 
     def __mul__(self, *args, **kwargs):
         """Modify this method to return a SAUL :class:`Stream` instead of an ObsPy :class:`~obspy.core.stream.Stream`.
@@ -175,12 +194,20 @@ class Stream(obspy.Stream):
                 raise NotImplementedError('`open_file` currently only works on macOS!')
 
     @classmethod
-    def from_iris(cls, network, station, channel, starttime, endtime, location='*'):
+    def from_iris(
+        cls, network, station, channel, starttime, endtime, location='*', cache=False
+    ):
         """Create a SAUL :class:`Stream` object containing waveforms obtained from IRIS servers.
 
         This class method wraps :func:`waveform_collection.server.gather_waveforms` with
         the ``source`` argument set to ``'IRIS'``. Wildcards (``*``, ``?``) are accepted
-        for the ``network``, ``station``, ``channel``, and ``location`` parameters.
+        for the ``network``, ``station``, ``channel``, and ``location`` parameters. The
+        user can optionally choose to cache waveform data to avoid redundant data
+        download for repeated identical requests (see ``cache`` argument).
+
+        Warning:
+            Caching (see ``cache`` argument), while convenient, is sketchy since data
+            are not guaranteed to be the same between calls!
 
         Args:
             network (str): SEED network code
@@ -192,18 +219,31 @@ class Stream(obspy.Stream):
             endtime (tuple or :class:`~obspy.core.utcdatetime.UTCDateTime`): End time
                 for data request (same format as ``starttime``)
             location (str): SEED location code
+            cache (bool): Toggle whether to cache the
+                :func:`~waveform_collection.server.gather_waveforms` function call to
+                avoid downloading data again in subsequent calls
 
         Returns:
             SAUL :class:`Stream`: Newly-created object with the server-obtained waveforms
         """
-        st = gather_waveforms(
+        # Ensure we have UTCDateTime objects to start
+        starttime = cls._preprocess_time(starttime)
+        endtime = cls._preprocess_time(endtime)
+        if cache:  # We must convert times to tuples
+            starttime = cls._time_tuple(starttime)
+            endtime = cls._time_tuple(endtime)
+            gather_func = cls._gather_waveforms_cache
+            print('\033[33m' + '[CACHING ENABLED]' + '\033[0m')
+        else:
+            gather_func = gather_waveforms
+        st = gather_func(
             source='IRIS',
             network=network,
             station=station,
             location=location,
             channel=channel,
-            starttime=cls._preprocess_time(starttime),
-            endtime=cls._preprocess_time(endtime),
+            starttime=starttime,
+            endtime=endtime,
             merge_fill_value=False,
             trim_fill_value=False,
         )
