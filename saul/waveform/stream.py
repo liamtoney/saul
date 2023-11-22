@@ -112,6 +112,8 @@ class Stream(obspy.Stream):
             Can obtain standard :meth:`obspy.core.stream.Stream.plot` behavior by
             setting ``fig=None``.
         """
+        if 'reftime' in kwargs:
+            kwargs['reftime'] = self._preprocess_time(kwargs['reftime'])  # Allow tuples
         if 'fig' not in kwargs:
             from matplotlib.pyplot import figure
 
