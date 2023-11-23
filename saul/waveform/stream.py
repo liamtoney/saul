@@ -158,13 +158,24 @@ class Stream(obspy.Stream):
                     transform=transform,
                 )
             if wavespeed is not None:
+                color = 'tab:red'
                 ymax = ax.get_ylim()[1]  # [km]
                 ax.plot(
                     [0, ymax / wavespeed],
                     [0, ymax],
-                    color='tab:red',
+                    color=color,
                     scalex=False,
                     scaley=False,
+                )
+                transform = blended_transform_factory(ax.transData, ax.transAxes)
+                ax.text(
+                    ymax / wavespeed,
+                    1.02,
+                    f'{wavespeed} km/s',
+                    color=color,
+                    transform=transform,
+                    ha='center',
+                    va='baseline',
                 )
             reftime = kwargs.get('reftime', min([tr.stats.starttime for tr in st_plot]))
             time_format = '%Y-%m-%d %H:%M:%S'
