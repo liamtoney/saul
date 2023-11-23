@@ -106,7 +106,13 @@ class Stream(obspy.Stream):
 
         If the user specifies ``src_lat`` and ``src_lon``, ``type='section'`` is assumed
         and distances are automatically calculated. This saves the user from having to
-        calculate these in a prior step.
+        calculate these in a prior step. If this plotting mode is used, the user can
+        also specify a ``wavespeed`` to plot a moveout line on the record section.
+
+        Args:
+            src_lat (int or float): Source latitude [°]
+            src_lon (int or float): Source longitude [°]
+            wavespeed (int or float): Moveout line [km/s] to plot on the record section
 
         Note:
             Can obtain standard :meth:`obspy.core.stream.Stream.plot` behavior by
@@ -131,6 +137,7 @@ class Stream(obspy.Stream):
             if 'alpha' not in kwargs:
                 kwargs['alpha'] = 1
             src_lat, src_lon = kwargs.pop('src_lat'), kwargs.pop('src_lon')
+            wavespeed = kwargs.pop('wavespeed', None)
             st_plot = self.copy()  # Work on a copy of the Stream, since we modify it!
             for tr in st_plot:
                 tr.stats.distance = gps2dist_azimuth(  # [m]
@@ -150,6 +157,15 @@ class Stream(obspy.Stream):
                     family='monospace',
                     transform=transform,
                 )
+            if wavespeed is not None:
+                ymax = ax.get_ylim()[1]  # [km]
+                ax.plot(
+                    [0, ymax / wavespeed],
+                    [0, ymax],
+                    color='tab:red',
+                    scalex=False,
+                    scaley=False,
+                )
             reftime = kwargs.get('reftime', min([tr.stats.starttime for tr in st_plot]))
             time_format = '%Y-%m-%d %H:%M:%S'
             ax.set_xlabel('Time (s) after {} UTC'.format(reftime.strftime(time_format)))
@@ -157,6 +173,8 @@ class Stream(obspy.Stream):
             fig.tight_layout(pad=0.5)
             return fig
         else:
+            if 'wavespeed' in kwargs:
+                print('Ignoring `wavespeed` kwarg!')  # Can't use this kwarg here
             return super().plot(*args, **kwargs)
 
     def to_kml(self, filename='saul.Stream.kml', ge=False):
