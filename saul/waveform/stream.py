@@ -120,12 +120,14 @@ class Stream(obspy.Stream):
             kwargs['fig'] = figure()
         if 'src_lat' in kwargs and 'src_lon' in kwargs:
             kwargs['type'] = 'section'
-            for kwarg in 'orientation', 'outfile', 'format', 'handle':
+            for kwarg in 'orientation', 'outfile', 'format', 'handle', 'vred':
                 if kwarg in kwargs:
                     print(f'Ignoring `{kwarg}` kwarg!')  # Since we set these below
             kwargs['orientation'] = 'horizontal'
-            kwargs['outfile'], kwargs['format'] = None, None  # Disable these!
+            kwargs['outfile'] = None  # Disable
+            kwargs['format'] = None  # Disable
             kwargs['handle'] = True  # Ensures that the Figure instance is returned
+            kwargs['vred'] = None  # Disable, https://github.com/obspy/obspy/issues/3371
             if 'alpha' not in kwargs:
                 kwargs['alpha'] = 1
             src_lat, src_lon = kwargs.pop('src_lat'), kwargs.pop('src_lon')
