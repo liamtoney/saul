@@ -247,6 +247,7 @@ class Stream(obspy.Stream):
             merge_fill_value=False,
             trim_fill_value=False,
         )
+        st = st.copy() if cache else st  # Ensure we don't modify the cached object
         return cls(traces=st.traces)
 
     @classmethod
