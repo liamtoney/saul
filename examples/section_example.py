@@ -1,6 +1,6 @@
 from saul import Stream
 
-st = Stream.from_iris(
+st = Stream.from_earthscope(
     'UU', 'ZNPU,KNB,LCMT', 'HHN', (2023, 11, 14, 22, 38), (2023, 11, 14, 22, 40)
 )
 st.detrend('demean').taper(0.05).remove_response(output='DISP')
