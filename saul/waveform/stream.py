@@ -13,7 +13,9 @@ import numpy as np
 import obspy
 from lxml.etree import Element, SubElement, tostring
 from matplotlib.cm import get_cmap
+from matplotlib.transforms import blended_transform_factory
 from obspy import UTCDateTime
+from obspy.geodetics.base import gps2dist_azimuth
 from obspy.io.kml.core import _rgba_tuple_to_kml_color_code
 from waveform_collection import gather_waveforms, read_local
 
@@ -100,17 +102,91 @@ class Stream(obspy.Stream):
         return out
 
     def plot(self, *args, **kwargs):
-        """Slightly modify this method to **always** plot into a new figure.
+        """Modify this method to **always** plot into a new figure, and make record section plotting easier.
+
+        If the user specifies ``src_lat`` and ``src_lon``, ``type='section'`` is assumed
+        and distances are automatically calculated. This saves the user from having to
+        calculate these in a prior step. If this plotting mode is used, the user can
+        also specify a ``wavespeed`` to plot a moveout line on the record section.
+
+        Args:
+            src_lat (int or float): Source latitude [°]
+            src_lon (int or float): Source longitude [°]
+            wavespeed (int or float): Moveout line [km/s] to plot on the record section
 
         Note:
             Can obtain standard :meth:`obspy.core.stream.Stream.plot` behavior by
             setting ``fig=None``.
         """
+        if 'reftime' in kwargs:
+            kwargs['reftime'] = self._preprocess_time(kwargs['reftime'])  # Allow tuples
         if 'fig' not in kwargs:
             from matplotlib.pyplot import figure
 
             kwargs['fig'] = figure()
-        return super().plot(*args, **kwargs)
+        if 'src_lat' in kwargs and 'src_lon' in kwargs:
+            kwargs['type'] = 'section'
+            for kwarg in 'orientation', 'outfile', 'format', 'handle', 'vred':
+                if kwarg in kwargs:
+                    print(f'Ignoring `{kwarg}` kwarg!')  # Since we set these below
+            kwargs['orientation'] = 'horizontal'
+            kwargs['outfile'] = None  # Disable
+            kwargs['format'] = None  # Disable
+            kwargs['handle'] = True  # Ensures that the Figure instance is returned
+            kwargs['vred'] = None  # Disable, https://github.com/obspy/obspy/issues/3371
+            if 'alpha' not in kwargs:
+                kwargs['alpha'] = 1
+            src_lat, src_lon = kwargs.pop('src_lat'), kwargs.pop('src_lon')
+            wavespeed = kwargs.pop('wavespeed', None)
+            st_plot = self.copy()  # Work on a copy of the Stream, since we modify it!
+            for tr in st_plot:
+                tr.stats.distance = gps2dist_azimuth(  # [m]
+                    src_lat, src_lon, tr.stats.latitude, tr.stats.longitude
+                )[0]
+            fig = st_plot.plot(*args, **kwargs)
+            ax = fig.axes[0]  # Get the Axes instance
+            # Label the stations
+            transform = blended_transform_factory(ax.transAxes, ax.transData)
+            for tr in st_plot:
+                ax.text(
+                    1.01,  # Axes space
+                    tr.stats.distance / 1000,  # [km] Data space
+                    tr.id,
+                    ha='left',
+                    va='center',
+                    family='monospace',
+                    transform=transform,
+                )
+            if wavespeed is not None:
+                color = 'tab:red'
+                ymax = ax.get_ylim()[1]  # [km]
+                ax.plot(
+                    [0, ymax / wavespeed],
+                    [0, ymax],
+                    color=color,
+                    scalex=False,
+                    scaley=False,
+                )
+                transform = blended_transform_factory(ax.transData, ax.transAxes)
+                ax.text(
+                    ymax / wavespeed,
+                    1.02,
+                    f'{wavespeed} km/s',
+                    color=color,
+                    transform=transform,
+                    ha='center',
+                    va='baseline',
+                )
+            reftime = kwargs.get('reftime', min([tr.stats.starttime for tr in st_plot]))
+            time_format = '%Y-%m-%d %H:%M:%S'
+            ax.set_xlabel('Time (s) after {} UTC'.format(reftime.strftime(time_format)))
+            ax.set_ylabel(f'Distance (km) from (${src_lat}$°, ${src_lon}$°)')
+            fig.tight_layout(pad=0.5)
+            return fig
+        else:
+            if 'wavespeed' in kwargs:
+                print('Ignoring `wavespeed` kwarg!')  # Can't use this kwarg here
+            return super().plot(*args, **kwargs)
 
     def to_kml(self, filename='saul.Stream.kml', ge=False):
         """Write the SAUL :class:`Stream` station locations to a KML file and optionally open it.
