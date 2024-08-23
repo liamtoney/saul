@@ -270,10 +270,10 @@ class Stream(obspy.Stream):
                 raise NotImplementedError('`open_file` currently only works on macOS!')
 
     @classmethod
-    def from_iris(
+    def from_earthscope(
         cls, network, station, channel, starttime, endtime, location='*', cache=False
     ):
-        """Create a SAUL :class:`Stream` object containing waveforms obtained from IRIS servers.
+        """Create a SAUL :class:`Stream` object containing waveforms obtained from EarthScope servers.
 
         This class method wraps :func:`waveform_collection.server.gather_waveforms` with
         the ``source`` argument set to ``'IRIS'``. Wildcards (``*``, ``?``) are accepted
