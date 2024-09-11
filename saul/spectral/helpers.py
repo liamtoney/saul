@@ -84,7 +84,9 @@ def obspy_filter_response(filter_type, sampling_rate, freqs=1024, **options):
         case _:
             raise NotImplementedError(f'Filter type "{filter_type}" is not supported.')
     f, h = freqz_zpk(z, p, k, worN=freqs, fs=df)
-    return f, 20 * np.log10(abs(h))
+    with np.errstate(divide='ignore'):
+        h_db = 20 * np.log10(abs(h))
+    return f, h_db
 
 
 def _data_kind(st):
