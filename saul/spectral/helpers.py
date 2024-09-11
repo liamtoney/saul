@@ -6,7 +6,7 @@ from pathlib import Path
 
 import numpy as np
 from obspy.signal.filter import lowpass_cheby_2
-from scipy.signal import iirfilter, tf2zpk
+from scipy.signal import freqz_zpk, iirfilter, tf2zpk
 
 # Reference values for PSD dB units
 REFERENCE_VELOCITY = 1  # [m/s] For seismic data
@@ -18,9 +18,6 @@ CYCLES_PER_WINDOW = 4
 
 # This file downloaded from the supplementary material of Macpherson et al. (2022)
 AK_INFRA_NOISE = Path(__file__).with_name('alaska_ambient_infrasound_noise_models.txt')
-
-# These are the ObsPy filter types which I've coded into `obspy_filter_response()`
-_SUPPORTED_FILTER_TYPES = ('bandpass', 'highpass', 'lowpass', 'lowpass_cheby_2')
 
 
 def get_ak_infra_noise():
@@ -48,13 +45,10 @@ def get_ak_infra_noise():
     return 1 / f, hnm, mnm, lnm
 
 
-def obspy_filter_response(type, df, **options):
+def obspy_filter_response(filter_type, sampling_rate, freqs=1024, **options):
     """Based on ObsPy 1.4.1."""
-    if type not in _SUPPORTED_FILTER_TYPES:
-        raise ValueError(
-            f'Filter type "{type}" is not supported. Supported types: {", ".join(_SUPPORTED_FILTER_TYPES)}'
-        )
-    match type:
+    df = sampling_rate  # Rename so that code below resembles ObsPy more closely
+    match filter_type:
         case 'bandpass':
             fe = 0.5 * df
             low = options['freqmin'] / fe
@@ -76,7 +70,7 @@ def obspy_filter_response(type, df, **options):
                 options['corners'] * 2 if options['zerophase'] else options['corners']
             )
             z, p, k = iirfilter(
-                effective_corners, f, btype=type, ftype='butter', output='zpk'
+                effective_corners, f, btype=filter_type, ftype='butter', output='zpk'
             )
         case 'lowpass_cheby_2':
             freq = options.pop('freq')
@@ -86,7 +80,10 @@ def obspy_filter_response(type, df, **options):
                 None, freq, df, ba=True, freq_passband=False, **options
             )
             z, p, k = tf2zpk(b, a)
-    return z, p, k
+        case _:
+            raise NotImplementedError(f'Filter type "{filter_type}" is not supported.')
+    f, h = freqz_zpk(z, p, k, worN=freqs, fs=df)
+    return f, 20 * np.log10(abs(h))
 
 
 def _data_kind(st):
