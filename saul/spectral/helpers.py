@@ -150,19 +150,25 @@ def obspy_filter_response(
 def extract_trace_filter_params(tr):
     """Extract filter parameters from an ObsPy :class:`~obspy.core.trace.Trace` object.
 
-    Can be combined with :func:`~saul.spectral.helpers.obspy_filter_response` to
-    conveniently plot the filter response of the last processing step.
+    Expects to find a filter operation in the string stored in
+    ``tr.stats.processing[-1]``. Can be combined with
+    :func:`~saul.spectral.helpers.obspy_filter_response` to conveniently plot the filter
+    response of the previous filtering operation like so:
 
     .. code-block:: python
 
         tr.filter(...)
-        obspy_filter_response(**extract_trace_filter_params(tr))
+        obspy_filter_response(plot=True, **extract_trace_filter_params(tr))
 
     Args:
         tr (:class:`~obspy.core.trace.Trace`): Input trace
 
     Returns:
         dict: Extracted filter parameters
+
+    Warning:
+        The uses sketchy string processing and :func:`eval` to extract the filter
+        parameters!
     """
     string = tr.stats.processing[-1]
     assert 'filter' in string, 'Was filtering the last processing step?'
