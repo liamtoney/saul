@@ -5,6 +5,8 @@ Contains helper functions and constants for tasks related to spectral estimation
 from pathlib import Path
 
 import numpy as np
+from obspy.signal.filter import lowpass_cheby_2
+from scipy.signal import iirfilter, tf2zpk
 
 # Reference values for PSD dB units
 REFERENCE_VELOCITY = 1  # [m/s] For seismic data
@@ -16,6 +18,9 @@ CYCLES_PER_WINDOW = 4
 
 # This file downloaded from the supplementary material of Macpherson et al. (2022)
 AK_INFRA_NOISE = Path(__file__).with_name('alaska_ambient_infrasound_noise_models.txt')
+
+# These are the ObsPy filter types which I've coded into `obspy_filter_response()`
+_SUPPORTED_FILTER_TYPES = ('bandpass', 'highpass', 'lowpass', 'lowpass_cheby_2')
 
 
 def get_ak_infra_noise():
@@ -41,6 +46,56 @@ def get_ak_infra_noise():
     f, hnm, mnm, lnm = np.loadtxt(AK_INFRA_NOISE, delimiter=',', skiprows=12).T
     # We convert frequency to period to match the ObsPy functions
     return 1 / f, hnm, mnm, lnm
+
+
+def obspy_filter_response(type, df, **options):
+    """Based on ObsPy 1.4.1."""
+    if type not in _SUPPORTED_FILTER_TYPES:
+        raise ValueError(
+            f'Filter type "{type}" is not supported. Supported types: {", ".join(_SUPPORTED_FILTER_TYPES)}'
+        )
+    match type:
+        case 'bandpass':
+            fe = 0.5 * df
+            low = options['freqmin'] / fe
+            high = options['freqmax'] / fe
+            effective_corners = (
+                options['corners'] * 2 if options['zerophase'] else options['corners']
+            )
+            z, p, k = iirfilter(
+                effective_corners,
+                [low, high],
+                btype='band',
+                ftype='butter',
+                output='zpk',
+            )
+        case 'highpass':
+            fe = 0.5 * df
+            f = options['freq'] / fe
+            effective_corners = (
+                options['corners'] * 2 if options['zerophase'] else options['corners']
+            )
+            z, p, k = iirfilter(
+                effective_corners, f, btype='highpass', ftype='butter', output='zpk'
+            )
+        case 'lowpass':
+            fe = 0.5 * df
+            f = options['freq'] / fe
+            effective_corners = (
+                options['corners'] * 2 if options['zerophase'] else options['corners']
+            )
+            z, p, k = iirfilter(
+                effective_corners, f, btype='lowpass', ftype='butter', output='zpk'
+            )
+        case 'lowpass_cheby_2':
+            freq = options.pop('freq')
+            options.pop('ba', None)
+            options.pop('freq_passband', None)
+            b, a = lowpass_cheby_2(
+                None, freq, df, ba=True, freq_passband=False, **options
+            )
+            z, p, k = tf2zpk(b, a)
+    return z, p, k
 
 
 def _data_kind(st):
