@@ -69,23 +69,14 @@ def obspy_filter_response(type, df, **options):
                 ftype='butter',
                 output='zpk',
             )
-        case 'highpass':
+        case 'highpass' | 'lowpass':
             fe = 0.5 * df
             f = options['freq'] / fe
             effective_corners = (
                 options['corners'] * 2 if options['zerophase'] else options['corners']
             )
             z, p, k = iirfilter(
-                effective_corners, f, btype='highpass', ftype='butter', output='zpk'
-            )
-        case 'lowpass':
-            fe = 0.5 * df
-            f = options['freq'] / fe
-            effective_corners = (
-                options['corners'] * 2 if options['zerophase'] else options['corners']
-            )
-            z, p, k = iirfilter(
-                effective_corners, f, btype='lowpass', ftype='butter', output='zpk'
+                effective_corners, f, btype=type, ftype='butter', output='zpk'
             )
         case 'lowpass_cheby_2':
             freq = options.pop('freq')
