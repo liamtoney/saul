@@ -56,10 +56,15 @@ def obspy_filter_response(filter_type, sampling_rate, freqs=1024, **options):
             types are supported; see the match statement in the code
         sampling_rate (int or float): Sampling rate of target data
         freqs (int or array_like): Passed on as ``worN`` argument to
-            :func:`scipy.signal.freqz_zpk`
+            :func:`scipy.signal.freqz_zpk` — if an array, the response will be computed
+            at these frequencies
         **options: Necessary keyword arguments that will be passed on to the respective
             filter function (e.g., ``freqmin=1``, ``freqmax=5`` for
             ``filter_type='bandpass'``)
+
+    Returns:
+        tuple: Array of frequencies at which the response was computed [Hz], frequency
+        response [dB]
     """
     df = sampling_rate  # Rename so that code below resembles ObsPy more closely
     match filter_type:
