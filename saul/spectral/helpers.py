@@ -3,9 +3,11 @@ Contains helper functions and constants for tasks related to spectral estimation
 filtering.
 """
 
+import inspect
 from pathlib import Path
 
 import numpy as np
+from obspy.core.util.base import _get_function_from_entry_point
 from obspy.signal.filter import lowpass_cheby_2
 from scipy.signal import freqz_zpk, iirfilter, tf2zpk
 
@@ -69,12 +71,13 @@ def obspy_filter_response(filter_type, sampling_rate, freqs=1024, **options):
     df = sampling_rate  # Rename so that code below resembles ObsPy more closely
     match filter_type:
         case 'bandpass':
+            defaults = _get_defaults_for_filter_func(filter_type)
+            corners = options.get('corners', defaults['corners'])
+            zerophase = options.get('zerophase', defaults['zerophase'])
             fe = 0.5 * df
             low = options['freqmin'] / fe
             high = options['freqmax'] / fe
-            effective_corners = (
-                options['corners'] * 2 if options['zerophase'] else options['corners']
-            )
+            effective_corners = corners * 2 if zerophase else corners
             z, p, k = iirfilter(
                 effective_corners,
                 [low, high],
@@ -83,20 +86,20 @@ def obspy_filter_response(filter_type, sampling_rate, freqs=1024, **options):
                 output='zpk',
             )
         case 'highpass' | 'lowpass':
+            defaults = _get_defaults_for_filter_func(filter_type)
+            corners = options.get('corners', defaults['corners'])
+            zerophase = options.get('zerophase', defaults['zerophase'])
             fe = 0.5 * df
             f = options['freq'] / fe
-            effective_corners = (
-                options['corners'] * 2 if options['zerophase'] else options['corners']
-            )
+            effective_corners = corners * 2 if zerophase else corners
             z, p, k = iirfilter(
                 effective_corners, f, btype=filter_type, ftype='butter', output='zpk'
             )
         case 'lowpass_cheby_2':
-            freq = options.pop('freq')
-            options.pop('ba', None)
-            options.pop('freq_passband', None)
+            defaults = _get_defaults_for_filter_func(filter_type)
+            maxorder = options.get('maxorder', defaults['maxorder'])
             b, a = lowpass_cheby_2(
-                None, freq, df, ba=True, freq_passband=False, **options
+                None, options['freq'], df, maxorder=maxorder, ba=True
             )
             z, p, k = tf2zpk(b, a)
         case _:
@@ -108,6 +111,18 @@ def obspy_filter_response(filter_type, sampling_rate, freqs=1024, **options):
         h = h[1:]
     h_db = 20 * np.log10(abs(h))
     return f, h_db
+
+
+def _get_defaults_for_filter_func(filter_type):
+    """Generate dictionary of default parameters for an ObsPy filter function."""
+    func = _get_function_from_entry_point('filter', filter_type)
+    # https://stackoverflow.com/a/12627202
+    defaults = {
+        k: v.default
+        for k, v in inspect.signature(func).parameters.items()
+        if v.default is not inspect.Parameter.empty
+    }
+    return defaults
 
 
 def _data_kind(st):
