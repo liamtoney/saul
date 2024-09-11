@@ -147,6 +147,17 @@ def obspy_filter_response(
     return f, h_db
 
 
+def extract_trace_filter_params(tr):
+    string = tr.stats.processing[-1]
+    assert 'filter' in string, 'Was filtering the last processing step?'
+    part_options, part_filter_type = string.rstrip(')').split('::')
+    options = eval(part_options.split('=')[1])
+    filter_type = eval(part_filter_type.split('=')[1])
+    return dict(
+        filter_type=filter_type, sampling_rate=tr.stats.sampling_rate, **options
+    )
+
+
 def _get_defaults_for_filter_func(filter_type):
     """Generate dictionary of default parameters for an ObsPy filter function."""
     func = _get_function_from_entry_point('filter', filter_type)
