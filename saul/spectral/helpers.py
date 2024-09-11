@@ -1,5 +1,6 @@
 """
-Contains helper functions and constants for tasks related to spectral estimation.
+Contains helper functions and constants for tasks related to spectral estimation and
+filtering.
 """
 
 from pathlib import Path
