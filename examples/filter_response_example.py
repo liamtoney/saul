@@ -7,7 +7,7 @@ tr = read()[0]
 tr.detrend('demean').taper(0.05).remove_sensitivity()
 
 filter_type = 'bandpass'
-options = dict(freqmin=1, freqmax=5, zerophase=False, corners=4)
+options = dict(freqmin=1, freqmax=5, zerophase=False, corners=8)
 trf = tr.copy().filter(filter_type, **options)
 
 psd = PSD([tr, trf], win_dur=20)
