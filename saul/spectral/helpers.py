@@ -50,7 +50,7 @@ def get_ak_infra_noise():
 
 
 def obspy_filter_response(
-    filter_type, sampling_rate, freqs=1024, plot=False, **options
+    filter_type, sampling_rate, freqs=4096, plot=False, **options
 ):
     """Calculate the frequency response of an ObsPy filter.
 
