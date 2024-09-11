@@ -158,7 +158,7 @@ def extract_trace_filter_params(tr):
     .. code-block:: python
 
         tr.filter(...)
-        obspy_filter_response(plot=True, **extract_trace_filter_params(tr))
+        _ = obspy_filter_response(plot=True, **extract_trace_filter_params(tr))
 
     Args:
         tr (:class:`~obspy.core.trace.Trace`): Input trace
