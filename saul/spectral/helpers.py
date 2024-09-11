@@ -6,6 +6,7 @@ filtering.
 import inspect
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import numpy as np
 from obspy.core.util.base import _get_function_from_entry_point
 from obspy.signal.filter import lowpass_cheby_2
@@ -48,7 +49,9 @@ def get_ak_infra_noise():
     return 1 / f, hnm, mnm, lnm
 
 
-def obspy_filter_response(filter_type, sampling_rate, freqs=1024, **options):
+def obspy_filter_response(
+    filter_type, sampling_rate, freqs=1024, plot=False, **options
+):
     """Calculate the frequency response of an ObsPy filter.
 
     Based on ObsPy 1.4.1.
@@ -60,6 +63,7 @@ def obspy_filter_response(filter_type, sampling_rate, freqs=1024, **options):
         freqs (int or array_like): Passed on as ``worN`` argument to
             :func:`scipy.signal.freqz_zpk` — if an array, the response will be computed
             at these frequencies
+        plot (bool): Whether to plot the frequency response
         **options: Necessary keyword arguments that will be passed on to the respective
             filter function (e.g., ``freqmin=1``, ``freqmax=5`` for
             ``filter_type='bandpass'``)
@@ -110,6 +114,36 @@ def obspy_filter_response(filter_type, sampling_rate, freqs=1024, **options):
         f = f[1:]
         h = h[1:]
     h_db = 20 * np.log10(abs(h))
+    if plot:
+        fig, ax = plt.subplots(figsize=(4, 4))
+        ax.semilogx(f, h_db)
+        match filter_type:
+            case 'bandpass':
+                x1, x2 = options['freqmin'], options['freqmax']
+                ax.scatter([x1, x2], [-3, -3])
+            case 'highpass':
+                x1, x2 = options['freq'], f.max()
+                ax.scatter(x1, -3)
+            case 'lowpass' | 'lowpass_cheby_2':
+                x1, x2 = f.min(), options['freq']
+                if filter_type != 'lowpass_cheby_2':
+                    ax.scatter(x2, -3)
+        ax.axvspan(x1, x2, color='tab:gray', alpha=0.5, lw=0, zorder=-5)
+        ax.grid(which='both', ls=':', color='tab:gray')
+        ax.set_axisbelow(True)
+        left = f.min() if x1 == f.min() else x1 / 2
+        right = f.max() if x2 == f.max() else x2 * 2
+        ax.set_xlim(left, right)
+        if filter_type == 'lowpass_cheby_2':
+            ax.set_ylim(-100, 5)
+            ax.set_yticks([0, -20, -40, -60, -80, -96])
+        else:
+            ax.set_ylim(-20, 1)
+            ax.set_yticks([0, -1, -3, -6, -10, -20])
+        ax.set_xlabel('Frequency (Hz)')
+        ax.set_ylabel('Gain (dB)')
+        fig.tight_layout()
+        fig.show()
     return f, h_db
 
 
