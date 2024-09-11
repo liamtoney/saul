@@ -47,7 +47,20 @@ def get_ak_infra_noise():
 
 
 def obspy_filter_response(filter_type, sampling_rate, freqs=1024, **options):
-    """Based on ObsPy 1.4.1."""
+    """Calculate the frequency response of an ObsPy filter.
+
+    Based on ObsPy 1.4.1.
+
+    Args:
+        filter_type (str): Type of filter to use. Note that not all of ObsPy's filter
+            types are supported; see the match statement in the code
+        sampling_rate (int or float): Sampling rate of target data
+        freqs (int or array_like): Passed on as ``worN`` argument to
+            :func:`scipy.signal.freqz_zpk`
+        **options: Necessary keyword arguments that will be passed on to the respective
+            filter function (e.g., ``freqmin=1``, ``freqmax=5`` for
+            ``filter_type='bandpass'``)
+    """
     df = sampling_rate  # Rename so that code below resembles ObsPy more closely
     match filter_type:
         case 'bandpass':
