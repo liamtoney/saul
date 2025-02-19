@@ -337,6 +337,7 @@ class Stream(obspy.Stream):
                 cha=channel,
                 start=starttime,
                 end=endtime,
+                merge='overlap,quality',
                 format='geocsv',
                 nodata='404',
             )
@@ -357,7 +358,6 @@ class Stream(obspy.Stream):
                     Station=str,
                     Location=str,
                     Channel=str,
-                    Quality=str,
                     SampleRate=float,
                 ),
                 parse_dates=['Earliest', 'Latest'],
