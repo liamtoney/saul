@@ -1,2 +1,8 @@
-from saul.spectral import PSD, Spectrogram, get_ak_infra_noise
+from saul.spectral import (
+    PSD,
+    Spectrogram,
+    extract_trace_filter_params,
+    get_ak_infra_noise,
+    obspy_filter_response,
+)
 from saul.waveform import Stream

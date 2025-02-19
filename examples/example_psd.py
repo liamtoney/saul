@@ -11,4 +11,5 @@ from pathlib import Path
 
 from matplotlib.pyplot import gcf
 
-gcf().savefig(Path(__file__).with_name('psd_example.png'), dpi=300, bbox_inches='tight')
+output_path = Path(__file__).parents[1] / '_doc' / 'example_psd.png'
+gcf().savefig(output_path, dpi=300, bbox_inches='tight')
