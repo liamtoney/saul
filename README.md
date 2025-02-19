@@ -44,7 +44,7 @@ st = Stream.from_earthscope('AK', 'HOM', 'BDF', (2023, 9, 1, 0, 5), (2023, 9, 1,
 st.detrend().taper(0.05).remove_response()  # SAUL Stream objects behave like ObsPy's
 PSD(st, method='multitaper').plot(show_noise_models=True)
 ```
-<img src="examples/psd_example.png" width=550>
+<img src="_doc/psd_example.png" width=550>
 
 For detailed usage information, see the [API documentation](https://saul.rtfd.io/).
 
