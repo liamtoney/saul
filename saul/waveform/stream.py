@@ -338,6 +338,14 @@ class Stream(obspy.Stream):
                 url,
                 sep='|',
                 comment='#',
+                dtype=dict(
+                    Network=str,
+                    Station=str,
+                    Location=str,
+                    Channel=str,
+                    Quality=str,
+                    SampleRate=float,
+                ),
                 parse_dates=['Earliest', 'Latest'],
                 keep_default_na=False,
             )
