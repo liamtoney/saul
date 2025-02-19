@@ -11,6 +11,7 @@ from pathlib import Path
 import matplotlib.dates as mdates
 import numpy as np
 import obspy
+import pandas as pd
 from lxml.etree import Element, SubElement, tostring
 from matplotlib.cm import get_cmap
 from matplotlib.transforms import blended_transform_factory
@@ -18,6 +19,15 @@ from obspy import UTCDateTime
 from obspy.geodetics.base import gps2dist_azimuth
 from obspy.io.kml.core import _rgba_tuple_to_kml_color_code
 from waveform_collection import gather_waveforms, read_local
+
+# URL and template for data availability queries
+_BASE_AVAILABILITY_URL = 'https://service.iris.edu/fdsnws/availability/1/query?'
+_AVAILABILITY_QUERY_TEMPLATE = (
+    'format=geocsv&nodata=404&net={}&sta={}&loc={}&cha={}&starttime={}&endtime={}'
+)
+
+# For availability info output
+_TIME_FORMAT = '%Y-%m-%dT%H:%M'
 
 
 class Stream(obspy.Stream):
@@ -271,7 +281,15 @@ class Stream(obspy.Stream):
 
     @classmethod
     def from_earthscope(
-        cls, network, station, channel, starttime, endtime, location='*', cache=False
+        cls,
+        network,
+        station,
+        channel,
+        starttime,
+        endtime,
+        location='*',
+        cache=False,
+        just_availability=False,
     ):
         """Create a SAUL :class:`Stream` object containing waveforms obtained from EarthScope servers.
 
@@ -279,7 +297,10 @@ class Stream(obspy.Stream):
         the ``source`` argument set to ``'IRIS'``. Wildcards (``*``, ``?``) are accepted
         for the ``network``, ``station``, ``channel``, and ``location`` parameters. The
         user can optionally choose to cache waveform data to avoid redundant data
-        download for repeated identical requests (see ``cache`` argument).
+        download for repeated identical requests (see ``cache`` argument). The user can
+        also specify ``just_availability=True`` to only return the availability
+        timespan(s) of the requested data. In this case, the ``cache`` argument is
+        ignored.
 
         Warning:
             Caching (see ``cache`` argument), while convenient, is sketchy since data
@@ -298,13 +319,42 @@ class Stream(obspy.Stream):
             cache (bool): Toggle whether to cache the
                 :func:`~waveform_collection.server.gather_waveforms` function call to
                 avoid downloading data again in subsequent calls
+            just_availability (bool): Toggle whether to return only the availability
+                timespan(s) of the requested data, instead of the actual waveforms
 
         Returns:
-            SAUL :class:`Stream`: Newly-created object with the server-obtained waveforms
+            A newly-created SAUL :class:`Stream` with the server-obtained waveforms, or,
+            if ``just_availability`` is ``True``, a :class:`~pandas.DataFrame`
+            containing data availability information
         """
         # Ensure we have UTCDateTime objects to start
         starttime = cls._preprocess_time(starttime)
         endtime = cls._preprocess_time(endtime)
+        if just_availability:  # Just query the availability and return a DataFrame
+            url = _BASE_AVAILABILITY_URL + _AVAILABILITY_QUERY_TEMPLATE.format(
+                network, station, location, channel, starttime, endtime
+            )
+            df = pd.read_table(
+                url,
+                sep='|',
+                comment='#',
+                parse_dates=['Earliest', 'Latest'],
+                keep_default_na=False,
+            )
+            # Print the availability info nicely
+            tr_ids = df.apply(
+                lambda row: f'{row.Network}.{row.Station}.{row.Location}.{row.Channel}',
+                axis='columns',
+            )
+            id_length = tr_ids.map(len).max()
+            lines = []
+            for i, row in df.iterrows():
+                tr_id_str = tr_ids[i].ljust(id_length)
+                starttime_str = row.Earliest.strftime(_TIME_FORMAT)
+                endtime_str = row.Latest.strftime(_TIME_FORMAT)
+                lines.append(f'{tr_id_str} | {starttime_str} - {endtime_str}')
+            print('\n'.join(lines))
+            return df
         if cache:  # We must convert times to tuples
             starttime = cls._time_tuple(starttime)
             endtime = cls._time_tuple(endtime)
