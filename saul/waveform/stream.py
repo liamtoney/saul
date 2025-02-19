@@ -2,6 +2,7 @@
 Contains the definition of SAUL's :class:`Stream` class.
 """
 
+import io
 import subprocess
 import sys
 from datetime import timedelta
@@ -12,6 +13,7 @@ import matplotlib.dates as mdates
 import numpy as np
 import obspy
 import pandas as pd
+import requests
 from lxml.etree import Element, SubElement, tostring
 from matplotlib.cm import get_cmap
 from matplotlib.transforms import blended_transform_factory
@@ -21,10 +23,7 @@ from obspy.io.kml.core import _rgba_tuple_to_kml_color_code
 from waveform_collection import gather_waveforms, read_local
 
 # URL and template for data availability queries
-_BASE_AVAILABILITY_URL = 'https://service.iris.edu/fdsnws/availability/1/query?'
-_AVAILABILITY_QUERY_TEMPLATE = (
-    'format=geocsv&nodata=404&net={}&sta={}&loc={}&cha={}&starttime={}&endtime={}'
-)
+_BASE_AVAILABILITY_URL = 'https://service.iris.edu/fdsnws/availability/1/query'
 
 # For availability info output
 _TIME_FORMAT = '%Y-%m-%dT%H:%M'
@@ -331,11 +330,22 @@ class Stream(obspy.Stream):
         starttime = cls._preprocess_time(starttime)
         endtime = cls._preprocess_time(endtime)
         if just_availability:  # Just query the availability and return a DataFrame
-            url = _BASE_AVAILABILITY_URL + _AVAILABILITY_QUERY_TEMPLATE.format(
-                network, station, location, channel, starttime, endtime
+            params = dict(
+                net=network,
+                sta=station,
+                loc=location,
+                cha=channel,
+                start=starttime,
+                end=endtime,
+                format='geocsv',
+                nodata='404',
             )
+            response = requests.get(_BASE_AVAILABILITY_URL, params=params)
+            if response.status_code == 404:
+                print('No data available for this request!')
+                return pd.DataFrame()
             df = pd.read_table(
-                url,
+                io.StringIO(response.text),
                 sep='|',
                 comment='#',
                 dtype=dict(
