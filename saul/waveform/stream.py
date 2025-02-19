@@ -340,10 +340,14 @@ class Stream(obspy.Stream):
                 format='geocsv',
                 nodata='404',
             )
+            print('-------------------------')
+            print('GETTING AVAILABILITY INFO')
+            print('-------------------------')
             response = requests.get(_BASE_AVAILABILITY_URL, params=params)
             if response.status_code == 404:
                 print('No data available for this request!')
                 return pd.DataFrame()
+            print('Done')
             df = pd.read_table(
                 io.StringIO(response.text),
                 sep='|',
@@ -371,7 +375,7 @@ class Stream(obspy.Stream):
                 starttime_str = row.Earliest.strftime(_TIME_FORMAT)
                 endtime_str = row.Latest.strftime(_TIME_FORMAT)
                 lines.append(f'{tr_id_str} | {starttime_str} - {endtime_str}')
-            print('\n'.join(lines))
+            print('\n' + '\n'.join(lines))
             return df
         if cache:  # We must convert times to tuples
             starttime = cls._time_tuple(starttime)
