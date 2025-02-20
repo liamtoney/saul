@@ -86,7 +86,7 @@ def get_availability(
     if print_timespans:
         _print_availability_df(df, leading_newline=True)
     if plot:
-        _plot_availability_df(df)
+        _plot_availability_df(df, starttime, endtime)
     return df
 
 
@@ -109,7 +109,7 @@ def _print_availability_df(df, leading_newline=False):
     print(out)
 
 
-def _plot_availability_df(df):
+def _plot_availability_df(df, starttime, endtime):
     """TODO convert from this draft"""
     df_plot = df.copy()
     df_plot['tr_id'] = df.apply(
@@ -121,15 +121,24 @@ def _plot_availability_df(df):
     fig, axs = plt.subplots(nrows=unique_tr_ids.size, sharex=True, figsize=figsize)
     axs = np.atleast_1d(axs)
     for i, tr_id in enumerate(unique_tr_ids):
+        # Plot background timespan of query as gray
+        axs[i].axvspan(
+            starttime.matplotlib_date,
+            endtime.matplotlib_date,
+            lw=0,
+            color='tab:gray',
+            zorder=1,
+        )
         df_plot_tr_id = df_plot[df_plot['tr_id'] == tr_id]
         for _, row in df_plot_tr_id.iterrows():
+            # Plot availability timespans as green
             axs[i].axvspan(
                 row['Earliest'],
                 row['Latest'],
                 lw=0,
                 color='tab:green',
+                zorder=2,
             )
-        axs[i].patch.set_facecolor('tab:gray')
         axs[i].set_ylabel(
             tr_id, rotation=0, ha='right', va='center', family='monospace'
         )
