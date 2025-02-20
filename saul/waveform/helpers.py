@@ -16,7 +16,7 @@ from obspy import UTCDateTime
 _BASE_URL = 'https://service.iris.edu/fdsnws/availability/1/query'
 
 # Datetime format for pretty-printed availability timespans
-_DATETIME_FORMAT = '%Y-%m-%dT%H:%M'
+_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S'
 
 
 def get_availability(
@@ -91,18 +91,22 @@ def get_availability(
 
 
 def _print_availability_df(df, leading_newline=False):
-    """TODO convert from this draft"""
-    tr_ids = df.apply(
-        lambda row: f'{row.Network}.{row.Station}.{row.Location}.{row.Channel}',
-        axis='columns',
+    """Pretty-print availability timespans to the console."""
+    max_id_length = (
+        df[['Network', 'Station', 'Location', 'Channel']]
+        .map(len)  # Number of characters in each SEED code
+        .sum(axis='columns')
+        .max()
+        + 3  # Since the 4 SEED codes are separated by dots in the ID
     )
-    id_length = tr_ids.map(len).max()
     lines = []
-    for i, row in df.iterrows():
-        tr_id_str = tr_ids[i].ljust(id_length)
-        starttime_str = row.Earliest.strftime(_DATETIME_FORMAT)
-        endtime_str = row.Latest.strftime(_DATETIME_FORMAT)
-        lines.append(f'{tr_id_str} | {starttime_str} - {endtime_str}')
+    for _, row in df.iterrows():
+        id_str = f'{row.Network}.{row.Station}.{row.Location}.{row.Channel}'.ljust(
+            max_id_length  # Ensures all IDs are aligned
+        )
+        earliest_str = row.Earliest.strftime(_DATETIME_FORMAT)
+        latest_str = row.Latest.strftime(_DATETIME_FORMAT)
+        lines.append(f'{id_str} | {earliest_str} - {latest_str}')
     out = '\n'.join(lines)
     if leading_newline:
         out = '\n' + out
