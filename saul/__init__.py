@@ -5,4 +5,4 @@ from saul.spectral import (
     get_ak_infra_noise,
     obspy_filter_response,
 )
-from saul.waveform import Stream
+from saul.waveform import Stream, get_availability

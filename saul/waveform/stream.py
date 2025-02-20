@@ -2,7 +2,6 @@
 Contains the definition of SAUL's :class:`Stream` class.
 """
 
-import io
 import subprocess
 import sys
 from datetime import timedelta
@@ -12,8 +11,6 @@ from pathlib import Path
 import matplotlib.dates as mdates
 import numpy as np
 import obspy
-import pandas as pd
-import requests
 from lxml.etree import Element, SubElement, tostring
 from matplotlib.cm import get_cmap
 from matplotlib.transforms import blended_transform_factory
@@ -22,11 +19,7 @@ from obspy.geodetics.base import gps2dist_azimuth
 from obspy.io.kml.core import _rgba_tuple_to_kml_color_code
 from waveform_collection import gather_waveforms, read_local
 
-# URL and template for data availability queries
-_BASE_AVAILABILITY_URL = 'https://service.iris.edu/fdsnws/availability/1/query'
-
-# For availability info output
-_TIME_FORMAT = '%Y-%m-%dT%H:%M'
+from saul.waveform.helpers import _preprocess_time
 
 
 class Stream(obspy.Stream):
@@ -35,15 +28,6 @@ class Stream(obspy.Stream):
     See the docstring for that class for documentation on the attributes and methods
     inherited by this class.
     """
-
-    @staticmethod
-    def _preprocess_time(starttime_or_endtime):
-        """Cast tuples of integers to :class:`~obspy.core.utcdatetime.UTCDateTime`."""
-        if isinstance(starttime_or_endtime, tuple):
-            starttime_or_endtime = UTCDateTime(*starttime_or_endtime)
-        elif not isinstance(starttime_or_endtime, UTCDateTime):
-            raise TypeError('Time must be either a tuple or a UTCDateTime!')
-        return starttime_or_endtime
 
     @staticmethod
     def _time_tuple(t):
@@ -76,8 +60,8 @@ class Stream(obspy.Stream):
         The input ``starttime`` and ``endtime`` will always be tuples.
         """
         return gather_waveforms(
-            starttime=Stream._preprocess_time(starttime),
-            endtime=Stream._preprocess_time(endtime),
+            starttime=_preprocess_time(starttime),
+            endtime=_preprocess_time(endtime),
             **kwargs,
         )
 
@@ -128,7 +112,7 @@ class Stream(obspy.Stream):
             setting ``fig=None``.
         """
         if 'reftime' in kwargs:
-            kwargs['reftime'] = self._preprocess_time(kwargs['reftime'])  # Allow tuples
+            kwargs['reftime'] = _preprocess_time(kwargs['reftime'])  # Allow tuples
         if 'fig' not in kwargs:
             from matplotlib.pyplot import figure
 
@@ -280,15 +264,7 @@ class Stream(obspy.Stream):
 
     @classmethod
     def from_earthscope(
-        cls,
-        network,
-        station,
-        channel,
-        starttime,
-        endtime,
-        location='*',
-        cache=False,
-        just_availability=False,
+        cls, network, station, channel, starttime, endtime, location='*', cache=False
     ):
         """Create a SAUL :class:`Stream` object containing waveforms obtained from EarthScope servers.
 
@@ -296,10 +272,7 @@ class Stream(obspy.Stream):
         the ``source`` argument set to ``'IRIS'``. Wildcards (``*``, ``?``) are accepted
         for the ``network``, ``station``, ``channel``, and ``location`` parameters. The
         user can optionally choose to cache waveform data to avoid redundant data
-        download for repeated identical requests (see ``cache`` argument). The user can
-        also specify ``just_availability=True`` to only return the availability
-        timespan(s) of the requested data. In this case, the ``cache`` argument is
-        ignored.
+        download for repeated identical requests (see ``cache`` argument).
 
         Warning:
             Caching (see ``cache`` argument), while convenient, is sketchy since data
@@ -318,65 +291,13 @@ class Stream(obspy.Stream):
             cache (bool): Toggle whether to cache the
                 :func:`~waveform_collection.server.gather_waveforms` function call to
                 avoid downloading data again in subsequent calls
-            just_availability (bool): Toggle whether to return only the availability
-                timespan(s) of the requested data, instead of the actual waveforms
 
         Returns:
-            A newly-created SAUL :class:`Stream` with the server-obtained waveforms, or,
-            if ``just_availability`` is ``True``, a :class:`~pandas.DataFrame`
-            containing data availability information
+            SAUL :class:`Stream`: Newly-created object with the server-obtained waveforms
         """
         # Ensure we have UTCDateTime objects to start
-        starttime = cls._preprocess_time(starttime)
-        endtime = cls._preprocess_time(endtime)
-        if just_availability:  # Just query the availability and return a DataFrame
-            params = dict(
-                net=network,
-                sta=station,
-                loc=location,
-                cha=channel,
-                start=starttime,
-                end=endtime,
-                merge='overlap,quality',
-                format='geocsv',
-                nodata='404',
-            )
-            print('-------------------------')
-            print('GETTING AVAILABILITY INFO')
-            print('-------------------------')
-            response = requests.get(_BASE_AVAILABILITY_URL, params=params)
-            if response.status_code == 404:
-                print('No data available for this request!')
-                return pd.DataFrame()
-            print('Done')
-            df = pd.read_table(
-                io.StringIO(response.text),
-                sep='|',
-                comment='#',
-                dtype=dict(
-                    Network=str,
-                    Station=str,
-                    Location=str,
-                    Channel=str,
-                    SampleRate=float,
-                ),
-                parse_dates=['Earliest', 'Latest'],
-                keep_default_na=False,
-            )
-            # Print the availability info nicely
-            tr_ids = df.apply(
-                lambda row: f'{row.Network}.{row.Station}.{row.Location}.{row.Channel}',
-                axis='columns',
-            )
-            id_length = tr_ids.map(len).max()
-            lines = []
-            for i, row in df.iterrows():
-                tr_id_str = tr_ids[i].ljust(id_length)
-                starttime_str = row.Earliest.strftime(_TIME_FORMAT)
-                endtime_str = row.Latest.strftime(_TIME_FORMAT)
-                lines.append(f'{tr_id_str} | {starttime_str} - {endtime_str}')
-            print('\n' + '\n'.join(lines))
-            return df
+        starttime = _preprocess_time(starttime)
+        endtime = _preprocess_time(endtime)
         if cache:  # We must convert times to tuples
             starttime = cls._time_tuple(starttime)
             endtime = cls._time_tuple(endtime)
@@ -443,8 +364,8 @@ class Stream(obspy.Stream):
             station=station,
             location=location,
             channel=channel,
-            starttime=cls._preprocess_time(starttime),
-            endtime=cls._preprocess_time(endtime),
+            starttime=_preprocess_time(starttime),
+            endtime=_preprocess_time(endtime),
             merge=False,
         )
         return cls(traces=st.traces)

@@ -1,10 +1,9 @@
-from saul import Stream
+from saul import get_availability
 
-df = Stream.from_earthscope(
+df = get_availability(
     'AK,AV',
     'HOM,RC01,BAEI',
     '?DF,BHZ',
     (2024, 8, 1),
     (2025, 2, 1),
-    just_availability=True,
 )
