@@ -5,6 +5,9 @@ assessment, and plotting.
 
 import io
 
+import matplotlib.dates as mdates
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import requests
 from obspy import UTCDateTime
@@ -16,7 +19,16 @@ _BASE_URL = 'https://service.iris.edu/fdsnws/availability/1/query'
 _DATETIME_FORMAT = '%Y-%m-%dT%H:%M'
 
 
-def get_availability(network, station, channel, starttime, endtime, location='*'):
+def get_availability(
+    network,
+    station,
+    channel,
+    starttime,
+    endtime,
+    location='*',
+    print_timespans=True,
+    plot=False,
+):
     """Obtain waveform availability timespans.
 
     Uses the NSF SAGE availability web service:
@@ -32,6 +44,9 @@ def get_availability(network, station, channel, starttime, endtime, location='*'
         endtime (tuple or :class:`~obspy.core.utcdatetime.UTCDateTime`): End time
             for availability search (same format as ``starttime``)
         location (str): SEED location code
+        print_timespans (bool): Toggle pretty-printing availability timespans to the
+            console
+        plot (bool): Toggle plotting availability timespans
 
     Returns:
         :class:`~pandas.DataFrame`: Table of data availability information, with columns
@@ -68,12 +83,15 @@ def get_availability(network, station, channel, starttime, endtime, location='*'
         parse_dates=['Earliest', 'Latest'],
         keep_default_na=False,
     )
-    print()
-    _print_availability_df(df)
+    if print_timespans:
+        _print_availability_df(df, leading_newline=True)
+    if plot:
+        _plot_availability_df(df)
     return df
 
 
-def _print_availability_df(df):
+def _print_availability_df(df, leading_newline=False):
+    """TODO convert from this draft"""
     tr_ids = df.apply(
         lambda row: f'{row.Network}.{row.Station}.{row.Location}.{row.Channel}',
         axis='columns',
@@ -85,11 +103,50 @@ def _print_availability_df(df):
         starttime_str = row.Earliest.strftime(_DATETIME_FORMAT)
         endtime_str = row.Latest.strftime(_DATETIME_FORMAT)
         lines.append(f'{tr_id_str} | {starttime_str} - {endtime_str}')
-    print('\n'.join(lines))
+    out = '\n'.join(lines)
+    if leading_newline:
+        out = '\n' + out
+    print(out)
 
 
-def _plot_availability_df():
-    pass
+def _plot_availability_df(df):
+    """TODO convert from this draft"""
+    df_plot = df.copy()
+    df_plot['tr_id'] = df.apply(
+        lambda row: f'{row.Network}.{row.Station}.{row.Location}.{row.Channel}',
+        axis='columns',
+    )
+    unique_tr_ids = df_plot['tr_id'].unique()
+    figsize = (6.4, min(1 * unique_tr_ids.size, 8))
+    fig, axs = plt.subplots(nrows=unique_tr_ids.size, sharex=True, figsize=figsize)
+    axs = np.atleast_1d(axs)
+    for i, tr_id in enumerate(unique_tr_ids):
+        df_plot_tr_id = df_plot[df_plot['tr_id'] == tr_id]
+        for _, row in df_plot_tr_id.iterrows():
+            axs[i].axvspan(
+                row['Earliest'],
+                row['Latest'],
+                lw=0,
+                color='tab:green',
+            )
+        axs[i].patch.set_facecolor('tab:gray')
+        axs[i].set_ylabel(
+            tr_id, rotation=0, ha='right', va='center', family='monospace'
+        )
+        axs[i].set_yticks([])
+        axs[i].tick_params(axis='x', bottom=False, labelbottom=False)
+        for spine in axs[i].spines.values():
+            spine.set_visible(False)
+        if axs[i] is axs[-1]:
+            axs[i].spines['bottom'].set_visible(True)
+            axs[i].spines['bottom'].set_position(('outward', 5))
+            axs[i].tick_params(axis='x', bottom=True, labelbottom=True)
+    loc = axs[-1].xaxis.set_major_locator(mdates.AutoDateLocator())
+    axs[-1].xaxis.set_major_formatter(mdates.ConciseDateFormatter(loc))
+    axs[-1].autoscale(enable=True, axis='x', tight=True)
+    fig.tight_layout()
+    fig.subplots_adjust(hspace=0.1)
+    fig.show()
 
 
 def _preprocess_time(starttime_or_endtime):
