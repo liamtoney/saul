@@ -27,6 +27,7 @@ autodoc_mock_imports = [
     'multitaper',
     'numpy',
     'obspy',
+    'pandas',
     'scipy',
     'waveform_collection',
 ]
