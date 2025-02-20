@@ -34,7 +34,7 @@ def get_availability(network, station, channel, starttime, endtime, location='*'
         location (str): SEED location code
 
     Returns:
-        :class:`~pandas.DataFrame` Table of data availability information
+        :class:`~pandas.DataFrame`: Table of data availability information
     """
     # Ensure we have UTCDateTime objects to start
     starttime = _preprocess_time(starttime)
