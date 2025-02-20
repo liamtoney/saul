@@ -64,12 +64,7 @@ def get_availability(network, station, channel, starttime, endtime, location='*'
         io.StringIO(response.text),
         sep='|',
         comment='#',
-        dtype=dict(
-            Network=str,
-            Station=str,
-            Location=str,
-            Channel=str,
-        ),
+        dtype={'Network': str, 'Station': str, 'Location': str, 'Channel': str},
         parse_dates=['Earliest', 'Latest'],
         keep_default_na=False,
     )
