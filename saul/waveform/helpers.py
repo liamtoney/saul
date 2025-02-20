@@ -18,6 +18,10 @@ _BASE_URL = 'https://service.iris.edu/fdsnws/availability/1/query'
 # Datetime format for pretty-printed availability timespans
 _DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S'
 
+# Colors for availability timespan plotting
+_AVAILABLE_COLOR = 'tab:green'
+_UNAVAILABLE_COLOR = 'tab:gray'
+
 
 def get_availability(
     network,
@@ -121,7 +125,7 @@ def _plot_availability_df(df, starttime, endtime):
         axis='columns',
     )
     unique_tr_ids = df_plot['tr_id'].unique()
-    figsize = (6.4, min(1 * unique_tr_ids.size, 8))
+    figsize = (6.4, min(0.3 * unique_tr_ids.size, 8))
     fig, axs = plt.subplots(nrows=unique_tr_ids.size, sharex=True, figsize=figsize)
     axs = np.atleast_1d(axs)
     for i, tr_id in enumerate(unique_tr_ids):
@@ -130,7 +134,7 @@ def _plot_availability_df(df, starttime, endtime):
             starttime.matplotlib_date,
             endtime.matplotlib_date,
             lw=0,
-            color='tab:gray',
+            color=_UNAVAILABLE_COLOR,
             zorder=1,
         )
         df_plot_tr_id = df_plot[df_plot['tr_id'] == tr_id]
@@ -140,11 +144,16 @@ def _plot_availability_df(df, starttime, endtime):
                 row['Earliest'],
                 row['Latest'],
                 lw=0,
-                color='tab:green',
+                color=_AVAILABLE_COLOR,
                 zorder=2,
             )
         axs[i].set_ylabel(
-            tr_id, rotation=0, ha='right', va='center', family='monospace'
+            tr_id,
+            rotation=0,
+            ha='right',
+            va='center',
+            family='monospace',
+            fontsize=plt.rcParams['font.size'] - 1,
         )
         axs[i].set_yticks([])
         axs[i].tick_params(axis='x', bottom=False, labelbottom=False)
@@ -156,9 +165,22 @@ def _plot_availability_df(df, starttime, endtime):
             axs[i].tick_params(axis='x', bottom=True, labelbottom=True)
     loc = axs[-1].xaxis.set_major_locator(mdates.AutoDateLocator())
     axs[-1].xaxis.set_major_formatter(mdates.ConciseDateFormatter(loc))
-    axs[-1].autoscale(enable=True, axis='x', tight=True)
+    axs[-1].set_xlim(starttime.matplotlib_date, endtime.matplotlib_date)
     fig.tight_layout()
-    fig.subplots_adjust(hspace=0.1)
+    fig.subplots_adjust(hspace=0.3)
+    axs[-1].legend(
+        handles=[
+            plt.Rectangle((0, 0), 1, 1, color=_AVAILABLE_COLOR, label='Available'),
+            plt.Rectangle((0, 0), 1, 1, color=_UNAVAILABLE_COLOR, label='Unavailable'),
+        ],
+        loc='upper right',
+        bbox_to_anchor=(0, 0),
+        frameon=False,
+        borderaxespad=0.5,
+        borderpad=0.5,
+        handlelength=1.2,
+        handleheight=0.6,
+    )
     fig.show()
 
 
