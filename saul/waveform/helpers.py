@@ -1,6 +1,6 @@
 """
-Contains helper functions for tasks related to waveform data availablity assessment and
-plotting.
+Contains helper functions for tasks related to waveform data gathering, availablity
+assessment, and plotting.
 """
 
 import io
