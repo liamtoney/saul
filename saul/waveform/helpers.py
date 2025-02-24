@@ -18,9 +18,13 @@ _BASE_URL = 'https://service.iris.edu/fdsnws/availability/1/query'
 # Datetime format for pretty-printed availability timespans
 _DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S'
 
-# Colors for availability timespan plotting
+# Constants for availability timespan plotting
 _AVAILABLE_COLOR = 'tab:green'
 _UNAVAILABLE_COLOR = 'tab:gray'
+_BAR_HEIGHT = 0.2  # [in] Height of ID availability bars
+_BAR_LENGTH = 6  # [in] Length of ID availability bars
+_PAD = 0.05  # [in] Padding between ID availability bars
+_MARGINS = 1.4, 0.2, 0.1, 0.55  # [in] Outer [left, right, top, bottom] overall margins
 
 
 def get_availability(
@@ -118,16 +122,40 @@ def _print_availability_df(df, leading_newline=False):
 
 
 def _plot_availability_df(df, starttime, endtime):
-    """TODO convert from this draft"""
+    """Make an availability plot."""
     df_plot = df.copy()
     df_plot['tr_id'] = df.apply(
         lambda row: f'{row.Network}.{row.Station}.{row.Location}.{row.Channel}',
         axis='columns',
     )
     unique_tr_ids = df_plot['tr_id'].unique()
-    figsize = (6.4, min(0.3 * unique_tr_ids.size, 8))
-    fig, axs = plt.subplots(nrows=unique_tr_ids.size, sharex=True, figsize=figsize)
+    fig_width = _BAR_LENGTH + sum(_MARGINS[:2])
+    fig_height = (
+        unique_tr_ids.size * _BAR_HEIGHT
+        + (unique_tr_ids.size - 1) * _PAD
+        + sum(_MARGINS[2:])
+    )
+    fig, axs = plt.subplots(
+        nrows=unique_tr_ids.size,
+        figsize=(fig_width, fig_height),
+        sharex=True,
+        sharey=True,
+    )
     axs = np.atleast_1d(axs)
+    # Reposition subplots
+    x0 = _MARGINS[0]
+    width = _BAR_LENGTH
+    height = _BAR_HEIGHT
+    for i in range(unique_tr_ids.size):
+        y0 = fig_height - _MARGINS[2] - _PAD * i - _BAR_HEIGHT * (i + 1)
+        axs[i].set_position(
+            [
+                x0 / fig_width,
+                y0 / fig_height,
+                width / fig_width,
+                height / fig_height,
+            ]
+        )
     for i, tr_id in enumerate(unique_tr_ids):
         # Plot background timespan of query as gray
         axs[i].axvspan(
@@ -153,31 +181,30 @@ def _plot_availability_df(df, starttime, endtime):
             ha='right',
             va='center',
             family='monospace',
-            fontsize=plt.rcParams['font.size'] - 1,
+            fontsize=plt.rcParams['font.size'] - 2,
         )
         axs[i].set_yticks([])
         axs[i].tick_params(axis='x', bottom=False, labelbottom=False)
         for spine in axs[i].spines.values():
             spine.set_visible(False)
-        if axs[i] is axs[-1]:
-            axs[i].spines['bottom'].set_visible(True)
-            axs[i].spines['bottom'].set_position(('outward', 5))
-            axs[i].tick_params(axis='x', bottom=True, labelbottom=True)
+    axs[-1].spines['bottom'].set_visible(True)
+    axs[-1].spines['bottom'].set_position(
+        ('outward', _PAD * plt.rcParams['figure.dpi'])
+    )
+    axs[-1].tick_params(axis='x', bottom=True, labelbottom=True)
     loc = axs[-1].xaxis.set_major_locator(mdates.AutoDateLocator())
     axs[-1].xaxis.set_major_formatter(mdates.ConciseDateFormatter(loc))
     axs[-1].set_xlim(starttime.matplotlib_date, endtime.matplotlib_date)
-    fig.tight_layout()
-    fig.subplots_adjust(hspace=0.3)
-    axs[-1].legend(
+    fig.legend(
         handles=[
             plt.Rectangle((0, 0), 1, 1, color=_AVAILABLE_COLOR, label='Available'),
             plt.Rectangle((0, 0), 1, 1, color=_UNAVAILABLE_COLOR, label='Unavailable'),
         ],
-        loc='upper right',
-        bbox_to_anchor=(0, 0),
+        loc='lower left',
+        bbox_to_anchor=(_MARGINS[1] / fig_width, _MARGINS[2] / fig_height),
         frameon=False,
-        borderaxespad=0.5,
-        borderpad=0.5,
+        borderaxespad=0,
+        borderpad=0,
         handlelength=1.2,
         handleheight=0.6,
     )
