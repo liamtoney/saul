@@ -27,6 +27,7 @@ autodoc_mock_imports = [
     'multitaper',
     'numpy',
     'obspy',
+    'pandas',
     'scipy',
     'waveform_collection',
 ]
@@ -39,6 +40,7 @@ intersphinx_mapping = dict(
     multitaper=('https://multitaper.readthedocs.io/en/latest/', None),
     numpy=('https://numpy.org/doc/stable/', None),
     obspy=('https://docs.obspy.org/', None),
+    pandas=('https://pandas.pydata.org/docs/', None),
     python=('https://docs.python.org/3/', None),
     scipy=('https://docs.scipy.org/doc/scipy/', None),
     waveform_collection=('https://uaf-waveform-collection.readthedocs.io/en/master/', None),

@@ -19,6 +19,8 @@ from obspy.geodetics.base import gps2dist_azimuth
 from obspy.io.kml.core import _rgba_tuple_to_kml_color_code
 from waveform_collection import gather_waveforms, read_local
 
+from saul.waveform.helpers import _preprocess_time
+
 
 class Stream(obspy.Stream):
     """A subclass of ObsPy's :class:`~obspy.core.stream.Stream` class with extra functionality.
@@ -26,15 +28,6 @@ class Stream(obspy.Stream):
     See the docstring for that class for documentation on the attributes and methods
     inherited by this class.
     """
-
-    @staticmethod
-    def _preprocess_time(starttime_or_endtime):
-        """Cast tuples of integers to :class:`~obspy.core.utcdatetime.UTCDateTime`."""
-        if isinstance(starttime_or_endtime, tuple):
-            starttime_or_endtime = UTCDateTime(*starttime_or_endtime)
-        elif not isinstance(starttime_or_endtime, UTCDateTime):
-            raise TypeError('Time must be either a tuple or a UTCDateTime!')
-        return starttime_or_endtime
 
     @staticmethod
     def _time_tuple(t):
@@ -67,8 +60,8 @@ class Stream(obspy.Stream):
         The input ``starttime`` and ``endtime`` will always be tuples.
         """
         return gather_waveforms(
-            starttime=Stream._preprocess_time(starttime),
-            endtime=Stream._preprocess_time(endtime),
+            starttime=_preprocess_time(starttime),
+            endtime=_preprocess_time(endtime),
             **kwargs,
         )
 
@@ -119,7 +112,7 @@ class Stream(obspy.Stream):
             setting ``fig=None``.
         """
         if 'reftime' in kwargs:
-            kwargs['reftime'] = self._preprocess_time(kwargs['reftime'])  # Allow tuples
+            kwargs['reftime'] = _preprocess_time(kwargs['reftime'])  # Allow tuples
         if 'fig' not in kwargs:
             from matplotlib.pyplot import figure
 
@@ -303,8 +296,8 @@ class Stream(obspy.Stream):
             SAUL :class:`Stream`: Newly-created object with the server-obtained waveforms
         """
         # Ensure we have UTCDateTime objects to start
-        starttime = cls._preprocess_time(starttime)
-        endtime = cls._preprocess_time(endtime)
+        starttime = _preprocess_time(starttime)
+        endtime = _preprocess_time(endtime)
         if cache:  # We must convert times to tuples
             starttime = cls._time_tuple(starttime)
             endtime = cls._time_tuple(endtime)
@@ -371,8 +364,8 @@ class Stream(obspy.Stream):
             station=station,
             location=location,
             channel=channel,
-            starttime=cls._preprocess_time(starttime),
-            endtime=cls._preprocess_time(endtime),
+            starttime=_preprocess_time(starttime),
+            endtime=_preprocess_time(endtime),
             merge=False,
         )
         return cls(traces=st.traces)
