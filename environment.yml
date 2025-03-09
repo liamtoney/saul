@@ -8,4 +8,5 @@ dependencies:
   - pip
   - pip:
       - git+https://github.com/uafgeotools/waveform_collection.git
+      - git+https://code.usgs.gov/ghsc/esi/esi-core.git
       - --editable .
