@@ -7,6 +7,9 @@ from functools import cache
 
 import matplotlib.pyplot as plt
 import numpy as np
+from esi_core.gmprocess.waveform_processing.smoothing.konno_ohmachi import (
+    konno_ohmachi_smooth,
+)
 from multitaper import mtspec
 from obspy.signal.spectral_estimation import (
     get_idc_infra_hi_noise,
@@ -218,6 +221,41 @@ class PSD:
         ax.set_ylabel(_format_power_label(self.data_kind, self.db_ref_val))
         fig.tight_layout()
         fig.show()
+
+    def smooth(self, bandwidth):
+        """Smooth the calculated PSDs via the Konno–Ohmachi method.
+
+        The Konno–Ohmachi method smooths PSDs using fixed-bandwith windows. The C code
+        used by this method is
+        `here <https://code.usgs.gov/ghsc/esi/esi-core/-/blob/main/src/esi_core/gmprocess/waveform_processing/smoothing/smoothing.c>`_.
+        The
+        `ObsPy documentation <https://docs.obspy.org/packages/autogen/obspy.signal.konnoohmachismoothing.konno_ohmachi_smoothing.html>`_
+        for a similar function may also be helpful.
+
+        For more information, see equation 4 in Konno and Ohmachi (1998) — the :math:`b`
+        in that equation is the ``bandwidth`` parameter here.
+
+            Konno, K., & Ohmachi, T. (1998). Ground-motion characteristics estimated
+            from spectral ratio between horizontal and vertical components of
+            microtremor. *Bulletin of the Seismological Society of America*, *88*\ (1),
+            228–241. https://doi.org/10.1785/BSSA0880010228
+
+        Note:
+            The smoothing is performed in-place on the existing spectra in this object!
+
+        Args:
+            bandwidth (int or float): Bandwidth for smoothing — lower values produce a
+                broader smoothing effect
+        """
+        for f, pxx_db in self.psd:
+            konno_ohmachi_smooth(
+                spec=pxx_db,
+                freqs=f,
+                ko_freqs=f,
+                spec_smooth=pxx_db,
+                bandwidth=bandwidth,
+            )
+        return self
 
     def copy(self):
         """Return a deep copy of the :class:`PSD` object."""
