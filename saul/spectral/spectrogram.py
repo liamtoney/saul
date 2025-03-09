@@ -132,10 +132,6 @@ class Spectrogram:
         """
         return mtspec.spectrogram(np.array(tr_data_tuple), **kwargs)
 
-    def copy(self):
-        """Return a deep copy of the :class:`Spectrogram` object."""
-        return copy.deepcopy(self)
-
     def plot(
         self,
         db_lim='smart',
@@ -275,3 +271,7 @@ class Spectrogram:
             height += triangle_height
         cax.set_position([pos.xmin, ymin, pos.width, height])
         fig.show()
+
+    def copy(self):
+        """Return a deep copy of the :class:`Spectrogram` object."""
+        return copy.deepcopy(self)

@@ -134,10 +134,6 @@ class PSD:
         """
         return mtspec.MTSpec(np.array(tr_data_tuple), **kwargs)
 
-    def copy(self):
-        """Return a deep copy of the :class:`PSD` object."""
-        return copy.deepcopy(self)
-
     def plot(
         self,
         db_lim='smart',
@@ -234,3 +230,7 @@ class PSD:
         ax.set_ylabel(_format_power_label(self.data_kind, self.db_ref_val))
         fig.tight_layout()
         fig.show()
+
+    def copy(self):
+        """Return a deep copy of the :class:`PSD` object."""
+        return copy.deepcopy(self)
