@@ -2,6 +2,7 @@
 Contains the definition of SAUL's :class:`Spectrogram` class.
 """
 
+import copy
 from functools import cache
 
 import matplotlib.dates as mdates
@@ -130,6 +131,10 @@ class Spectrogram:
             worth it.
         """
         return mtspec.spectrogram(np.array(tr_data_tuple), **kwargs)
+
+    def copy(self):
+        """Return a deep copy of the :class:`Spectrogram` object."""
+        return copy.deepcopy(self)
 
     def plot(
         self,

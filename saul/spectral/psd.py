@@ -2,6 +2,7 @@
 Contains the definition of SAUL's :class:`PSD` class.
 """
 
+import copy
 from functools import cache
 
 import matplotlib.pyplot as plt
@@ -132,6 +133,10 @@ class PSD:
             worth it.
         """
         return mtspec.MTSpec(np.array(tr_data_tuple), **kwargs)
+
+    def copy(self):
+        """Return a deep copy of the :class:`PSD` object."""
+        return copy.deepcopy(self)
 
     def plot(
         self,
