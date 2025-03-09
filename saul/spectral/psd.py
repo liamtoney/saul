@@ -122,18 +122,6 @@ class PSD:
             pxx_db = 10 * np.log10(pxx / (self.db_ref_val**2))
             self.psd.append((f, pxx_db))
 
-    @staticmethod
-    @cache
-    def _mtspec(tr_data_tuple, **kwargs):
-        """Wrapper around :class:`mtspec.MTSpec` to facilitate tuple input (needed for memoization).
-
-        Warning:
-            For large input arrays (many samples), conversion to tuple and then back to
-            :class:`numpy.ndarray` can be **slow**. In this case, memoization may not be
-            worth it.
-        """
-        return mtspec.MTSpec(np.array(tr_data_tuple), **kwargs)
-
     def plot(
         self,
         db_lim='smart',
@@ -234,3 +222,15 @@ class PSD:
     def copy(self):
         """Return a deep copy of the :class:`PSD` object."""
         return copy.deepcopy(self)
+
+    @staticmethod
+    @cache
+    def _mtspec(tr_data_tuple, **kwargs):
+        """Wrapper around :class:`mtspec.MTSpec` to facilitate tuple input (needed for memoization).
+
+        Warning:
+            For large input arrays (many samples), conversion to tuple and then back to
+            :class:`numpy.ndarray` can be **slow**. In this case, memoization may not be
+            worth it.
+        """
+        return mtspec.MTSpec(np.array(tr_data_tuple), **kwargs)
