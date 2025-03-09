@@ -120,18 +120,6 @@ class Spectrogram:
         sxx_db = 10 * np.log10(sxx / (self.db_ref_val**2))
         self.spectrogram = (f, t, sxx_db)
 
-    @staticmethod
-    @cache
-    def _spectrogram(tr_data_tuple, **kwargs):
-        """Wrapper around :func:`mtspec.spectrogram` to facilitate tuple input (needed for memoization).
-
-        Warning:
-            For large input arrays (many samples), conversion to tuple and then back to
-            :class:`numpy.ndarray` can be **slow**. In this case, memoization may not be
-            worth it.
-        """
-        return mtspec.spectrogram(np.array(tr_data_tuple), **kwargs)
-
     def plot(
         self,
         db_lim='smart',
@@ -275,3 +263,15 @@ class Spectrogram:
     def copy(self):
         """Return a deep copy of the :class:`Spectrogram` object."""
         return copy.deepcopy(self)
+
+    @staticmethod
+    @cache
+    def _spectrogram(tr_data_tuple, **kwargs):
+        """Wrapper around :func:`mtspec.spectrogram` to facilitate tuple input (needed for memoization).
+
+        Warning:
+            For large input arrays (many samples), conversion to tuple and then back to
+            :class:`numpy.ndarray` can be **slow**. In this case, memoization may not be
+            worth it.
+        """
+        return mtspec.spectrogram(np.array(tr_data_tuple), **kwargs)
