@@ -52,3 +52,8 @@ intersphinx_mapping = dict(
 
 html_theme = 'sphinx_rtd_theme'
 html_theme_options = {'collapse_navigation': False}
+
+# -- Options for sphinx.ext.autodoc  -----------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#configuration
+
+autodoc_member_order = 'bysource'
