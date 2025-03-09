@@ -22,6 +22,7 @@ extensions = [
 ]
 napoleon_numpy_docstring = False  # We are using Google docstring style
 autodoc_mock_imports = [
+    'esi_core',
     'lxml',
     'matplotlib',
     'multitaper',
