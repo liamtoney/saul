@@ -60,7 +60,8 @@ class Stream(obspy.Stream):
                 avoid downloading data again in subsequent calls
 
         Returns:
-            SAUL :class:`Stream`: Newly-created object with the server-obtained waveforms
+            SAUL :class:`Stream`: Newly-created object with the server-obtained
+            waveforms in units of integer counts
         """
         # Ensure we have UTCDateTime objects to start
         starttime = _preprocess_time(starttime)
