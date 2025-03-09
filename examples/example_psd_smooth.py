@@ -1,5 +1,3 @@
-import matplotlib.pyplot as plt
-
 from saul import PSD, Stream
 
 # Get and pre-process array data
@@ -8,8 +6,7 @@ st = Stream.from_earthscope(
 )
 st.detrend().taper(0.05).remove_sensitivity()
 
-# Figure 1 — No smoothing
-PSD(st).plot(db_lim=(20, 110))
-
-# Figure 2 — Konno–Ohmachi smoothing
-PSD(st).smooth(40).plot(db_lim=(20, 110))
+# Plot PSD without and with smoothing
+db_lim = 20, 110
+PSD(st).plot(db_lim=db_lim)
+PSD(st).smooth(40).plot(db_lim=db_lim)
