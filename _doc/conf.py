@@ -14,11 +14,11 @@ copyright = f'{datetime.now().year}, {author}'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.intersphinx',
+    'sphinx.ext.autodoc',
     'sphinx.ext.todo',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.viewcode',
 ]
 
 # Options for HTML output --------------------------------------------------------------
@@ -44,7 +44,6 @@ autodoc_mock_imports = [
     'waveform_collection',
 ]
 autodoc_member_order = 'bysource'
-
 autoclass_content = 'init'
 
 todo_include_todos = True
