@@ -24,11 +24,11 @@ from saul.spectral.helpers import (
     CYCLES_PER_WINDOW,
     REFERENCE_PRESSURE,
     REFERENCE_VELOCITY,
-    _data_kind,
     _format_power_label,
     get_ak_infra_noise,
 )
 from saul.waveform.stream import Stream
+from saul.waveform.units import get_waveform_units
 
 
 class PSD:
@@ -95,7 +95,9 @@ class PSD:
             self.number_of_tapers = number_of_tapers
         self.st = Stream(tr_or_st).copy()  # Always use *copied* saul.Stream objects
         assert self.st.count() > 0, 'No waveforms provided!'
-        self.data_kind = _data_kind(self.st)
+        data_kinds = set(get_waveform_units(tr)[0] for tr in self.st)  # Unique kinds
+        assert len(data_kinds) == 1, 'Input waveforms have mixed units — not supported!'
+        self.data_kind = list(data_kinds)[0]
 
         # Set reference value for PSD from data kind
         self.db_ref_val = (

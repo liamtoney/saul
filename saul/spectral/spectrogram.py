@@ -16,10 +16,10 @@ from saul.spectral.helpers import (
     CYCLES_PER_WINDOW,
     REFERENCE_PRESSURE,
     REFERENCE_VELOCITY,
-    _data_kind,
     _format_power_label,
 )
 from saul.waveform.stream import Stream
+from saul.waveform.units import get_waveform_units
 
 
 class Spectrogram:
@@ -83,8 +83,8 @@ class Spectrogram:
         st = Stream(tr_or_st)  # Cast input to saul.Stream
         assert st.count() > 0, 'No waveforms provided!'
         assert st.count() == 1, 'Must provide only a single Trace!'
-        self.data_kind = _data_kind(st)
         self.tr = st[0].copy()  # Always use *copied* saul.Stream objects
+        self.data_kind = get_waveform_units(tr)[0]
 
         # Set reference value for spectrogram from data kind
         self.db_ref_val = (
