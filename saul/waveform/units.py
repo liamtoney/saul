@@ -17,7 +17,7 @@ _VALID_UNIT_OPTIONS = 'm/s**2', 'm/s', 'm', 'pa'
 
 
 def _get_data_kind(tr: Trace) -> str:
-    """Determine what kind of data a Trace contains."""
+    """Determine what kind of data a :class:`~obspy.core.trace.Trace` contains."""
     assert len(tr.stats.channel) == 3, 'Only 3-character channel codes are supported!'
     if tr.stats.channel[1:] == 'DF':
         data_kind = 'infrasound'
@@ -30,7 +30,7 @@ def _get_data_kind(tr: Trace) -> str:
 
 
 def _get_response_output(tr: Trace) -> Tuple[bool, str | None]:
-    """Evaluate a Trace's response removal history — `None` means unknown."""
+    """Evaluate a :class:`~obspy.core.trace.Trace`'s response removal history — ``None`` means unknown."""
     # Determine which entries in `tr.stats.processing` are "response" calls
     try:
         is_response_call = [
@@ -67,7 +67,7 @@ def _get_response_output(tr: Trace) -> Tuple[bool, str | None]:
 
 
 def _get_response_units(tr: Trace) -> str | None:
-    """Get physical units from a Trace's attached response — `None` means unknown."""
+    """Get physical units from a :class:`~obspy.core.trace.Trace`'s attached response — ``None`` means unknown."""
     response = tr.stats.get('response')
     if not response:
         # No response info attached, so we don't know the units
@@ -84,12 +84,13 @@ def get_waveform_units(tr: Trace) -> Tuple[str, str | None]:
     """Infer the data kind and physical units of an input waveform.
 
     Args:
-        tr (Trace): Input ObsPy Trace object
+        tr (:class:`~obspy.core.trace.Trace`): Input ObsPy :class:`~obspy.core.trace.Trace` object
 
     Returns:
-        tuple: Tuple of `(data_kind, waveform_units)` where `data_kind` (str) is the
-        waveform data kind and `waveform_units` (str or None) is the inferred physical
-        units of the waveform — `None` means unknown
+        :class:`tuple`: Tuple of ``(data_kind, waveform_units)`` where ``data_kind``
+        (:class:`str`) is the waveform data kind and ``waveform_units`` (:class:`str` or
+        :class:`None`) is the inferred physical units of the waveform — ``None`` means
+        unknown
 
     Warning:
         This function is designed to carefully check in multiple places to infer the
