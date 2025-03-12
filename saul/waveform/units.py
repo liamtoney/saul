@@ -8,7 +8,7 @@ from typing import Tuple
 
 from obspy import Trace
 
-# These are OsbPy's available response outputs (as of OsbPy version 1.4.1)
+# These are ObsPy's available response outputs (as of ObsPy version 1.4.1)
 _VALID_OUTPUT_OPTIONS = 'ACC', 'VEL', 'DISP', 'DEF'
 
 # We only know how to handle these response units (lowercase)
