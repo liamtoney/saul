@@ -192,18 +192,6 @@ def _get_defaults_for_filter_func(filter_type):
     return defaults
 
 
-def _data_kind(st):
-    """Determine whether an input :class:`~saul.waveform.stream.Stream` contains infrasound or seismic data."""
-    if np.all([tr.stats.channel[1:3] == 'DF' for tr in st]):
-        return 'infrasound'
-    elif np.all([tr.stats.channel[1] == 'H' for tr in st]):
-        return 'seismic'
-    else:
-        raise ValueError(
-            'Could not determine whether data are infrasound or seismic — or both data kinds are present.'
-        )
-
-
 def _format_power_label(data_kind, db_ref_val):
     """Format the axis / colorbar label for spectral power quantities."""
     if data_kind == 'infrasound':
