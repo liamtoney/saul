@@ -40,7 +40,7 @@ def get_ak_infra_noise():
         p, hnm, mnm, lnm = get_ak_infra_noise()
 
     Returns:
-        tuple: Period [s], high noise model [dB rel. 1 Pa\ :sup:`2` Hz\ :sup:`–1`],
+        :class:`tuple`: Period [s], high noise model [dB rel. 1 Pa\ :sup:`2` Hz\ :sup:`–1`],
         median noise model [dB rel. 1 Pa\ :sup:`2` Hz\ :sup:`–1`], low noise model [dB
         rel. 1 Pa\ :sup:`2` Hz\ :sup:`–1`]
     """
@@ -69,8 +69,8 @@ def obspy_filter_response(
             ``filter_type='bandpass'``)
 
     Returns:
-        tuple: Array of frequencies at which the response was computed [Hz], frequency
-        response [dB]
+        :class:`tuple`: Array of frequencies at which the response was computed [Hz],
+        frequency response [dB]
     """
     df = sampling_rate  # Rename so that code below resembles ObsPy more closely
     match filter_type:
@@ -164,7 +164,7 @@ def extract_trace_filter_params(tr):
         tr (:class:`~obspy.core.trace.Trace`): Input trace
 
     Returns:
-        dict: Extracted filter parameters
+        :class:`dict`: Extracted filter parameters
 
     Warning:
         The uses sketchy string processing and :func:`eval` to extract the filter
