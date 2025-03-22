@@ -187,13 +187,31 @@ class PSD:
                     noise_models[i] = period, pxx_db_rel_ref_val
             else:  # self.data_kind == 'seismic'
                 noise_models = [get_nlnm(), get_nhnm()]
-                # These are in units of acceleration, so need to convert to velocity
-                for i, noise_model in enumerate(noise_models):
-                    period, pxx_db_acc = noise_model
-                    # Below equation is taken from Table 3 in Peterson (1993)
-                    # https://pubs.usgs.gov/of/1993/0322/ofr93-322.pdf
-                    pxx_db_vel = pxx_db_acc + 20.0 * np.log10(period / (2 * np.pi))
-                    noise_models[i] = period, pxx_db_vel
+                # These are in units of acceleration, so we might need to convert them;
+                # see Table 3 in Peterson (1993)
+                # https://pubs.usgs.gov/of/1993/0322/ofr93-322.pdf
+                match self.waveform_units:
+                    case 'm':
+                        for i, noise_model in enumerate(noise_models):
+                            period, pxx_db_acc = noise_model
+                            pxx_db_disp = pxx_db_acc + 20.0 * np.log10(
+                                period**2 / (4 * np.pi**2)
+                            )
+                            noise_models[i] = period, pxx_db_disp
+                    case 'm/s':
+                        for i, noise_model in enumerate(noise_models):
+                            period, pxx_db_acc = noise_model
+                            pxx_db_vel = pxx_db_acc + 20.0 * np.log10(
+                                period / (2 * np.pi)
+                            )
+                            noise_models[i] = period, pxx_db_vel
+                    case 'm/s**2':
+                        pass  # No conversion needed
+                    case _:
+                        msg = (
+                            f'Unsupported seismic waveform units: {self.waveform_units}'
+                        )
+                        raise ValueError(msg)
             xlim, ylim = ax.get_xlim(), ax.get_ylim()  # Store these to restore limits
             for i, noise_model in enumerate(noise_models):
                 period, pxx_db = noise_model
