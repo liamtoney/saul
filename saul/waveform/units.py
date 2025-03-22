@@ -161,7 +161,8 @@ def _validate_provided_vs_inferred_units(
     else:  # Use explicitly provided units
         provided_units = provided_units.lower()
         assert provided_units in _VALID_UNIT_OPTIONS, f'Invalid units: {provided_units}'
-        msg = f'Provided units ({provided_units}) do not match inferred units ({inferred_units})'
-        assert provided_units == inferred_units, msg
+        if inferred_units is not None:  # We can additionally for consistency
+            msg = f'Provided units ({provided_units}) do not match inferred units ({inferred_units})'
+            assert provided_units == inferred_units, msg
         validated_units = provided_units
     return validated_units
