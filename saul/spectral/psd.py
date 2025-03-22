@@ -113,7 +113,7 @@ class PSD:
         self.data_kind = data_kind_unique[0]
         self.db_ref_val = _get_db_reference_value(self.data_kind)
         self.waveform_units = _validate_provided_vs_inferred_units(
-            units, inferred_units_unique[0]
+            units, inferred_units_unique[0], self.data_kind
         )
 
         # KEY: Calculate PSD (in dB relative to self.db_ref_val)

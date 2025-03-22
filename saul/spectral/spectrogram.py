@@ -94,7 +94,7 @@ class Spectrogram:
         self.data_kind = data_kind
         self.db_ref_val = _get_db_reference_value(self.data_kind)
         self.waveform_units = _validate_provided_vs_inferred_units(
-            units, inferred_units
+            units, inferred_units, self.data_kind
         )
 
         # KEY: Calculate spectrogram (in dB relative to self.db_ref_val)

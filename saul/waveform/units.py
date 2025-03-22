@@ -150,7 +150,7 @@ def get_waveform_units(tr: Trace) -> Tuple[str, str | None]:
 
 
 def _validate_provided_vs_inferred_units(
-    provided_units: str, inferred_units: str | None
+    provided_units: str, inferred_units: str | None, data_kind: str
 ) -> str:
     """Validate user-provided units against inferred units."""
     if provided_units == 'infer':
@@ -165,4 +165,14 @@ def _validate_provided_vs_inferred_units(
             msg = f'Provided units ({provided_units}) do not match inferred units ({inferred_units})'
             assert provided_units == inferred_units, msg
         validated_units = provided_units
+    # Now, check that units are compatible with the data kind
+    match data_kind:
+        case 'infrasound':
+            msg = f'Invalid waveform units for infrasound: {validated_units}'
+            assert validated_units == 'pa', msg
+        case 'seismic':
+            msg = f'Invalid waveform units for seismic: {validated_units}'
+            assert validated_units in ('m', 'm/s', 'm/s**2'), msg
+        case _:
+            raise ValueError(f'Unknown data kind: {data_kind}')
     return validated_units
