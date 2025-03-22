@@ -22,13 +22,12 @@ from scipy.signal import welch
 
 from saul.spectral.helpers import (
     CYCLES_PER_WINDOW,
-    REFERENCE_PRESSURE,
-    REFERENCE_VELOCITY,
     _format_power_label,
+    _get_db_reference_value,
     get_ak_infra_noise,
 )
 from saul.waveform.stream import Stream
-from saul.waveform.units import get_waveform_units
+from saul.waveform.units import _validate_provided_vs_inferred_units, get_waveform_units
 
 
 class PSD:
@@ -47,6 +46,7 @@ class PSD:
         data_kind (str): Input waveform data kind; ``'infrasound'`` or ``'seismic'``
             (inferred from channel code)
         db_ref_val (int or float): dB reference value for PSD (data kind dependent)
+        waveform_units (str): Units of the input waveforms
         psd (list): List of PSDs (in dB) calculated from input waveforms; of the form
             ``[(f1, pxx_db1), (f2, pxx_db2), ...]`` given a
             :class:`~saul.waveform.stream.Stream` consisting of
@@ -60,6 +60,7 @@ class PSD:
         win_dur=60,
         time_bandwidth_product=4,
         number_of_tapers=7,
+        units='infer',
     ):
         """Create a :class:`PSD` object.
 
@@ -72,15 +73,18 @@ class PSD:
 
         Args:
             tr_or_st (:class:`~obspy.core.trace.Trace` or :class:`~saul.waveform.stream.Stream`):
-                Input waveforms (response is expected to be removed; SAUL expects units
-                of pressure [Pa] for infrasound data and velocity [m/s] for seismic
-                data!)
+                Input waveforms (response is expected to be removed; see ``units``
+                argument)
             method (str): Either ``'welch'`` **[W]** or ``'multitaper'`` **[M]**
             win_dur (int or float): **[W]** Segment length in seconds. This usually must
                 be tweaked to obtain the cleanest-looking plot and to ensure that the
                 longest-period signals of interest are included
             time_bandwidth_product (float): **[M]** Time-bandwidth product
             number_of_tapers (int): **[M]** Number of tapers to use
+            units (str): Units of the input waveforms; either ``'infer'`` to guess from
+                input response information or a string explicitly defining the units
+                (see ``_VALID_UNIT_OPTIONS`` in :mod:`saul.waveform.units` for supported
+                options) — all input waveforms must have the same units!
         """
         # Pre-processing and checks
         assert method in [
@@ -95,13 +99,21 @@ class PSD:
             self.number_of_tapers = number_of_tapers
         self.st = Stream(tr_or_st).copy()  # Always use *copied* saul.Stream objects
         assert self.st.count() > 0, 'No waveforms provided!'
-        data_kinds = set(get_waveform_units(tr)[0] for tr in self.st)  # Unique kinds
-        assert len(data_kinds) == 1, 'Input waveforms have mixed units — not supported!'
-        self.data_kind = list(data_kinds)[0]
 
-        # Set reference value for PSD from data kind
-        self.db_ref_val = (
-            REFERENCE_PRESSURE if self.data_kind == 'infrasound' else REFERENCE_VELOCITY
+        # Handle data kind, units, and reference dB value
+        data_kind_st, inferred_units_st = zip(
+            *[get_waveform_units(tr) for tr in self.st]
+        )
+        data_kind_unique = list(set(data_kind_st))
+        msg = 'Input waveforms have mixed data kinds — not supported!'
+        assert len(data_kind_unique) == 1, msg  # Do all waveforms have same data kind?
+        inferred_units_unique = list(set(inferred_units_st))
+        msg = 'Input waveforms have mixed units — not supported!'
+        assert len(inferred_units_unique) == 1, msg  # Do all waveforms have same units?
+        self.data_kind = data_kind_unique[0]
+        self.db_ref_val = _get_db_reference_value(self.data_kind)
+        self.waveform_units = _validate_provided_vs_inferred_units(
+            units, inferred_units_unique[0]
         )
 
         # KEY: Calculate PSD (in dB relative to self.db_ref_val)
@@ -220,7 +232,7 @@ class PSD:
             db_lim = np.ceil(db_min / 10) * 10, np.ceil(db_max / 10) * 10
         ax.set_ylim(db_lim)
         ax.set_xlabel(xlabel)
-        ax.set_ylabel(_format_power_label(self.data_kind, self.db_ref_val))
+        ax.set_ylabel(_format_power_label(self.db_ref_val, self.waveform_units))
         fig.tight_layout()
         fig.show()
 

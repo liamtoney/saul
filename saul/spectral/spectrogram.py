@@ -14,12 +14,11 @@ from scipy.signal import spectrogram
 
 from saul.spectral.helpers import (
     CYCLES_PER_WINDOW,
-    REFERENCE_PRESSURE,
-    REFERENCE_VELOCITY,
     _format_power_label,
+    _get_db_reference_value,
 )
 from saul.waveform.stream import Stream
-from saul.waveform.units import get_waveform_units
+from saul.waveform.units import _validate_provided_vs_inferred_units, get_waveform_units
 
 
 class Spectrogram:
@@ -36,6 +35,7 @@ class Spectrogram:
         data_kind (str): Input waveform data kind; ``'infrasound'`` or ``'seismic'``
             (inferred from channel code)
         db_ref_val (int or float): dB reference value for PSD (data kind dependent)
+        waveform_units (str): Units of the input waveform
         spectrogram (tuple): Spectrogram (in dB) calculated from the input waveform; of
             the form ``(f, t, sxx_db)`` where ``f`` and ``t`` are 1D arrays and
             ``sxx_db`` is a 2D array with shape ``(f.size, t.size)``
@@ -48,6 +48,7 @@ class Spectrogram:
         win_dur=8,
         time_bandwidth_product=4,
         number_of_tapers=7,
+        units='infer',
     ):
         """Create a :class:`Spectrogram` object.
 
@@ -60,15 +61,18 @@ class Spectrogram:
 
         Args:
             tr_or_st (:class:`~obspy.core.trace.Trace` or :class:`~saul.waveform.stream.Stream`):
-                Input waveforms (response is expected to be removed; SAUL expects units
-                of pressure [Pa] for infrasound data and velocity [m/s] for seismic
-                data!)
+                Input waveform (response is expected to be removed; see ``units``
+                argument)
             method (str): Either ``'scipy'`` or ``'multitaper'`` **[M]**
             win_dur (int or float): Segment length in seconds. This usually must be
                 adjusted, within the constraints of the total signal duration, to ensure
                 that the longest-period signals of interest are included
             time_bandwidth_product (float): **[M]** Time-bandwidth product
             number_of_tapers (int): **[M]** Number of tapers to use
+            units (str): Units of the input waveform; either ``'infer'`` to guess from
+                input response information or a string explicitly defining the units
+                (see ``_VALID_UNIT_OPTIONS`` in :mod:`saul.waveform.units` for supported
+                options)
         """
         # Pre-processing and checks
         assert method in [
@@ -81,14 +85,16 @@ class Spectrogram:
             self.time_bandwidth_product = time_bandwidth_product
             self.number_of_tapers = number_of_tapers
         st = Stream(tr_or_st)  # Cast input to saul.Stream
-        assert st.count() > 0, 'No waveforms provided!'
-        assert st.count() == 1, 'Must provide only a single Trace!'
+        assert st.count() > 0, 'No waveform provided!'
+        assert st.count() == 1, 'Must provide only a single waveform!'
         self.tr = st[0].copy()  # Always use *copied* saul.Stream objects
-        self.data_kind = get_waveform_units(tr)[0]
 
-        # Set reference value for spectrogram from data kind
-        self.db_ref_val = (
-            REFERENCE_PRESSURE if self.data_kind == 'infrasound' else REFERENCE_VELOCITY
+        # Handle data kind, units, and reference dB value
+        data_kind, inferred_units = get_waveform_units(self.tr)
+        self.data_kind = data_kind
+        self.db_ref_val = _get_db_reference_value(self.data_kind)
+        self.waveform_units = _validate_provided_vs_inferred_units(
+            units, inferred_units
         )
 
         # KEY: Calculate spectrogram (in dB relative to self.db_ref_val)
@@ -143,13 +149,22 @@ class Spectrogram:
         spec_ax = fig.add_subplot(gs[0, 0])
         wf_ax = fig.add_subplot(gs[1, 0], sharex=spec_ax)  # Common time axis
         cax = fig.add_subplot(gs[0, 1])
-        rescale = 1e6 if self.data_kind == 'seismic' else 1  # Convert seismic to μm/s
+        rescale = 1e6 if self.data_kind == 'seismic' else 1  # Use μ prefix for seismic
         wf_ax.plot(
             self.tr.times('matplotlib'), self.tr.data * rescale, 'black', linewidth=0.5
         )
-        wf_ax.set_ylabel(
-            'Velocity (μm s$^{-1}$)' if self.data_kind == 'seismic' else 'Pressure (Pa)'
-        )
+        match self.waveform_units:
+            case 'pa':
+                ylabel = 'Pressure (Pa)'
+            case 'm':
+                ylabel = 'Displacement (μm)'
+            case 'm/s':
+                ylabel = 'Velocity (μm s$^{-1}$)'
+            case 'm/s^2':
+                ylabel = 'Acceleration (μm s$^{-2}$)'
+            case _:
+                raise ValueError(f'Invalid units: {self.waveform_units}')
+        wf_ax.set_ylabel(ylabel)
         wf_ax.grid(linestyle=':', zorder=-5)
         f, t, sxx_db = self.spectrogram
         t_mpl = self.tr.stats.starttime.matplotlib_date + (t / mdates.SEC_PER_DAY)
@@ -237,7 +252,7 @@ class Spectrogram:
             cax,
             extend=extend,
             extendfrac=extendfrac,
-            label=_format_power_label(self.data_kind, self.db_ref_val),
+            label=_format_power_label(self.db_ref_val, self.waveform_units),
         )
         spec_ax.set_title(self.tr.id, family='monospace')
         # Layout adjustment

@@ -147,3 +147,20 @@ def get_waveform_units(tr: Trace) -> Tuple[str, str | None]:
                 raise ValueError(f'Unknown data kind: {data_kind}')
 
     return data_kind, waveform_units
+
+
+def _validate_provided_vs_inferred_units(
+    provided_units: str, inferred_units: str | None
+) -> str:
+    """Validate user-provided units against inferred units."""
+    if provided_units == 'infer':
+        if not inferred_units:
+            raise ValueError('Could not infer units; please provide them explicitly!')
+        else:
+            validated_units = inferred_units
+    else:  # Use explicitly provided units
+        assert provided_units in _VALID_UNIT_OPTIONS, f'Invalid units: {provided_units}'
+        msg = f'Provided units ({provided_units}) do not match inferred units ({inferred_units})'
+        assert provided_units == inferred_units, msg
+        validated_units = provided_units
+    return validated_units
