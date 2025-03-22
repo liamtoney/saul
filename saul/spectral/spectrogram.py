@@ -160,7 +160,7 @@ class Spectrogram:
                 ylabel = 'Displacement (μm)'
             case 'm/s':
                 ylabel = 'Velocity (μm s$^{-1}$)'
-            case 'm/s^2':
+            case 'm/s**2':
                 ylabel = 'Acceleration (μm s$^{-2}$)'
             case _:
                 raise ValueError(f'Invalid units: {self.waveform_units}')
