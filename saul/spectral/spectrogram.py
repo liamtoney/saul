@@ -25,6 +25,9 @@ from saul.waveform.stream import Stream
 class Spectrogram:
     """A class for calculating and plotting spectrograms of waveforms.
 
+    Attributes
+    ==========
+
     Attributes:
         method (str): See :meth:`__init__`
         win_dur (int or float): See :meth:`__init__`
@@ -39,6 +42,9 @@ class Spectrogram:
         spectrogram (tuple): Spectrogram (in dB) calculated from the input waveform; of
             the form ``(f, t, sxx_db)`` where ``f`` and ``t`` are 1D arrays and
             ``sxx_db`` is a 2D array with shape ``(f.size, t.size)``
+
+    Methods
+    =======
     """
 
     def __init__(

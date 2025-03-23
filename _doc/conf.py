@@ -44,7 +44,8 @@ autodoc_mock_imports = [
     'waveform_collection',
 ]
 autodoc_member_order = 'bysource'
-autoclass_content = 'init'
+autoclass_content = 'class'
+autodoc_class_signature = 'separated'
 
 todo_include_todos = True
 
