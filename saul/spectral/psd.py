@@ -218,7 +218,9 @@ class PSD:
                         case 'm/s**2':
                             pass  # No conversion needed
                         case _:
-                            msg = f'Unsupported seismic waveform units: {self.waveform_units}'
+                            msg = (
+                                f'Invalid seismic waveform units: {self.waveform_units}'
+                            )
                             raise ValueError(msg)
                 case _:
                     raise ValueError(f'No noise models for data kind: {self.data_kind}')
