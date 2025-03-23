@@ -215,9 +215,10 @@ def _format_power_label(db_ref_val, waveform_units):
 
 def _get_db_reference_value(data_kind):
     """Get the reference value for spectral power quantities in dB."""
-    if data_kind == 'infrasound':
-        return REFERENCE_INFRASOUND
-    elif data_kind == 'seismic':
-        return REFERENCE_SEISMIC
-    else:
-        raise ValueError(f'Unknown data kind: {data_kind}')
+    match data_kind:
+        case 'infrasound':
+            return REFERENCE_INFRASOUND
+        case 'seismic':
+            return REFERENCE_SEISMIC
+        case _:
+            raise ValueError(f'Unknown data kind: {data_kind}')

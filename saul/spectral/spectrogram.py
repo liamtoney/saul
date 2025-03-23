@@ -35,8 +35,8 @@ class Spectrogram:
         number_of_tapers (int): See :meth:`__init__`; only defined if
             ``method='multitaper'``
         tr (:class:`~obspy.core.trace.Trace`): Input waveform
-        data_kind (str): Input waveform data kind; ``'infrasound'`` or ``'seismic'``
-            (inferred from channel code)
+        data_kind (str): Input waveform data kind; e.g., ``'infrasound'`` or
+            ``'seismic'`` (inferred from channel code)
         db_ref_val (int or float): dB reference value for PSD (data kind dependent)
         waveform_units (str): Units of the input waveform
         spectrogram (tuple): Spectrogram (in dB) calculated from the input waveform; of

@@ -46,8 +46,8 @@ class PSD:
         st (SAUL :class:`~saul.waveform.stream.Stream`): Input waveforms (single
             :class:`~obspy.core.trace.Trace` input is converted to SAUL
             :class:`~saul.waveform.stream.Stream`)
-        data_kind (str): Input waveform data kind; ``'infrasound'`` or ``'seismic'``
-            (inferred from channel code)
+        data_kind (str): Input waveform data kind; e.g., ``'infrasound'`` or
+            ``'seismic'`` (inferred from channel code)
         db_ref_val (int or float): dB reference value for PSD (data kind dependent)
         waveform_units (str): Units of the input waveforms
         psd (list): List of PSDs (in dB) calculated from input waveforms; of the form
@@ -178,46 +178,50 @@ class PSD:
         if log_x:
             ax.set_xscale('log')
         if show_noise_models:
-            if self.data_kind == 'infrasound':
-                if infra_noise_model == 'ak':
-                    period, *nms = get_ak_infra_noise()
-                    noise_models = [(period, nm) for nm in nms]
-                else:  # infra_noise_model == 'idc':
-                    noise_models = [get_idc_infra_low_noise(), get_idc_infra_hi_noise()]
-                # These are all given relative to 1 Pa, so need to convert to ref_val
-                for i, noise_model in enumerate(noise_models):
-                    period, pxx_db_rel_1_pa = noise_model
-                    pxx_db_rel_ref_val = pxx_db_rel_1_pa - 10 * np.log10(
-                        self.db_ref_val**2
-                    )
-                    noise_models[i] = period, pxx_db_rel_ref_val
-            else:  # self.data_kind == 'seismic'
-                noise_models = [get_nlnm(), get_nhnm()]
-                # These are in units of acceleration, so we might need to convert them;
-                # see Table 3 in Peterson (1993)
-                # https://pubs.usgs.gov/of/1993/0322/ofr93-322.pdf
-                match self.waveform_units:
-                    case 'm':
-                        for i, noise_model in enumerate(noise_models):
-                            period, pxx_db_acc = noise_model
-                            pxx_db_disp = pxx_db_acc + 20.0 * np.log10(
-                                period**2 / (4 * np.pi**2)
-                            )
-                            noise_models[i] = period, pxx_db_disp
-                    case 'm/s':
-                        for i, noise_model in enumerate(noise_models):
-                            period, pxx_db_acc = noise_model
-                            pxx_db_vel = pxx_db_acc + 20.0 * np.log10(
-                                period / (2 * np.pi)
-                            )
-                            noise_models[i] = period, pxx_db_vel
-                    case 'm/s**2':
-                        pass  # No conversion needed
-                    case _:
-                        msg = (
-                            f'Unsupported seismic waveform units: {self.waveform_units}'
+            match self.data_kind:
+                case 'infrasound':
+                    if infra_noise_model == 'ak':
+                        period, *nms = get_ak_infra_noise()
+                        noise_models = [(period, nm) for nm in nms]
+                    else:  # infra_noise_model == 'idc':
+                        noise_models = [
+                            get_idc_infra_low_noise(),
+                            get_idc_infra_hi_noise(),
+                        ]
+                    # These are all given relative to 1 Pa -> need to convert to ref_val
+                    for i, noise_model in enumerate(noise_models):
+                        period, pxx_db_rel_1_pa = noise_model
+                        pxx_db_rel_ref_val = pxx_db_rel_1_pa - 10 * np.log10(
+                            self.db_ref_val**2
                         )
-                        raise ValueError(msg)
+                        noise_models[i] = period, pxx_db_rel_ref_val
+                case 'seismic':
+                    noise_models = [get_nlnm(), get_nhnm()]
+                    # These are in units of acceleration, so we might need to convert
+                    # them; see Table 3 in Peterson (1993)
+                    # https://pubs.usgs.gov/of/1993/0322/ofr93-322.pdf
+                    match self.waveform_units:
+                        case 'm':
+                            for i, noise_model in enumerate(noise_models):
+                                period, pxx_db_acc = noise_model
+                                pxx_db_disp = pxx_db_acc + 20.0 * np.log10(
+                                    period**2 / (4 * np.pi**2)
+                                )
+                                noise_models[i] = period, pxx_db_disp
+                        case 'm/s':
+                            for i, noise_model in enumerate(noise_models):
+                                period, pxx_db_acc = noise_model
+                                pxx_db_vel = pxx_db_acc + 20.0 * np.log10(
+                                    period / (2 * np.pi)
+                                )
+                                noise_models[i] = period, pxx_db_vel
+                        case 'm/s**2':
+                            pass  # No conversion needed
+                        case _:
+                            msg = f'Unsupported seismic waveform units: {self.waveform_units}'
+                            raise ValueError(msg)
+                case _:
+                    raise ValueError(f'No noise models for data kind: {self.data_kind}')
             xlim, ylim = ax.get_xlim(), ax.get_ylim()  # Store these to restore limits
             for i, noise_model in enumerate(noise_models):
                 period, pxx_db = noise_model

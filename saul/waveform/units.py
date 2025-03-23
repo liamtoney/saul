@@ -104,17 +104,18 @@ def get_waveform_units(tr: Trace) -> Tuple[str, str | None]:
     response_units = _get_response_units(tr)
 
     # Do some basic data kind compatability checks
-    if data_kind == 'infrasound':
-        msg = f'Invalid response units for infrasound: {response_units}'
-        assert response_units in ('pa', None), msg
-        # Only 'VEL' and 'DEF' make sense to use in the `remove_response()` call here
-        msg = f'Invalid response output for infrasound: {response_output}'
-        assert response_output in ('VEL', 'DEF', None), msg
-    elif data_kind == 'seismic':
-        msg = f'Invalid response units for seismic: {response_units}'
-        assert response_units != 'pa', msg
-    else:
-        raise ValueError(f'Unknown data kind: {data_kind}')
+    match data_kind:
+        case 'infrasound':
+            msg = f'Invalid response units for infrasound: {response_units}'
+            assert response_units in ('pa', None), msg
+            # Only 'VEL' and 'DEF' make sense for `remove_response()` call here
+            msg = f'Invalid response output for infrasound: {response_output}'
+            assert response_output in ('VEL', 'DEF', None), msg
+        case 'seismic':
+            msg = f'Invalid response units for seismic: {response_units}'
+            assert response_units != 'pa', msg
+        case _:
+            raise ValueError(f'Unknown data kind: {data_kind}')
 
     # Determine the units of the waveform data
     if not response_is_removed:
@@ -129,22 +130,24 @@ def get_waveform_units(tr: Trace) -> Tuple[str, str | None]:
         else:
             # This was a `remove_reponse()` call, check compatibility between
             # `response_output` and `response_units`
-            if data_kind == 'infrasound':
-                waveform_units = 'pa'
-            elif data_kind == 'seismic':
-                match response_output:
-                    case 'ACC':
-                        waveform_units = 'm/s**2'
-                    case 'VEL':
-                        waveform_units = 'm/s'
-                    case 'DISP':
-                        waveform_units = 'm'
-                    case 'DEF':
-                        waveform_units = response_units  # This can be `None`!
-                    case _:
-                        raise ValueError(f'Unknown response output: {response_output}')
-            else:
-                raise ValueError(f'Unknown data kind: {data_kind}')
+            match data_kind:
+                case 'infrasound':
+                    waveform_units = 'pa'
+                case 'seismic':
+                    match response_output:
+                        case 'ACC':
+                            waveform_units = 'm/s**2'
+                        case 'VEL':
+                            waveform_units = 'm/s'
+                        case 'DISP':
+                            waveform_units = 'm'
+                        case 'DEF':
+                            waveform_units = response_units  # This can be `None`!
+                        case _:
+                            msg = f'Invalid response output: {response_output}'
+                            raise ValueError(msg)
+                case _:
+                    raise ValueError(f'Unknown data kind: {data_kind}')
 
     return data_kind, waveform_units
 
