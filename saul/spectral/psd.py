@@ -33,6 +33,9 @@ from saul.waveform.units import _validate_provided_vs_inferred_units, get_wavefo
 class PSD:
     """A class for calculating and plotting PSDs of one or more waveforms.
 
+    Attributes
+    ==========
+
     Attributes:
         method (str): See :meth:`__init__`
         win_dur (int or float): See :meth:`__init__`; only defined if ``method='welch'``
@@ -51,6 +54,9 @@ class PSD:
             ``[(f1, pxx_db1), (f2, pxx_db2), ...]`` given a
             :class:`~saul.waveform.stream.Stream` consisting of
             :class:`~obspy.core.trace.Trace` entries ``[tr1, tr2, ...]``
+
+    Methods
+    =======
     """
 
     def __init__(
