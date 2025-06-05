@@ -21,7 +21,7 @@ def _get_data_kind(tr: Trace) -> str:
     assert len(tr.stats.channel) == 3, 'Only 3-character channel codes are supported!'
     if tr.stats.channel[1:] == 'DF':
         data_kind = 'infrasound'
-    elif tr.stats.channel[1] == 'H':
+    elif tr.stats.channel[1] in ('H', 'P'):  # High Gain Seismometer, Geophone
         data_kind = 'seismic'
     else:
         msg = f'Could not determine data kind for channel code: {tr.stats.channel}'
