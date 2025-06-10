@@ -13,8 +13,8 @@ from obspy.signal.filter import lowpass_cheby_2
 from scipy.signal import freqz_zpk, iirfilter, tf2zpk
 
 # Reference values for PSD dB units
-REFERENCE_VELOCITY = 1  # [m/s] For seismic data
-REFERENCE_PRESSURE = 20e-6  # [Pa] For infrasound data
+REFERENCE_SEISMIC = 1  # [m, m/s, or m/s**2]
+REFERENCE_INFRASOUND = 20e-6  # [Pa]
 
 # Minimum number of cycles a wave must make within a given time window in order to be
 # considered "resolvable"
@@ -192,26 +192,33 @@ def _get_defaults_for_filter_func(filter_type):
     return defaults
 
 
-def _data_kind(st):
-    """Determine whether an input :class:`~saul.waveform.stream.Stream` contains infrasound or seismic data."""
-    if np.all([tr.stats.channel[1:3] == 'DF' for tr in st]):
-        return 'infrasound'
-    elif np.all([tr.stats.channel[1] == 'H' for tr in st]):
-        return 'seismic'
-    else:
-        raise ValueError(
-            'Could not determine whether data are infrasound or seismic — or both data kinds are present.'
-        )
-
-
-def _format_power_label(data_kind, db_ref_val):
+def _format_power_label(db_ref_val, waveform_units):
     """Format the axis / colorbar label for spectral power quantities."""
-    if data_kind == 'infrasound':
-        # Convert Pa to µPa
-        return f'Power (dB rel. [{db_ref_val * 1e6:g} μPa]$^2$ Hz$^{{-1}}$)'
-    else:  # data_kind == 'seismic'
-        if db_ref_val == 1:
-            # Special formatting case since 1^2 = 1
+    match waveform_units:
+        case 'pa':
+            assert db_ref_val == REFERENCE_INFRASOUND
+            # Convert Pa to µPa
+            return f'Power (dB rel. [{db_ref_val * 1e6:g} μPa]$^2$ Hz$^{{-1}}$)'
+        # All of these use formatting that relies on 1^2 = 1, so we assert that here!
+        case 'm':
+            assert db_ref_val == REFERENCE_SEISMIC == 1
+            return f'Power (dB rel. {db_ref_val:g} m$^2$ Hz$^{{-1}}$)'
+        case 'm/s':
+            assert db_ref_val == REFERENCE_SEISMIC == 1
             return f'Power (dB rel. {db_ref_val:g} [m s$^{{-1}}$]$^2$ Hz$^{{-1}}$)'
-        else:
-            return f'Power (dB rel. [{db_ref_val:g} m s$^{{-1}}$]$^2$ Hz$^{{-1}}$)'
+        case 'm/s**2':
+            assert db_ref_val == REFERENCE_SEISMIC == 1
+            return f'Power (dB rel. {db_ref_val:g} [m s$^{{-2}}$]$^2$ Hz$^{{-1}}$)'
+        case _:
+            raise ValueError(f'Invalid units: {waveform_units}')
+
+
+def _get_db_reference_value(data_kind):
+    """Get the reference value for spectral power quantities in dB."""
+    match data_kind:
+        case 'infrasound':
+            return REFERENCE_INFRASOUND
+        case 'seismic':
+            return REFERENCE_SEISMIC
+        case _:
+            raise ValueError(f'Unknown data kind: {data_kind}')
