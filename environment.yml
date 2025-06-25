@@ -3,6 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - multitaper
+  - numpy<2.0.0  # https://code.usgs.gov/ghsc/esi/esi-core/-/blob/main/pyproject.toml?ref_type=heads#L34
   - obspy
   - pandas
   - pip
