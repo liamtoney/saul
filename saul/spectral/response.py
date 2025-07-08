@@ -92,10 +92,16 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
             # First channel representative of sensor
             channel_sensor = station.channels[0]
 
+            # Use double dash for empty location codes
+            if channel_sensor.location_code == '':
+                location_code = '--'
+            else:
+                location_code = channel_sensor.location_code
+
             # Store some metadata
             networks.append(network.code)
             stations.append(station.code)
-            location_codes.append(channel_sensor.location_code)
+            location_codes.append(location_code)
             start_dates.append(_convert_timestamp(station.start_date))
             end_dates.append(_convert_timestamp(station.end_date))
 
@@ -129,7 +135,7 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
 
             # Optional plotting
             if plot:
-                label = f'{network.code}.{station.code}.{channel_sensor.location_code}'
+                label = f'{network.code}.{station.code}.{location_code}'
                 ax1.semilogx(freqs, db_response)
                 ax2.semilogx(freqs, np.angle(cpx_response, deg=True), label=label)
                 ax1.scatter(corner_db_ref_freq, corner_db_ref_value)
