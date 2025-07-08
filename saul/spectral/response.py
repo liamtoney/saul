@@ -56,7 +56,8 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
 
     Args:
         inventory (:class:`~obspy.core.inventory.Inventory`): ObsPy inventory object
-            containing station metadata.
+            containing station metadata, including response information. This means the
+            inventory should have been fetched with the ``level='response'`` option!
         sampling_rate (int or float): Sampling rate for response computation in Hz. This
             must be high enough such that the Nyquist frequency is above the reference
             frequency ("stage_gain_frequency") of the sensors in the input inventory.
@@ -80,7 +81,14 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
     # Iterate over the inventory
     print('Calculating responses...')
     for network in inventory:
+
+        if len(network.stations) == 0:
+            continue  # No stations in this network
+
         for station in network:
+
+            if len(station.channels) == 0:
+                continue  # No channels for this station
 
             # Handle multiple location codes for a single station, which implies multiple
             # sensors
@@ -91,6 +99,10 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
 
             # First channel representative of sensor
             channel_sensor = station.channels[0]
+
+            # Is a response present?
+            if len(channel_sensor.response.response_stages) == 0:
+                continue  # No response for the representative channel
 
             # Use double dash for empty location codes
             if channel_sensor.location_code == '':
@@ -157,31 +169,38 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
 
     # Optionally finish the plot
     if plot:
-        yticks1 = [-20, -10, -6, -3, 0]  # [dB]
-        ax1.set_ylim(yticks1[0], yticks1[-1])
-        ax1.set_yticks(yticks1)
-        ax2.set_ylim(-180, 180)
-        ax2.yaxis.set_major_locator(plt.MultipleLocator(90))
-        ax2.yaxis.set_minor_locator(plt.MultipleLocator(30))
-        ax2.set_xlim(_MIN_FREQ, sampling_rate / 2)
-        ax1.set_ylabel('Amplitude\n(dB re. val. @ ref. freq.)')
-        ax2.set_ylabel('Phase (°)')
-        ax2.set_xlabel('Frequency (Hz)')
-        for ax in ax1, ax2:
-            ax.grid(ls=':')
-            ax.set_axisbelow(True)
-        legend = fig.legend()
-        for text in legend.get_texts():
-            text.set_family('monospace')
-        _ax1 = ax1.twiny()
-        _ax2 = ax2.twiny()
-        for _ax in _ax1, _ax2:
-            _ax.set_xscale('log')
-            _ax.set_xlim(1 / _MIN_FREQ, 1 / (sampling_rate / 2))
-        _ax1.set_xlabel('Period (s)', labelpad=10)
-        _ax2.tick_params(labeltop=False)
-        fig.tight_layout()
-        fig.show()
+        if df.empty:
+            plt.close(fig)
+        else:
+            yticks1 = [-20, -10, -6, -3, 0]  # [dB]
+            ax1.set_ylim(yticks1[0], yticks1[-1])
+            ax1.set_yticks(yticks1)
+            ax2.set_ylim(-180, 180)
+            ax2.yaxis.set_major_locator(plt.MultipleLocator(90))
+            ax2.yaxis.set_minor_locator(plt.MultipleLocator(30))
+            ax2.set_xlim(_MIN_FREQ, sampling_rate / 2)
+            ax1.set_ylabel('Amplitude\n(dB re. val. @ ref. freq.)')
+            ax2.set_ylabel('Phase (°)')
+            ax2.set_xlabel('Frequency (Hz)')
+            for ax in ax1, ax2:
+                ax.grid(ls=':')
+                ax.set_axisbelow(True)
+            legend = fig.legend()
+            for text in legend.get_texts():
+                text.set_family('monospace')
+            _ax1 = ax1.twiny()
+            _ax2 = ax2.twiny()
+            for _ax in _ax1, _ax2:
+                _ax.set_xscale('log')
+                _ax.set_xlim(1 / _MIN_FREQ, 1 / (sampling_rate / 2))
+            _ax1.set_xlabel('Period (s)', labelpad=10)
+            _ax2.tick_params(labeltop=False)
+            fig.tight_layout()
+            fig.show()
+
+    # Warn if DataFrame is empty
+    if df.empty:
+        print('No responses found in the inventory!')
 
     # Return
     return df
