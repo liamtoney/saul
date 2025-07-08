@@ -105,11 +105,11 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
             assert sensor_stage.input_units.lower() in _VALID_UNIT_OPTIONS
             assert sensor_stage.output_units.upper() == 'V'
 
-            # Calculate the response (TODO: `ref_freq` selection?)
+            # Calculate the response
             cpx_response, freqs = _compute_sensor_response(
                 channel_sensor.response, sampling_rate, _MIN_FREQ
             )
-            ref_freq = channel_sensor.response.instrument_sensitivity.frequency  # [Hz]
+            ref_freq = sensor_stage.stage_gain_frequency  # [Hz]  # TODO: Correct?
             db_response = _compute_db_relative_to_ref(cpx_response, freqs, ref_freq)
 
             # Find frequency of corner
