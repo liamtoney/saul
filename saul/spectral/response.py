@@ -167,6 +167,13 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
         legend = fig.legend()
         for text in legend.get_texts():
             text.set_family('monospace')
+        _ax1 = ax1.twiny()
+        _ax2 = ax2.twiny()
+        for _ax in _ax1, _ax2:
+            _ax.set_xscale('log')
+            _ax.set_xlim(1 / _MIN_FREQ, 1 / (sampling_rate / 2))
+        _ax1.set_xlabel('Period (s)', labelpad=10)
+        _ax2.tick_params(labeltop=False)
         fig.tight_layout()
         fig.show()
 
