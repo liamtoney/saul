@@ -27,11 +27,15 @@ def _convert_timestamp(utcdatetime):
     )
 
 
-def _compute_response(response, sampling_rate, min_freq):
-    """Compute instrument response using a nicely padded FFT."""
+def _compute_sensor_response(response, sampling_rate, min_freq):
+    """Compute instrument (sensor only!) response using a nicely padded FFT."""
     nfft = 2 ** (int(np.ceil(np.log2(sampling_rate / min_freq))) + 7)  # TODO: Padding
     cpx_response, freqs = response.get_evalresp_response(
-        t_samp=1 / sampling_rate, nfft=nfft, output='DEF'
+        t_samp=1 / sampling_rate,
+        nfft=nfft,
+        output='DEF',
+        end_stage=1,  # Includes only stage sequence number 1
+        hide_sensitivity_mismatch_warning=True,  # Since we're skipping some stages
     )
     return cpx_response, freqs
 
@@ -95,7 +99,7 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
             sensor_types.append(channel_sensor.sensor.type)
 
             # Calculate the response (TODO: `ref_freq` selection?)
-            cpx_response, freqs = _compute_response(
+            cpx_response, freqs = _compute_sensor_response(
                 channel_sensor.response, sampling_rate, _MIN_FREQ
             )
             ref_freq = channel_sensor.response.instrument_sensitivity.frequency  # [Hz]
