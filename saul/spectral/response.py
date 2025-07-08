@@ -69,7 +69,7 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
     """
 
     # Set up lists to store key info for the DataFrame
-    networks, stations, location_codes = [], [], []
+    networks, stations, locations, channels = [], [], [], []
     start_dates, end_dates = [], []
     sensor_types = []
     corner_frequencies = []
@@ -108,10 +108,22 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
                 # Use double dash for empty location codes
                 location_code_str = '--' if location_code == '' else location_code
 
+                # Get nice regex for channel codes
+                channel_letters = np.array(
+                    [list(channel.code) for channel in location.channels]
+                )
+                channel_code = ''
+                for column in channel_letters.T:
+                    if len(set(column)) == 1:  # All the same letter
+                        channel_code += column[0]
+                    else:
+                        channel_code += '?'  # Different letters, use '?' wildcard
+
                 # Store some metadata
                 networks.append(network.code)
                 stations.append(station.code)
-                location_codes.append(location_code_str)
+                locations.append(location_code_str)
+                channels.append(channel_code)
                 start_dates.append(_convert_timestamp(channel_sensor.start_date))
                 end_dates.append(_convert_timestamp(channel_sensor.end_date))
 
@@ -147,7 +159,7 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
 
                 # Optional plotting
                 if plot:
-                    label = f'{network.code}.{station.code}.{location_code_str}'
+                    label = f'{network.code}.{station.code}.{location_code_str}.{channel_code}'
                     ax1.semilogx(freqs, db_response)
                     ax2.semilogx(freqs, np.angle(cpx_response, deg=True), label=label)
                     ax1.scatter(corner_db_ref_freq, corner_db_ref_value)
@@ -159,7 +171,8 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
         dict(
             network=networks,
             station=stations,
-            location_code=location_codes,
+            location=locations,
+            channel=channels,
             start_date=start_dates,
             end_date=end_dates,
             sensor_type=sensor_types,
