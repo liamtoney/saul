@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from saul.waveform.units import _VALID_UNIT_OPTIONS
+
 # [Hz] Minimum frequency for response computation (playing it safe here by going lower
 # than the lowest expected corner of 240 s)
 _MIN_FREQ = 1 / 300
@@ -97,6 +99,11 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
 
             # KEY: The sensor type, which can provide clues on the response & corners
             sensor_types.append(channel_sensor.sensor.type)
+
+            # Check the sensor response stage
+            sensor_stage = channel_sensor.response.response_stages[0]
+            assert sensor_stage.input_units.lower() in _VALID_UNIT_OPTIONS
+            assert sensor_stage.output_units.upper() == 'V'
 
             # Calculate the response (TODO: `ref_freq` selection?)
             cpx_response, freqs = _compute_sensor_response(
