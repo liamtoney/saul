@@ -57,7 +57,9 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
     Args:
         inventory (:class:`~obspy.core.inventory.Inventory`): ObsPy inventory object
             containing station metadata.
-        sampling_rate (int or float): Sampling rate for response computation in Hz.
+        sampling_rate (int or float): Sampling rate for response computation in Hz. This
+            must be high enough such that the Nyquist frequency is above the reference
+            frequency ("stage_gain_frequency") of the sensors in the input inventory.
         plot (bool): If True, plot the responses and corner frequencies.
 
     Returns:
@@ -104,12 +106,14 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
             sensor_stage = channel_sensor.response.response_stages[0]
             assert sensor_stage.input_units.lower() in _VALID_UNIT_OPTIONS
             assert sensor_stage.output_units.upper() == 'V'
+            ref_freq = sensor_stage.stage_gain_frequency  # [Hz]  # TODO: Correct?
+            msg = 'Sampling rate too low for reference frequency!'
+            assert ref_freq < sampling_rate / 2, msg
 
             # Calculate the response
             cpx_response, freqs = _compute_sensor_response(
                 channel_sensor.response, sampling_rate, _MIN_FREQ
             )
-            ref_freq = sensor_stage.stage_gain_frequency  # [Hz]  # TODO: Correct?
             db_response = _compute_db_relative_to_ref(cpx_response, freqs, ref_freq)
 
             # Find frequency of corner
