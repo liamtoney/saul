@@ -200,7 +200,7 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
             for ax in ax1, ax2:
                 ax.grid(ls=':')
                 ax.set_axisbelow(True)
-            legend = fig.legend()
+            legend = fig.legend(draggable=True)
             for text in legend.get_texts():
                 text.set_family('monospace')
             _ax1 = ax1.twiny()
