@@ -92,7 +92,9 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
 
             # Handle multiple location codes for a single station, which implies
             # multiple sensors
-            unique_location_codes = set(channel.location_code for channel in station)
+            unique_location_codes = sorted(
+                set(channel.location_code for channel in station)
+            )
             for location_code in unique_location_codes:
 
                 location = station.select(location=location_code)
