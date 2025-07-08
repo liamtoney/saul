@@ -90,67 +90,67 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
             if len(station.channels) == 0:
                 continue  # No channels for this station
 
-            # Handle multiple location codes for a single station, which implies multiple
-            # sensors
-            if len(set(channel.location_code for channel in station)) != 1:
-                raise NotImplementedError(
-                    'Multiple location codes for a single station!'
+            # Handle multiple location codes for a single station, which implies
+            # multiple sensors
+            unique_location_codes = set(channel.location_code for channel in station)
+            for location_code in unique_location_codes:
+
+                location = station.select(location=location_code)
+
+                # TODO: First channel encountered at this location is considered
+                # representative of sensor
+                channel_sensor = location.channels[0]
+
+                # Is a response present?
+                if len(channel_sensor.response.response_stages) == 0:
+                    continue  # No response for the representative channel
+
+                # Use double dash for empty location codes
+                location_code_str = '--' if location_code == '' else location_code
+
+                # Store some metadata
+                networks.append(network.code)
+                stations.append(station.code)
+                location_codes.append(location_code_str)
+                start_dates.append(_convert_timestamp(channel_sensor.start_date))
+                end_dates.append(_convert_timestamp(channel_sensor.end_date))
+
+                # KEY: The sensor type, which can provide clues on response & corners
+                sensor_types.append(channel_sensor.sensor.type)
+
+                # Check the sensor response stage
+                sensor_stage = channel_sensor.response.response_stages[0]
+                assert sensor_stage.input_units.lower() in _VALID_UNIT_OPTIONS
+                assert sensor_stage.output_units.upper() == 'V'
+                ref_freq = sensor_stage.stage_gain_frequency  # [Hz]  # TODO: Correct?
+                msg = 'Sampling rate too low for reference frequency!'
+                assert ref_freq < sampling_rate / 2, msg
+
+                # Calculate the response
+                cpx_response, freqs = _compute_sensor_response(
+                    channel_sensor.response, sampling_rate, _MIN_FREQ
                 )
+                db_response = _compute_db_relative_to_ref(cpx_response, freqs, ref_freq)
 
-            # First channel representative of sensor
-            channel_sensor = station.channels[0]
+                # Find frequency of corner
+                mask = freqs <= ref_freq  # We only look below the reference frequency
+                db_response_lower = db_response[mask]
+                freqs_lower = freqs[mask]
+                corner_db_ref_idx = np.nanargmin(
+                    np.abs(db_response_lower - _CORNER_DB_REF)
+                )
+                corner_db_ref_freq = freqs_lower[corner_db_ref_idx]
+                corner_db_ref_value = db_response_lower[corner_db_ref_idx]
+                msg = 'Corner frequency not found within tolerance!'
+                assert abs(_CORNER_DB_REF - corner_db_ref_value) < _DB_TOL, msg
+                corner_frequencies.append(corner_db_ref_freq)
 
-            # Is a response present?
-            if len(channel_sensor.response.response_stages) == 0:
-                continue  # No response for the representative channel
-
-            # Use double dash for empty location codes
-            if channel_sensor.location_code == '':
-                location_code = '--'
-            else:
-                location_code = channel_sensor.location_code
-
-            # Store some metadata
-            networks.append(network.code)
-            stations.append(station.code)
-            location_codes.append(location_code)
-            start_dates.append(_convert_timestamp(station.start_date))
-            end_dates.append(_convert_timestamp(station.end_date))
-
-            # KEY: The sensor type, which can provide clues on the response & corners
-            sensor_types.append(channel_sensor.sensor.type)
-
-            # Check the sensor response stage
-            sensor_stage = channel_sensor.response.response_stages[0]
-            assert sensor_stage.input_units.lower() in _VALID_UNIT_OPTIONS
-            assert sensor_stage.output_units.upper() == 'V'
-            ref_freq = sensor_stage.stage_gain_frequency  # [Hz]  # TODO: Correct?
-            msg = 'Sampling rate too low for reference frequency!'
-            assert ref_freq < sampling_rate / 2, msg
-
-            # Calculate the response
-            cpx_response, freqs = _compute_sensor_response(
-                channel_sensor.response, sampling_rate, _MIN_FREQ
-            )
-            db_response = _compute_db_relative_to_ref(cpx_response, freqs, ref_freq)
-
-            # Find frequency of corner
-            mask = freqs <= ref_freq  # We only look below the reference frequency
-            db_response_lower = db_response[mask]
-            freqs_lower = freqs[mask]
-            corner_db_ref_idx = np.nanargmin(np.abs(db_response_lower - _CORNER_DB_REF))
-            corner_db_ref_freq = freqs_lower[corner_db_ref_idx]
-            corner_db_ref_value = db_response_lower[corner_db_ref_idx]
-            msg = 'Corner frequency not found within tolerance!'
-            assert abs(_CORNER_DB_REF - corner_db_ref_value) < _DB_TOL, msg
-            corner_frequencies.append(corner_db_ref_freq)
-
-            # Optional plotting
-            if plot:
-                label = f'{network.code}.{station.code}.{location_code}'
-                ax1.semilogx(freqs, db_response)
-                ax2.semilogx(freqs, np.angle(cpx_response, deg=True), label=label)
-                ax1.scatter(corner_db_ref_freq, corner_db_ref_value)
+                # Optional plotting
+                if plot:
+                    label = f'{network.code}.{station.code}.{location_code_str}'
+                    ax1.semilogx(freqs, db_response)
+                    ax2.semilogx(freqs, np.angle(cpx_response, deg=True), label=label)
+                    ax1.scatter(corner_db_ref_freq, corner_db_ref_value)
 
     print('Done')
 
