@@ -1,6 +1,5 @@
 """
-This file contains code for calculating sensor response and corner frequencies, with
-optional plotting.
+Calculation of sensor response and corner frequencies, with optional plotting.
 """
 
 import matplotlib.pyplot as plt
@@ -55,9 +54,10 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
     """Calculate sensor responses and corner frequencies from an ObsPy inventory.
 
     Args:
-        inventory (:class:`~obspy.core.inventory.Inventory`): ObsPy inventory object
-            containing station metadata, including response information. This means the
-            inventory should have been fetched with the ``level='response'`` option!
+        inventory (:class:`~obspy.core.inventory.inventory.Inventory`): ObsPy inventory
+            object containing station metadata, including response information. This
+            means the inventory should have been fetched with the ``level='response'``
+            option!
         sampling_rate (int or float): Sampling rate for response computation in Hz. This
             must be high enough such that the Nyquist frequency is above the reference
             frequency ("stage_gain_frequency") of the sensors in the input inventory.

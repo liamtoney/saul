@@ -7,5 +7,6 @@
    :maxdepth: 1
 
    saul.spectral.helpers
+   saul.spectral.response
    saul.spectral.psd.PSD
    saul.spectral.spectrogram.Spectrogram
