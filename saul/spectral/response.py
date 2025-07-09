@@ -5,6 +5,7 @@ Calculation of sensor response and corner frequencies, with optional plotting.
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from obspy.core.inventory import PolesZerosResponseStage
 
 from saul.waveform.units import _VALID_UNIT_OPTIONS
 
@@ -19,13 +20,6 @@ _CORNER_DB_REF = -3
 # [dB] Tolerance for corner frequency search; if the derived dB value at the corner
 # frequency is not within this tolerance of `_CORNER_DB_REF` an error is raised
 _DB_TOL = 0.01
-
-
-def _convert_timestamp(utcdatetime):
-    """Convert a UTCDateTime object to a pandas Timestamp."""
-    return (
-        pd.NaT if utcdatetime is None else pd.Timestamp(utcdatetime.datetime, tz='UTC')
-    )
 
 
 def _compute_sensor_response(response, sampling_rate, min_freq):
@@ -65,12 +59,11 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
 
     Returns:
         :class:`~pandas.DataFrame`: DataFrame with columns for network, station,
-        location code, start date, end date, sensor type, and corner frequency.
+        location code, sensor type, and corner frequency.
     """
 
     # Set up lists to store key info for the DataFrame
     networks, stations, locations, channels = [], [], [], []
-    start_dates, end_dates = [], []
     sensor_types = []
     corner_frequencies = []
 
@@ -99,14 +92,6 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
 
                 location = station.select(location=location_code)
 
-                # TODO: First channel encountered at this location is considered
-                # representative of sensor
-                channel_sensor = location.channels[0]
-
-                # Is a response present?
-                if len(channel_sensor.response.response_stages) == 0:
-                    continue  # No response for the representative channel
-
                 # Use double dash for empty location codes
                 location_code_str = '--' if location_code == '' else location_code
 
@@ -121,24 +106,75 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
                     else:
                         channel_code += '?'  # Different letters, use '?' wildcard
 
+                # Form trace ID
+                tr_id = (
+                    f'{network.code}.{station.code}.{location_code_str}.{channel_code}'
+                )
+
+                # Gather responses for this location
+                _responses = [channel.response for channel in location.channels]
+
+                # Are all responses present for this location?
+                empty_responses = [
+                    len(_response.response_stages) == 0 for _response in _responses
+                ]
+                if any(empty_responses):
+                    continue  # Incomplete or fully absent responses for this location
+
+                # Check that all sensor responses are identical for this location
+                _sensor_stages = [
+                    _response.response_stages[0] for _response in _responses
+                ]
+                if not all(
+                    isinstance(_sensor_stage, PolesZerosResponseStage)
+                    for _sensor_stage in _sensor_stages
+                ):
+                    plt.close(fig) if plot else None
+                    raise NotImplementedError(
+                        'Only PolesZerosResponseStage objects are supported!'
+                    )
+                for _sensor_stage in _sensor_stages[1:]:
+                    same_poles = _sensor_stage.poles == _sensor_stages[0].poles
+                    same_zeros = _sensor_stage.zeros == _sensor_stages[0].zeros
+                    same_gain = _sensor_stage.stage_gain == _sensor_stages[0].stage_gain
+                    same_frequency = (
+                        _sensor_stage.stage_gain_frequency
+                        == _sensor_stages[0].stage_gain_frequency
+                    )
+                    if not same_poles and same_zeros and same_gain and same_frequency:
+                        plt.close(fig) if plot else None
+                        raise ValueError(
+                            f'Multiple sensor responses found:\n'
+                            f'{tr_id} | {location.start_date} – {location.end_date}'
+                        )
+
+                # Given the above check passed the first channel encountered at this
+                # location is considered representative of the sensor
+                channel_sensor = location.channels[0]
+
                 # Store some metadata
                 networks.append(network.code)
                 stations.append(station.code)
                 locations.append(location_code_str)
                 channels.append(channel_code)
-                start_dates.append(_convert_timestamp(channel_sensor.start_date))
-                end_dates.append(_convert_timestamp(channel_sensor.end_date))
 
                 # KEY: The sensor type, which can provide clues on response & corners
-                sensor_types.append(channel_sensor.sensor.type)
+                sensor_type = channel_sensor.sensor.type
+                sensor_types.append('' if sensor_type is None else sensor_type)
 
                 # Check the sensor response stage
                 sensor_stage = channel_sensor.response.response_stages[0]
-                assert sensor_stage.input_units.lower() in _VALID_UNIT_OPTIONS
-                assert sensor_stage.output_units.upper() == 'V'
+                input_valid = sensor_stage.input_units.lower() in _VALID_UNIT_OPTIONS
+                output_valid = sensor_stage.output_units.upper() == 'V'
+                if not (input_valid and output_valid):
+                    plt.close(fig) if plot else None
+                    raise ValueError(f'Invalid sensor response stage: {tr_id}')
                 ref_freq = sensor_stage.stage_gain_frequency  # [Hz]  # TODO: Correct?
-                msg = 'Sampling rate too low for reference frequency!'
-                assert ref_freq < sampling_rate / 2, msg
+                if ref_freq > sampling_rate / 2:
+                    plt.close(fig) if plot else None
+                    raise ValueError(
+                        f'Sampling rate too low for reference frequency: {tr_id}'
+                    )
 
                 # Calculate the response
                 cpx_response, freqs = _compute_sensor_response(
@@ -155,8 +191,9 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
                 )
                 corner_db_ref_freq = freqs_lower[corner_db_ref_idx]
                 corner_db_ref_value = db_response_lower[corner_db_ref_idx]
-                msg = 'Corner frequency not found within tolerance!'
-                assert abs(_CORNER_DB_REF - corner_db_ref_value) < _DB_TOL, msg
+                if abs(_CORNER_DB_REF - corner_db_ref_value) > _DB_TOL:
+                    plt.close(fig) if plot else None
+                    raise ValueError(f'Corner frequency not found within tolerance!')
                 corner_frequencies.append(corner_db_ref_freq)
 
                 # Optional plotting
@@ -175,8 +212,6 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
             station=stations,
             location=locations,
             channel=channels,
-            start_date=start_dates,
-            end_date=end_dates,
             sensor_type=sensor_types,
             corner_frequency=corner_frequencies,
         )
