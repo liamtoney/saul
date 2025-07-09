@@ -198,9 +198,8 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
 
                 # Optional plotting
                 if plot:
-                    label = f'{network.code}.{station.code}.{location_code_str}.{channel_code}'
                     ax1.semilogx(freqs, db_response)
-                    ax2.semilogx(freqs, np.angle(cpx_response, deg=True), label=label)
+                    ax2.semilogx(freqs, np.angle(cpx_response, deg=True), label=tr_id)
                     ax1.scatter(corner_db_ref_freq, corner_db_ref_value)
 
     print('Done')
