@@ -33,6 +33,9 @@ mamba env create --file environment.yml
 mamba env update --name <existing_environment> --file environment.yml
 ```
 
+SAUL is primarily developed on macOS, but it ought to work on Linux — and Windows via
+[Windows Subsystem for Linux (WSL)](https://learn.microsoft.com/en-us/windows/wsl/).
+
 ## Using
 
 Be sure that the environment you've installed SAUL into is activated. Here's a simple
