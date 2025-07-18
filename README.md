@@ -17,19 +17,20 @@ dependencies as much as possible to avoid duplicated effort.
 
 ## Installing
 
-Both of these options assume that you've already installed the
-[`mamba`](https://mamba.readthedocs.io/en/latest/) package manager (don't bother with
-[`conda`](https://docs.conda.io/en/latest/)), and that you've cloned this repository and
-have navigated to the root directory.
+Both of these options assume that you've already
+[installed Miniforge](https://github.com/conda-forge/miniforge?tab=readme-ov-file#install)
+(which provides the commands [`conda`](https://docs.conda.io/en/latest/) and
+[`mamba`](https://mamba.readthedocs.io/en/latest/)), and that you've cloned this
+repository and have navigated to the root directory.
 
 **Option 1:** Create a new environment named `saul`.
 ```
-mamba env create
+mamba env create --file environment.yml
 ```
 
 **Option 2:** Install SAUL into an existing environment of your choosing.
 ```
-mamba env update --name <existing_environment>
+mamba env update --name <existing_environment> --file environment.yml
 ```
 
 ## Using
