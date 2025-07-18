@@ -58,10 +58,10 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
         plot (bool): If True, plot the responses and corner frequencies.
 
     Returns:
-        :class:`~pandas.DataFrame`: DataFrame with columns for network code, station
-        code, location code, channel code, sensor type, and corner frequency.
+        :class:`~pandas.DataFrame`: Table of sensor type and corner frequency
+        information, with columns ``network``, ``station``, ``location``, ``channel``,
+        ``sensor_type``, and ``corner_frequency``
     """
-
     # Set up lists to store key info for the DataFrame
     networks, stations, locations, channels = [], [], [], []
     sensor_types = []
