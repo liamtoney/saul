@@ -58,8 +58,8 @@ def get_availability(
 
     Returns:
         :class:`~pandas.DataFrame`: Table of data availability information, with columns
-        ``Network``, ``Station``, ``Location``, ``Channel``, ``Earliest``, and
-        ``Latest``
+        ``network``, ``station``, ``location``, ``channel``, ``earliest``, and
+        ``latest``
     """
     # Ensure we have UTCDateTime objects to start
     starttime = _preprocess_time(starttime)
@@ -91,6 +91,8 @@ def get_availability(
         parse_dates=['Earliest', 'Latest'],
         keep_default_na=False,
     )
+    df.columns = df.columns.str.lower()  # All lowercase column names
+    df['location'] = df.location.replace('', '--')  # Empty location codes -> --
     if print_timespans:
         _print_availability_df(df, leading_newline=True)
     if plot:
@@ -101,7 +103,7 @@ def get_availability(
 def _print_availability_df(df, leading_newline=False):
     """Pretty-print availability timespans to the console."""
     max_id_length = (
-        df[['Network', 'Station', 'Location', 'Channel']]
+        df[['network', 'station', 'location', 'channel']]
         .map(len)  # Number of characters in each SEED code
         .sum(axis='columns')
         .max()
@@ -109,11 +111,11 @@ def _print_availability_df(df, leading_newline=False):
     )
     lines = []
     for _, row in df.iterrows():
-        id_str = f'{row.Network}.{row.Station}.{row.Location}.{row.Channel}'.ljust(
+        id_str = f'{row.network}.{row.station}.{row.location}.{row.channel}'.ljust(
             max_id_length  # Ensures all IDs are aligned
         )
-        earliest_str = row.Earliest.strftime(_DATETIME_FORMAT)
-        latest_str = row.Latest.strftime(_DATETIME_FORMAT)
+        earliest_str = row.earliest.strftime(_DATETIME_FORMAT)
+        latest_str = row.latest.strftime(_DATETIME_FORMAT)
         lines.append(f'{id_str} | {earliest_str} - {latest_str}')
     out = '\n'.join(lines)
     if leading_newline:
@@ -125,7 +127,7 @@ def _plot_availability_df(df, starttime, endtime):
     """Make an availability plot."""
     df_plot = df.copy()
     df_plot['tr_id'] = df.apply(
-        lambda row: f'{row.Network}.{row.Station}.{row.Location}.{row.Channel}',
+        lambda row: f'{row.network}.{row.station}.{row.location}.{row.channel}',
         axis='columns',
     )
     unique_tr_ids = df_plot['tr_id'].unique()
@@ -169,11 +171,7 @@ def _plot_availability_df(df, starttime, endtime):
         for _, row in df_plot_tr_id.iterrows():
             # Plot availability timespans as green
             axs[i].axvspan(
-                row['Earliest'],
-                row['Latest'],
-                lw=0,
-                color=_AVAILABLE_COLOR,
-                zorder=2,
+                row.earliest, row.latest, lw=0, color=_AVAILABLE_COLOR, zorder=2
             )
         axs[i].set_ylabel(
             tr_id,
