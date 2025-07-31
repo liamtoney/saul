@@ -9,6 +9,9 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools.packages]
 find = {}
 
+[tool.setuptools.package-data]
+saul = ["spectral/alaska_ambient_infrasound_noise_models.txt"]
+
 [tool.black]
 skip-string-normalization = true
 
