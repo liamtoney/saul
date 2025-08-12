@@ -37,6 +37,8 @@ class Spectrogram:
         number_of_tapers (int): See :meth:`__init__`; only defined if
             ``method='multitaper'``
         gamma (float): See :meth:`__init__`; only defined if ``method='s_transform'``
+        max_fs (int or float): See :meth:`__init__`; only defined if
+            ``method='s_transform'``
         tr (:class:`~obspy.core.trace.Trace`): Input waveform
         data_kind (str): Input waveform data kind; e.g., ``'infrasound'`` or
             ``'seismic'`` (inferred from channel code)
@@ -58,6 +60,7 @@ class Spectrogram:
         time_bandwidth_product=4,
         number_of_tapers=7,
         gamma=1,
+        max_fs=10,
         units='infer',
     ):
         """Create a :class:`Spectrogram` object.
@@ -87,6 +90,10 @@ class Spectrogram:
             gamma (float): **[S]** Gamma parameter, see `here
                 <https://github.com/claudiodsf/stockwell/blob/31e1db400aaa0b61c4df8b8ec30f9e58731f611e/stockwell/st.py#L76-L82>`_
                 for more info
+            max_fs (int or float): **[S]** Maximum allowed sampling rate in hertz. If an
+                input signal has a sampling rate higher than this, it will be
+                downsampled before the :math:`S` transform is computed (this saves
+                computation time and memory)
             units (str): Units of the input waveform; either ``'infer'`` to guess from
                 input response information or a string explicitly defining the units
                 (see ``_VALID_UNIT_OPTIONS`` in :mod:`saul.waveform.units` for supported
@@ -145,11 +152,16 @@ class Spectrogram:
             )
             f = f.squeeze()
         else:  # method == 's_transform'
-            f = np.linspace(0, self.tr.stats.sampling_rate / 2, self.tr.stats.npts // 2)
-            t = self.tr.times()
-            _sxx = _st.st(
-                self.tr.data, lo=0, hi=f.size - 1, gamma=gamma, win_type='gauss'
-            )
+            if self.tr.stats.sampling_rate > max_fs:
+                print(f'Downsampling data to {max_fs} Hz for S transform')
+                _tr = self.tr.copy()
+                _tr.filter('lowpass_cheby_2', freq=max_fs / 2)
+                _tr.interpolate(max_fs, method='lanczos', a=20)
+            else:
+                _tr = self.tr
+            f = np.linspace(0, _tr.stats.sampling_rate / 2, _tr.stats.npts // 2)
+            t = _tr.times()
+            _sxx = _st.st(_tr.data, lo=0, hi=f.size - 1, gamma=gamma, win_type='gauss')
             sxx = np.abs(_sxx) ** 2  # TODO: Convert to power? What about density?
         f, sxx = f[1:], sxx[1:, :]  # Remove DC component
         # Convert to dB [dB rel. (db_ref_val <db_ref_val_unit>)^2 Hz^-1]
