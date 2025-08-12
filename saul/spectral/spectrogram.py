@@ -234,6 +234,7 @@ class Spectrogram:
             grid_axis = 'both'
             spec_ax.set_ylabel('Frequency (Hz)')  # Go ahead and set this now
         spec_ax.grid(linestyle=':', zorder=5, axis=grid_axis)
+        spec_ax.set_facecolor(plt.rcParams['grid.color'])
         if self.method == 's_transform':
             fmin = f.min()  # S transform doesn't have frequency resolution limits
         else:
