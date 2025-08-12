@@ -222,7 +222,10 @@ class Spectrogram:
             grid_axis = 'both'
             spec_ax.set_ylabel('Frequency (Hz)')  # Go ahead and set this now
         spec_ax.grid(linestyle=':', zorder=5, axis=grid_axis)
-        fmin = 1 / (self.win_dur / CYCLES_PER_WINDOW)  # [Hz] Min. resolvable freq.
+        if self.method == 's_transform':
+            fmin = f.min()  # S transform doesn't have frequency resolution limits
+        else:
+            fmin = 1 / (self.win_dur / CYCLES_PER_WINDOW)  # [Hz] Min. resolvable freq.
         fmax = self.tr.stats.sampling_rate / 2  # [Hz] Nyquist
         spec_ax.set_ylim(fmin, fmax)
         if log_y:
