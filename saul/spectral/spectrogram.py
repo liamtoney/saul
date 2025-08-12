@@ -64,11 +64,12 @@ class Spectrogram:
         The spectrogram of the input waveform is estimated in this method (only a single
         waveform may be provided). Three spectral estimation approaches are supported:
         The method implemented by SciPy (:func:`scipy.signal.spectrogram`), the
-        multitaper method (:func:`mtspec.spectrogram`), and the :math:`S` transform. The
-        input arguments (below) relevant for each method are marked with a **[P]** for
-        the SciPy method, an **[M]** for the multitaper method, and an **[S]** for the
-        :math:`S` transform. Arguments corresponding to the non-selected method are
-        ignored.
+        multitaper method (:func:`mtspec.spectrogram`), and the :math:`S` transform
+        (implemented in the `Stockwell <https://github.com/claudiodsf/stockwell>`_
+        package). The input arguments (below) relevant for each method are marked with a
+        **[P]** for the SciPy method, an **[M]** for the multitaper method, and an
+        **[S]** for the :math:`S` transform. Arguments corresponding to the non-selected
+        method are ignored.
 
         Args:
             tr_or_st (:class:`~obspy.core.trace.Trace` or :class:`~saul.waveform.stream.Stream`):
@@ -141,7 +142,12 @@ class Spectrogram:
             )
             f = f.squeeze()
         else:  # method == 's_transform'
-            raise NotImplementedError
+            f = np.linspace(0, self.tr.stats.sampling_rate / 2, self.tr.stats.npts // 2)
+            t = self.tr.times()
+            _sxx = st.st(
+                self.tr.data, lo=0, hi=f.size - 1, gamma=gamma, win_type='gauss'
+            )
+            sxx = np.abs(_sxx) ** 2  # TODO: Convert to power? What about density?
         f, sxx = f[1:], sxx[1:, :]  # Remove DC component
         # Convert to dB [dB rel. (db_ref_val <db_ref_val_unit>)^2 Hz^-1]
         sxx_db = 10 * np.log10(sxx / (self.db_ref_val**2))
