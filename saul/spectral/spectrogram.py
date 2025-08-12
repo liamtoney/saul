@@ -77,7 +77,7 @@ class Spectrogram:
                 argument)
             method (str): Either ``'scipy'`` **[P]**, ``'multitaper'`` **[M]**, or
                 ``'s_transform'`` **[S]**
-            win_dur (int or float): **[P]**, **[M]** Segment length in seconds. This
+            win_dur (int or float): **[P]** **[M]** Segment length in seconds. This
                 usually must be adjusted, within the constraints of the total signal
                 duration, to ensure that the longest-period signals of interest are
                 included
