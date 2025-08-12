@@ -11,6 +11,7 @@ import numpy as np
 from matplotlib.gridspec import GridSpec
 from multitaper import mtspec
 from scipy.signal import spectrogram
+from stockwell import st
 
 from saul.spectral.helpers import (
     CYCLES_PER_WINDOW,
@@ -34,6 +35,7 @@ class Spectrogram:
             ``method='multitaper'``
         number_of_tapers (int): See :meth:`__init__`; only defined if
             ``method='multitaper'``
+        gamma (float): See :meth:`__init__`; only defined if ``method='s_transform'``
         tr (:class:`~obspy.core.trace.Trace`): Input waveform
         data_kind (str): Input waveform data kind; e.g., ``'infrasound'`` or
             ``'seismic'`` (inferred from channel code)
@@ -54,27 +56,35 @@ class Spectrogram:
         win_dur=8,
         time_bandwidth_product=4,
         number_of_tapers=7,
+        gamma=1,
         units='infer',
     ):
         """Create a :class:`Spectrogram` object.
 
         The spectrogram of the input waveform is estimated in this method (only a single
-        waveform may be provided). Two spectral estimation approaches are supported:
-        The method implemented by SciPy (:func:`scipy.signal.spectrogram`) and the
-        multitaper method (:func:`mtspec.spectrogram`). Additional input arguments
-        (below) relevant only for the multitaper method are marked with an **[M]**.
-        These arguments are ignored when the SciPy method is selected.
+        waveform may be provided). Three spectral estimation approaches are supported:
+        The method implemented by SciPy (:func:`scipy.signal.spectrogram`), the
+        multitaper method (:func:`mtspec.spectrogram`), and the :math:`S` transform. The
+        input arguments (below) relevant for each method are marked with a **[P]** for
+        the SciPy method, an **[M]** for the multitaper method, and an **[S]** for the
+        :math:`S` transform. Arguments corresponding to the non-selected method are
+        ignored.
 
         Args:
             tr_or_st (:class:`~obspy.core.trace.Trace` or :class:`~saul.waveform.stream.Stream`):
                 Input waveform (response is expected to be removed; see ``units``
                 argument)
-            method (str): Either ``'scipy'`` or ``'multitaper'`` **[M]**
-            win_dur (int or float): Segment length in seconds. This usually must be
-                adjusted, within the constraints of the total signal duration, to ensure
-                that the longest-period signals of interest are included
+            method (str): Either ``'scipy'`` **[P]**, ``'multitaper'`` **[M]**, or
+                ``'s_transform'`` **[S]**
+            win_dur (int or float): **[P]**, **[M]** Segment length in seconds. This
+                usually must be adjusted, within the constraints of the total signal
+                duration, to ensure that the longest-period signals of interest are
+                included
             time_bandwidth_product (float): **[M]** Time-bandwidth product
             number_of_tapers (int): **[M]** Number of tapers to use
+            gamma (float): **[S]** Gamma parameter, see `here
+                <https://github.com/claudiodsf/stockwell/blob/31e1db400aaa0b61c4df8b8ec30f9e58731f611e/stockwell/st.py#L76-L82>`_
+                for more info
             units (str): Units of the input waveform; either ``'infer'`` to guess from
                 input response information or a string explicitly defining the units
                 (see ``_VALID_UNIT_OPTIONS`` in :mod:`saul.waveform.units` for supported
@@ -84,12 +94,15 @@ class Spectrogram:
         assert method in [
             'scipy',
             'multitaper',
-        ], 'Method must be either \'scipy\' or \'multitaper\''
+            's_transform',
+        ], 'Method must be either \'scipy\', \'multitaper\', or \'s_transform\''
         self.method = method
         self.win_dur = win_dur
         if method == 'multitaper':
             self.time_bandwidth_product = time_bandwidth_product
             self.number_of_tapers = number_of_tapers
+        elif method == 's_transform':
+            self.gamma = gamma
         st = Stream(tr_or_st)  # Cast input to saul.Stream
         assert st.count() > 0, 'No waveform provided!'
         assert st.count() == 1, 'Must provide only a single waveform!'
@@ -116,7 +129,7 @@ class Spectrogram:
                 noverlap=nperseg // 2,  # 50 % overlap
                 nfft=nfft,
             )
-        else:  # method == 'multitaper'
+        elif method == 'multitaper':
             t, f, _, sxx = self._spectrogram(
                 tuple(self.tr.data),
                 dt=self.tr.stats.delta,
@@ -127,6 +140,8 @@ class Spectrogram:
                 iadapt=0,  # "Adaptive multitaper" <- change?
             )
             f = f.squeeze()
+        else:  # method == 's_transform'
+            raise NotImplementedError
         f, sxx = f[1:], sxx[1:, :]  # Remove DC component
         # Convert to dB [dB rel. (db_ref_val <db_ref_val_unit>)^2 Hz^-1]
         sxx_db = 10 * np.log10(sxx / (self.db_ref_val**2))
