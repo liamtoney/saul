@@ -7,6 +7,7 @@ dependencies:
   - obspy
   - pandas
   - pip
+  - python<3.13  # https://code.usgs.gov/ghsc/esi/esi-core/-/blob/main/pyproject.toml?ref_type=heads#L31
   - pip:
       - git+https://github.com/uafgeotools/waveform_collection.git
       - git+https://code.usgs.gov/ghsc/esi/esi-core.git
