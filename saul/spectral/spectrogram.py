@@ -11,7 +11,7 @@ import numpy as np
 from matplotlib.gridspec import GridSpec
 from multitaper import mtspec
 from scipy.signal import spectrogram
-from stockwell import st
+from stockwell import st as _st  # Avoid conflict with ObsPy `st`
 
 from saul.spectral.helpers import (
     CYCLES_PER_WINDOW,
@@ -144,7 +144,7 @@ class Spectrogram:
         else:  # method == 's_transform'
             f = np.linspace(0, self.tr.stats.sampling_rate / 2, self.tr.stats.npts // 2)
             t = self.tr.times()
-            _sxx = st.st(
+            _sxx = _st.st(
                 self.tr.data, lo=0, hi=f.size - 1, gamma=gamma, win_type='gauss'
             )
             sxx = np.abs(_sxx) ** 2  # TODO: Convert to power? What about density?
