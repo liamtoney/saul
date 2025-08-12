@@ -114,6 +114,7 @@ class Spectrogram:
             self.number_of_tapers = number_of_tapers
         else:  # method == 's_transform'
             self.gamma = gamma
+            self.max_fs = max_fs
         st = Stream(tr_or_st)  # Cast input to saul.Stream
         assert st.count() > 0, 'No waveform provided!'
         assert st.count() == 1, 'Must provide only a single waveform!'
