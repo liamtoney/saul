@@ -2,7 +2,6 @@ name: saul
 channels:
   - conda-forge
 dependencies:
-  - matplotlib<3.10  # Fixes: AttributeError: 'NoneType' object has no attribute 'axis'
   - multitaper
   - obspy
   - pandas

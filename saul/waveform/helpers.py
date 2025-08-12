@@ -190,7 +190,8 @@ def _plot_availability_df(df, starttime, endtime):
         ('outward', _PAD * plt.rcParams['figure.dpi'])
     )
     axs[-1].tick_params(axis='x', bottom=True, labelbottom=True)
-    loc = axs[-1].xaxis.set_major_locator(mdates.AutoDateLocator())
+    loc = mdates.AutoDateLocator()
+    axs[-1].xaxis.set_major_locator(loc)
     axs[-1].xaxis.set_major_formatter(mdates.ConciseDateFormatter(loc))
     axs[-1].set_xlim(starttime.matplotlib_date, endtime.matplotlib_date)
     fig.legend(
