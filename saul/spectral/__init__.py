@@ -14,4 +14,6 @@ with warnings.catch_warnings():
         extract_trace_filter_params,
     )
     from saul.spectral.psd import PSD
+
+from saul.spectral.response import calculate_responses
 from saul.spectral.spectrogram import Spectrogram
