@@ -30,7 +30,8 @@ class Spectrogram:
 
     Attributes:
         method (str): See :meth:`__init__`
-        win_dur (int or float): See :meth:`__init__`
+        win_dur (int or float): See :meth:`__init__`; only defined if ``method='scipy'``
+            or ``method='multitaper'``
         time_bandwidth_product (float): See :meth:`__init__`; only defined if
             ``method='multitaper'``
         number_of_tapers (int): See :meth:`__init__`; only defined if
@@ -98,11 +99,13 @@ class Spectrogram:
             's_transform',
         ], 'Method must be either \'scipy\', \'multitaper\', or \'s_transform\''
         self.method = method
-        self.win_dur = win_dur
-        if method == 'multitaper':
+        if method == 'scipy':
+            self.win_dur = win_dur
+        elif method == 'multitaper':
+            self.win_dur = win_dur
             self.time_bandwidth_product = time_bandwidth_product
             self.number_of_tapers = number_of_tapers
-        elif method == 's_transform':
+        else:  # method == 's_transform'
             self.gamma = gamma
         st = Stream(tr_or_st)  # Cast input to saul.Stream
         assert st.count() > 0, 'No waveform provided!'
