@@ -259,7 +259,10 @@ class Spectrogram:
             spec_ax_overlay.yaxis.set_label_position('left')
             # Finally, we add the y-axis grid (to the overlay to ensure correct ticking)
             spec_ax_overlay.grid(linestyle=':', axis='y')
-        wf_ax.set_xlim(t_mpl[0], t_mpl[-1])
+        wf_ax.set_xlim(
+            self.tr.stats.starttime.matplotlib_date,
+            self.tr.stats.endtime.matplotlib_date,
+        )
         # Tick locating and formatting
         locator = mdates.AutoDateLocator()
         wf_ax.xaxis.set_major_locator(locator)
