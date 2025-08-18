@@ -151,6 +151,7 @@ class Spectrogram:
                     iadapt=0,  # "Adaptive multitaper" <- change?
                 )
                 f = f.squeeze()
+                t += win_dur / 2  # Make t vector *centered* in each time window
             case 's_transform':
                 if self.tr.stats.sampling_rate > max_fs:
                     print(f'Downsampling data to {max_fs} Hz for S transform')
