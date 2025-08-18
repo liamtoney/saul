@@ -41,6 +41,7 @@ autodoc_mock_imports = [
     'obspy',
     'pandas',
     'scipy',
+    'stockwell',
     'waveform_collection',
 ]
 autodoc_member_order = 'bysource'
