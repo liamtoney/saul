@@ -100,21 +100,19 @@ class Spectrogram:
                 options)
         """
         # Pre-processing and checks
-        assert method in [
-            'scipy',
-            'multitaper',
-            's_transform',
-        ], 'Method must be either \'scipy\', \'multitaper\', or \'s_transform\''
+        msg = 'Method must be either \'scipy\', \'multitaper\', or \'s_transform\''
+        assert method in ['scipy', 'multitaper', 's_transform'], msg
         self.method = method
-        if method == 'scipy':
-            self.win_dur = win_dur
-        elif method == 'multitaper':
-            self.win_dur = win_dur
-            self.time_bandwidth_product = time_bandwidth_product
-            self.number_of_tapers = number_of_tapers
-        else:  # method == 's_transform'
-            self.gamma = gamma
-            self.max_fs = max_fs
+        match self.method:
+            case 'scipy':
+                self.win_dur = win_dur
+            case 'multitaper':
+                self.win_dur = win_dur
+                self.time_bandwidth_product = time_bandwidth_product
+                self.number_of_tapers = number_of_tapers
+            case 's_transform':
+                self.gamma = gamma
+                self.max_fs = max_fs
         st = Stream(tr_or_st)  # Cast input to saul.Stream
         assert st.count() > 0, 'No waveform provided!'
         assert st.count() == 1, 'Must provide only a single waveform!'
@@ -129,41 +127,44 @@ class Spectrogram:
         )
 
         # KEY: Calculate spectrogram (in dB relative to self.db_ref_val)
-        if method == 'scipy':
-            fs = self.tr.stats.sampling_rate
-            nperseg = int(win_dur * fs)  # Samples
-            nfft = np.power(2, int(np.ceil(np.log2(nperseg))) + 1)  # Pad FFT
-            f, t, sxx = spectrogram(
-                self.tr.data,
-                fs,
-                window='hann',
-                nperseg=nperseg,
-                noverlap=nperseg // 2,  # 50 % overlap
-                nfft=nfft,
-            )
-        elif method == 'multitaper':
-            t, f, _, sxx = self._spectrogram(
-                tuple(self.tr.data),
-                dt=self.tr.stats.delta,
-                twin=win_dur,
-                nw=time_bandwidth_product,
-                kspec=number_of_tapers,
-                olap=0.5,  # 50 % overlap
-                iadapt=0,  # "Adaptive multitaper" <- change?
-            )
-            f = f.squeeze()
-        else:  # method == 's_transform'
-            if self.tr.stats.sampling_rate > max_fs:
-                print(f'Downsampling data to {max_fs} Hz for S transform')
-                _tr = self.tr.copy()
-                _tr.filter('lowpass_cheby_2', freq=max_fs / 2)
-                _tr.interpolate(max_fs, method='lanczos', a=20)
-            else:
-                _tr = self.tr
-            f = np.linspace(0, _tr.stats.sampling_rate / 2, _tr.stats.npts // 2)
-            t = _tr.times()
-            _sxx = _st.st(_tr.data, lo=0, hi=f.size - 1, gamma=gamma, win_type='gauss')
-            sxx = np.abs(_sxx) ** 2  # TODO: Convert to power? What about density?
+        match self.method:
+            case 'scipy':
+                fs = self.tr.stats.sampling_rate
+                nperseg = int(win_dur * fs)  # Samples
+                nfft = np.power(2, int(np.ceil(np.log2(nperseg))) + 1)  # Pad FFT
+                f, t, sxx = spectrogram(
+                    self.tr.data,
+                    fs,
+                    window='hann',
+                    nperseg=nperseg,
+                    noverlap=nperseg // 2,  # 50 % overlap
+                    nfft=nfft,
+                )
+            case 'multitaper':
+                t, f, _, sxx = self._spectrogram(
+                    tuple(self.tr.data),
+                    dt=self.tr.stats.delta,
+                    twin=win_dur,
+                    nw=time_bandwidth_product,
+                    kspec=number_of_tapers,
+                    olap=0.5,  # 50 % overlap
+                    iadapt=0,  # "Adaptive multitaper" <- change?
+                )
+                f = f.squeeze()
+            case 's_transform':
+                if self.tr.stats.sampling_rate > max_fs:
+                    print(f'Downsampling data to {max_fs} Hz for S transform')
+                    _tr = self.tr.copy()
+                    _tr.filter('lowpass_cheby_2', freq=max_fs / 2)
+                    _tr.interpolate(max_fs, method='lanczos', a=20)
+                else:
+                    _tr = self.tr
+                f = np.linspace(0, _tr.stats.sampling_rate / 2, _tr.stats.npts // 2)
+                t = _tr.times()
+                _sxx = _st.st(
+                    _tr.data, lo=0, hi=f.size - 1, gamma=gamma, win_type='gauss'
+                )
+                sxx = np.abs(_sxx) ** 2  # TODO: Convert to power? What about density?
         f, sxx = f[1:], sxx[1:, :]  # Remove DC component
         # Convert to dB [dB rel. (db_ref_val <db_ref_val_unit>)^2 Hz^-1]
         sxx_db = 10 * np.log10(sxx / (self.db_ref_val**2))
