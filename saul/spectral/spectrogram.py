@@ -11,6 +11,7 @@ import numpy as np
 from matplotlib.gridspec import GridSpec
 from multitaper import mtspec
 from scipy.signal import spectrogram
+from stockwell import st as _st  # Avoid conflict with ObsPy `st`
 
 from saul.spectral.helpers import (
     CYCLES_PER_WINDOW,
@@ -29,11 +30,15 @@ class Spectrogram:
 
     Attributes:
         method (str): See :meth:`__init__`
-        win_dur (int or float): See :meth:`__init__`
+        win_dur (int or float): See :meth:`__init__`; only defined if ``method='scipy'``
+            or ``method='multitaper'``
         time_bandwidth_product (float): See :meth:`__init__`; only defined if
             ``method='multitaper'``
         number_of_tapers (int): See :meth:`__init__`; only defined if
             ``method='multitaper'``
+        gamma (float): See :meth:`__init__`; only defined if ``method='s_transform'``
+        max_fs (int or float): See :meth:`__init__`; only defined if
+            ``method='s_transform'``
         tr (:class:`~obspy.core.trace.Trace`): Input waveform
         data_kind (str): Input waveform data kind; e.g., ``'infrasound'`` or
             ``'seismic'`` (inferred from channel code)
@@ -54,42 +59,60 @@ class Spectrogram:
         win_dur=8,
         time_bandwidth_product=4,
         number_of_tapers=7,
+        gamma=1,
+        max_fs=10,
         units='infer',
     ):
         """Create a :class:`Spectrogram` object.
 
         The spectrogram of the input waveform is estimated in this method (only a single
-        waveform may be provided). Two spectral estimation approaches are supported:
-        The method implemented by SciPy (:func:`scipy.signal.spectrogram`) and the
-        multitaper method (:func:`mtspec.spectrogram`). Additional input arguments
-        (below) relevant only for the multitaper method are marked with an **[M]**.
-        These arguments are ignored when the SciPy method is selected.
+        waveform may be provided). Three spectral estimation approaches are supported:
+        The method implemented by SciPy (:func:`scipy.signal.spectrogram`), the
+        multitaper method (:func:`mtspec.spectrogram`), and the :math:`S` transform
+        (implemented in the `Stockwell <https://github.com/claudiodsf/stockwell>`_
+        package). The input arguments (below) relevant for each method are marked with a
+        **[P]** for the SciPy method, an **[M]** for the multitaper method, and an
+        **[S]** for the :math:`S` transform. Arguments corresponding to the non-selected
+        method are ignored.
 
         Args:
             tr_or_st (:class:`~obspy.core.trace.Trace` or :class:`~saul.waveform.stream.Stream`):
                 Input waveform (response is expected to be removed; see ``units``
                 argument)
-            method (str): Either ``'scipy'`` or ``'multitaper'`` **[M]**
-            win_dur (int or float): Segment length in seconds. This usually must be
-                adjusted, within the constraints of the total signal duration, to ensure
-                that the longest-period signals of interest are included
+            method (str): Either ``'scipy'`` **[P]**, ``'multitaper'`` **[M]**, or
+                ``'s_transform'`` **[S]**
+            win_dur (int or float): **[P]** **[M]** Segment length in seconds. This
+                usually must be adjusted, within the constraints of the total signal
+                duration, to ensure that the longest-period signals of interest are
+                included
             time_bandwidth_product (float): **[M]** Time-bandwidth product
             number_of_tapers (int): **[M]** Number of tapers to use
+            gamma (float): **[S]** Gamma parameter, see `here
+                <https://github.com/claudiodsf/stockwell/blob/31e1db400aaa0b61c4df8b8ec30f9e58731f611e/stockwell/st.py#L76-L82>`_
+                for more info
+            max_fs (int or float): **[S]** Maximum allowed sampling rate in hertz. If an
+                input signal has a sampling rate higher than this, it will be
+                downsampled before the :math:`S` transform is computed (this saves
+                computation time and memory)
             units (str): Units of the input waveform; either ``'infer'`` to guess from
                 input response information or a string explicitly defining the units
                 (see ``_VALID_UNIT_OPTIONS`` in :mod:`saul.waveform.units` for supported
                 options)
         """
         # Pre-processing and checks
-        assert method in [
-            'scipy',
-            'multitaper',
-        ], 'Method must be either \'scipy\' or \'multitaper\''
+        msg = 'Method must be either \'scipy\', \'multitaper\', or \'s_transform\''
+        assert method in ['scipy', 'multitaper', 's_transform'], msg
         self.method = method
-        self.win_dur = win_dur
-        if method == 'multitaper':
-            self.time_bandwidth_product = time_bandwidth_product
-            self.number_of_tapers = number_of_tapers
+        match self.method:
+            case 'scipy':
+                self.win_dur = win_dur
+            case 'multitaper':
+                self.win_dur = win_dur
+                self.time_bandwidth_product = time_bandwidth_product
+                self.number_of_tapers = number_of_tapers
+            case 's_transform':
+                self.gamma = gamma
+                self.max_fs = max_fs
         st = Stream(tr_or_st)  # Cast input to saul.Stream
         assert st.count() > 0, 'No waveform provided!'
         assert st.count() == 1, 'Must provide only a single waveform!'
@@ -104,29 +127,44 @@ class Spectrogram:
         )
 
         # KEY: Calculate spectrogram (in dB relative to self.db_ref_val)
-        if method == 'scipy':
-            fs = self.tr.stats.sampling_rate
-            nperseg = int(win_dur * fs)  # Samples
-            nfft = np.power(2, int(np.ceil(np.log2(nperseg))) + 1)  # Pad FFT
-            f, t, sxx = spectrogram(
-                self.tr.data,
-                fs,
-                window='hann',
-                nperseg=nperseg,
-                noverlap=nperseg // 2,  # 50 % overlap
-                nfft=nfft,
-            )
-        else:  # method == 'multitaper'
-            t, f, _, sxx = self._spectrogram(
-                tuple(self.tr.data),
-                dt=self.tr.stats.delta,
-                twin=win_dur,
-                nw=time_bandwidth_product,
-                kspec=number_of_tapers,
-                olap=0.5,  # 50 % overlap
-                iadapt=0,  # "Adaptive multitaper" <- change?
-            )
-            f = f.squeeze()
+        match self.method:
+            case 'scipy':
+                fs = self.tr.stats.sampling_rate
+                nperseg = int(win_dur * fs)  # Samples
+                nfft = np.power(2, int(np.ceil(np.log2(nperseg))) + 1)  # Pad FFT
+                f, t, sxx = spectrogram(
+                    self.tr.data,
+                    fs,
+                    window='hann',
+                    nperseg=nperseg,
+                    noverlap=nperseg // 2,  # 50 % overlap
+                    nfft=nfft,
+                )
+            case 'multitaper':
+                t, f, _, sxx = self._spectrogram(
+                    tuple(self.tr.data),
+                    dt=self.tr.stats.delta,
+                    twin=win_dur,
+                    nw=time_bandwidth_product,
+                    kspec=number_of_tapers,
+                    olap=0.5,  # 50 % overlap
+                    iadapt=0,  # "Adaptive multitaper" <- change?
+                )
+                f = f.squeeze()
+            case 's_transform':
+                if self.tr.stats.sampling_rate > max_fs:
+                    print(f'Downsampling data to {max_fs} Hz for S transform')
+                    _tr = self.tr.copy()
+                    _tr.filter('lowpass_cheby_2', freq=max_fs / 2)
+                    _tr.interpolate(max_fs, method='lanczos', a=20)
+                else:
+                    _tr = self.tr
+                f = np.linspace(0, _tr.stats.sampling_rate / 2, _tr.stats.npts // 2)
+                t = _tr.times()
+                _sxx = _st.st(
+                    _tr.data, lo=0, hi=f.size - 1, gamma=gamma, win_type='gauss'
+                )
+                sxx = np.abs(_sxx) ** 2  # TODO: Convert to power? What about density?
         f, sxx = f[1:], sxx[1:, :]  # Remove DC component
         # Convert to dB [dB rel. (db_ref_val <db_ref_val_unit>)^2 Hz^-1]
         sxx_db = 10 * np.log10(sxx / (self.db_ref_val**2))
@@ -198,7 +236,11 @@ class Spectrogram:
             grid_axis = 'both'
             spec_ax.set_ylabel('Frequency (Hz)')  # Go ahead and set this now
         spec_ax.grid(linestyle=':', zorder=5, axis=grid_axis)
-        fmin = 1 / (self.win_dur / CYCLES_PER_WINDOW)  # [Hz] Min. resolvable freq.
+        spec_ax.set_facecolor(plt.rcParams['grid.color'])
+        if self.method == 's_transform':
+            fmin = f.min()  # [Hz] S transform doesn't have frequency resolution limits
+        else:
+            fmin = 1 / (self.win_dur / CYCLES_PER_WINDOW)  # [Hz] Min. resolvable freq.
         fmax = self.tr.stats.sampling_rate / 2  # [Hz] Nyquist
         spec_ax.set_ylim(fmin, fmax)
         if log_y:
