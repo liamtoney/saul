@@ -14,7 +14,6 @@ import obspy
 from lxml.etree import Element, SubElement, tostring
 from matplotlib.cm import get_cmap
 from matplotlib.transforms import blended_transform_factory
-from obspy import UTCDateTime
 from obspy.geodetics.base import gps2dist_azimuth
 from obspy.io.kml.core import _rgba_tuple_to_kml_color_code
 from waveform_collection import gather_waveforms, read_local
