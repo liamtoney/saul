@@ -198,17 +198,17 @@ def _format_power_label(db_ref_val, waveform_units):
         case 'pa':
             assert db_ref_val == REFERENCE_INFRASOUND
             # Convert Pa to µPa
-            return f'Power (dB rel. [{db_ref_val * 1e6:g} μPa]$^2$ Hz$^{{-1}}$)'
+            return rf'Power (dB rel. [{db_ref_val * 1e6:g} μPa]$\mathdefault{{^2}}$ Hz$\mathdefault{{^{{-1}}}}$)'
         # All of these use formatting that relies on 1^2 = 1, so we assert that here!
         case 'm':
             assert db_ref_val == REFERENCE_SEISMIC == 1
-            return f'Power (dB rel. {db_ref_val:g} m$^2$ Hz$^{{-1}}$)'
+            return rf'Power (dB rel. {db_ref_val:g} m$\mathdefault{{^2}}$ Hz$\mathdefault{{^{{-1}}}}$)'
         case 'm/s':
             assert db_ref_val == REFERENCE_SEISMIC == 1
-            return f'Power (dB rel. {db_ref_val:g} [m s$^{{-1}}$]$^2$ Hz$^{{-1}}$)'
+            return rf'Power (dB rel. {db_ref_val:g} [m s$\mathdefault{{^{{-1}}}}$]$\mathdefault{{^2}}$ Hz$\mathdefault{{^{{-1}}}}$)'
         case 'm/s**2':
             assert db_ref_val == REFERENCE_SEISMIC == 1
-            return f'Power (dB rel. {db_ref_val:g} [m s$^{{-2}}$]$^2$ Hz$^{{-1}}$)'
+            return rf'Power (dB rel. {db_ref_val:g} [m s$\mathdefault{{^{{-2}}}}$]$\mathdefault{{^2}}$ Hz$\mathdefault{{^{{-1}}}}$)'
         case _:
             raise ValueError(f'Invalid units: {waveform_units}')
 
