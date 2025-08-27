@@ -13,6 +13,7 @@ import numpy as np
 import obspy
 from lxml.etree import Element, SubElement, tostring
 from matplotlib.cm import get_cmap
+from matplotlib.ticker import Formatter
 from matplotlib.transforms import blended_transform_factory
 from obspy.geodetics.base import gps2dist_azimuth
 from obspy.io.kml.core import _rgba_tuple_to_kml_color_code
@@ -297,7 +298,9 @@ class Stream(obspy.Stream):
             reftime = kwargs.get('reftime', min([tr.stats.starttime for tr in st_plot]))
             time_format = '%Y-%m-%d %H:%M:%S'
             ax.set_xlabel('Time (s) after {} UTC'.format(reftime.strftime(time_format)))
-            ax.set_ylabel(f'Distance (km) from (${src_lat}$°, ${src_lon}$°)')
+            ax.set_ylabel(
+                Formatter.fix_minus(f'Distance (km) from ({src_lat}°, {src_lon}°)')
+            )
             fig.tight_layout(pad=0.5)
             return fig
         else:
