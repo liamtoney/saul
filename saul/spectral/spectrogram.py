@@ -204,9 +204,9 @@ class Spectrogram:
             case 'm':
                 ylabel = 'Displacement (μm)'
             case 'm/s':
-                ylabel = 'Velocity (μm s$^{-1}$)'
+                ylabel = r'Velocity (μm s$\mathdefault{^{-1}}$)'
             case 'm/s**2':
-                ylabel = 'Acceleration (μm s$^{-2}$)'
+                ylabel = r'Acceleration (μm s$\mathdefault{^{-2}}$)'
             case _:
                 raise ValueError(f'Invalid units: {self.waveform_units}')
         wf_ax.set_ylabel(ylabel)
