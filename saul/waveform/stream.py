@@ -21,7 +21,7 @@ from obspy.geodetics.base import gps2dist_azimuth
 from obspy.io.kml.core import _rgba_tuple_to_kml_color_code
 from waveform_collection import gather_waveforms, read_local
 
-from saul.waveform.helpers import _preprocess_time
+from saul.waveform.helpers import _num2date, _preprocess_time
 
 
 class Stream(obspy.Stream):
@@ -269,8 +269,9 @@ class Stream(obspy.Stream):
             # Use km y-axis labels
             ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f'{x / 1000:g}'))
             # Cursor hover labels
-            ax.format_xdata = lambda x: FuncFormatter.fix_minus(f'{x:.2f} s')
-            ax.format_ydata = lambda x: f'{x / 1000:.2f} km'
+            ax.format_coord = lambda x, y: FuncFormatter.fix_minus(
+                f'({x:.2f} s, {y / 1000:.2f} km)'
+            )
             # Label the stations
             transform = blended_transform_factory(ax.transAxes, ax.transData)
             for tr in st_plot:
@@ -321,7 +322,12 @@ class Stream(obspy.Stream):
         else:
             if 'wavespeed' in kwargs:
                 print('Ignoring `wavespeed` kwarg!')  # Can't use this kwarg here
-            return super().plot(*args, **kwargs)
+            fig = super().plot(*args, **kwargs)
+            for ax in fig.axes:
+                ax.format_coord = (
+                    lambda x, y: f'({_num2date(x)}, {FuncFormatter.fix_minus(f'{y:.2g}')} unknown units)'
+                )
+            return fig
 
     @staticmethod
     def _time_tuple(t):
