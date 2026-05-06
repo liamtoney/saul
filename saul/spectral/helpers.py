@@ -168,11 +168,13 @@ def extract_trace_filter_params(tr):
 
     Warning:
         The uses sketchy string processing and :func:`eval` to extract the filter
-        parameters!
+        parameters! It fails to extract ``*args`` in
+        ``tr.filter(type, *args, **options)`` — only ``type`` and ``**options`` are
+        extracted.
     """
     string = tr.stats.processing[-1]
     assert 'filter' in string, 'Was filtering the last processing step?'
-    part_options, part_filter_type = string.rstrip(')').split('::')
+    _, part_options, part_filter_type = string.rstrip(')').split('::')
     options = eval(part_options.split('=')[1])
     filter_type = eval(part_filter_type.split('=')[1])
     return dict(
