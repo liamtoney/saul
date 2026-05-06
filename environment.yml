@@ -2,12 +2,12 @@ name: saul
 channels:
   - conda-forge
 dependencies:
-  - esi-core
-  - multitaper
+  - esi-core  # https://code.usgs.gov/ghsc/esi/esi-core
+  - multitaper  # https://github.com/gaprieto/multitaper
   - obspy
   - pandas
   - pip
-  - stockwell
+  - stockwell  # https://github.com/claudiodsf/stockwell
   - pip:
       - git+https://github.com/uafgeotools/waveform_collection.git
       - --editable .
