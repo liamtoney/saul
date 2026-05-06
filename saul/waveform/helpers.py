@@ -182,8 +182,7 @@ def _plot_availability_df(df, starttime, endtime):
             fontsize=plt.rcParams['font.size'] - 2,
         )
         axs[i].set_yticks([])
-        _coord_date = '%Y-%m-%d %H:%M UTC'
-        axs[i].format_coord = lambda x, y: f'{mdates.num2date(x).strftime(_coord_date)}'
+        axs[i].format_coord = lambda x, y: _num2date(x)
         axs[i].tick_params(axis='x', bottom=False, labelbottom=False)
         for spine in axs[i].spines.values():
             spine.set_visible(False)
@@ -219,3 +218,8 @@ def _preprocess_time(starttime_or_endtime):
     elif not isinstance(starttime_or_endtime, UTCDateTime):
         raise TypeError('Time must be either a tuple or a UTCDateTime!')
     return starttime_or_endtime
+
+
+def _num2date(matplotlib_date):
+    """Convert a Matplotlib date (float) to a nicely-formatted string."""
+    return mdates.num2date(matplotlib_date).strftime('%Y-%m-%d %H:%M:%S UTC')

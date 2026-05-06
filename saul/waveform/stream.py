@@ -21,7 +21,7 @@ from obspy.geodetics.base import gps2dist_azimuth
 from obspy.io.kml.core import _rgba_tuple_to_kml_color_code
 from waveform_collection import gather_waveforms, read_local
 
-from saul.waveform.helpers import _preprocess_time
+from saul.waveform.helpers import _num2date, _preprocess_time
 
 
 class Stream(obspy.Stream):
@@ -323,10 +323,9 @@ class Stream(obspy.Stream):
             if 'wavespeed' in kwargs:
                 print('Ignoring `wavespeed` kwarg!')  # Can't use this kwarg here
             fig = super().plot(*args, **kwargs)
-            _fmt_x = lambda x: mdates.num2date(x).strftime('%Y-%m-%d %H:%M:%S UTC')
             for ax in fig.axes:
                 ax.format_coord = (
-                    lambda x, y: f'({_fmt_x(x)}, {FuncFormatter.fix_minus(f'{y:.2g}')} unknown units)'
+                    lambda x, y: f'({_num2date(x)}, {FuncFormatter.fix_minus(f'{y:.2g}')} unknown units)'
                 )
             return fig
 

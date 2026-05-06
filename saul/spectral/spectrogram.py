@@ -19,6 +19,7 @@ from saul.spectral.helpers import (
     _format_power_label,
     _get_db_reference_value,
 )
+from saul.waveform.helpers import _num2date
 from saul.waveform.stream import Stream
 from saul.waveform.units import _validate_provided_vs_inferred_units, get_waveform_units
 
@@ -332,14 +333,13 @@ class Spectrogram:
             height += triangle_height
         cax.set_position([pos.xmin, ymin, pos.width, height])
         # Cursor formatting
-        _fmt_x = lambda x: mdates.num2date(x).strftime('%Y-%m-%d %H:%M:%S UTC')
         _template_y = '{:.3g} Hz / {:.2f} s'
         spec_ax.format_coord = (
-            lambda x, y: f'({_fmt_x(x)}, {Formatter.fix_minus(_template_y.format(y, 1 / y))})'
+            lambda x, y: f'({_num2date(x)}, {Formatter.fix_minus(_template_y.format(y, 1 / y))})'
         )
         im.format_cursor_data = lambda data: Formatter.fix_minus(f'{data:.1f} dB')
         wf_ax.format_coord = (
-            lambda x, y: f'({_fmt_x(x)}, {Formatter.fix_minus(f'{y:.2g}')} {yunit})'
+            lambda x, y: f'({_num2date(x)}, {Formatter.fix_minus(f'{y:.2g}')} {yunit})'
         )
         cax.format_coord = lambda x, y: ''  # Disable colorbar cursor info
         fig.show()
