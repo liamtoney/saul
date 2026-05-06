@@ -338,7 +338,7 @@ class Spectrogram:
         )
         im.format_cursor_data = lambda data: formatter.fix_minus(f'{data:.1f} dB')
         wf_ax.format_coord = (
-            lambda x, y: f'({_num2date(x)}, {formatter.fix_minus(f'{y:.2g}')} {yunit})'
+            lambda x, y: f'({_num2date(x)}, {formatter.fix_minus(f"{y:.2g}")} {yunit})'
         )
         cax.format_coord = lambda x, y: ''  # Disable colorbar cursor info
         fig.show()

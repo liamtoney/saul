@@ -325,7 +325,7 @@ class Stream(obspy.Stream):
             fig = super().plot(*args, **kwargs)
             for ax in fig.axes:
                 ax.format_coord = (
-                    lambda x, y: f'({_num2date(x)}, {FuncFormatter.fix_minus(f'{y:.2g}')} unknown units)'
+                    lambda x, y: f'({_num2date(x)}, {FuncFormatter.fix_minus(f"{y:.2g}")} unknown units)'
                 )
             return fig
 
