@@ -15,6 +15,7 @@ from scipy.signal import spectrogram
 from stockwell import st as _st  # Avoid conflict with ObsPy `st`
 
 from saul.spectral.helpers import (
+    _FREQ_TEMPLATE,
     CYCLES_PER_WINDOW,
     _format_power_label,
     _get_db_reference_value,
@@ -333,9 +334,8 @@ class Spectrogram:
             height += triangle_height
         cax.set_position([pos.xmin, ymin, pos.width, height])
         # Cursor formatting
-        _template_y = '{:.3g} Hz / {:.2f} s'
         spec_ax.format_coord = (
-            lambda x, y: f'({_num2date(x)}, {Formatter.fix_minus(_template_y.format(y, 1 / y))})'
+            lambda x, y: f'({_num2date(x)}, {Formatter.fix_minus(_FREQ_TEMPLATE.format(y, 1 / y))})'
         )
         im.format_cursor_data = lambda data: Formatter.fix_minus(f'{data:.1f} dB')
         wf_ax.format_coord = (

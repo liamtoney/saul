@@ -24,6 +24,9 @@ CYCLES_PER_WINDOW = 4
 # This file downloaded from the supplementary material of Macpherson et al. (2022)
 AK_INFRA_NOISE = Path(__file__).with_name('alaska_ambient_infrasound_noise_models.txt')
 
+# Common cursor data formatting template for frequencies and periods
+_FREQ_TEMPLATE = '{:.3g} Hz / {:.2f} s'
+
 
 def get_ak_infra_noise():
     """Returns the Alaska ambient infrasound noise models from Macpherson et al. (2022).
@@ -143,7 +146,9 @@ def obspy_filter_response(
             ax.set_yticks([0, -1, -3, -6, -10, -20])
         ax.set_xlabel('Frequency (Hz)')
         ax.set_ylabel('Gain (dB)')
-        ax.format_coord = lambda x, y: Formatter.fix_minus(f'({x:.3g} Hz, {y:.1f} dB)')
+        ax.format_coord = lambda x, y: Formatter.fix_minus(
+            f'({_FREQ_TEMPLATE.format(x, 1 / x)}, {y:.1f} dB)'
+        )
         fig.tight_layout()
         fig.show()
     return f, h_db

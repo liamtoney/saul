@@ -22,6 +22,7 @@ from scipy.fft import next_fast_len
 from scipy.signal import welch
 
 from saul.spectral.helpers import (
+    _FREQ_TEMPLATE,
     CYCLES_PER_WINDOW,
     _format_power_label,
     _get_db_reference_value,
@@ -264,9 +265,8 @@ class PSD:
         ax.set_ylim(db_lim)
         ax.set_xlabel(xlabel)
         ax.set_ylabel(_format_power_label(self.db_ref_val, self.waveform_units))
-        _template = '{:.3g} Hz / {:.2f} s'
         ax.format_coord = lambda x, y: Formatter.fix_minus(
-            f'({_template.format(*(1 / x, x) if use_period else (x, 1 / x))}, {y:.1f} dB)'
+            f'({_FREQ_TEMPLATE.format(*(1 / x, x) if use_period else (x, 1 / x))}, {y:.1f} dB)'
         )
         fig.tight_layout()
         fig.show()
