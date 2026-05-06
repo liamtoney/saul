@@ -8,6 +8,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.ticker import Formatter
 from obspy.core.util.base import _get_function_from_entry_point
 from obspy.signal.filter import lowpass_cheby_2
 from scipy.signal import freqz_zpk, iirfilter, tf2zpk
@@ -142,6 +143,7 @@ def obspy_filter_response(
             ax.set_yticks([0, -1, -3, -6, -10, -20])
         ax.set_xlabel('Frequency (Hz)')
         ax.set_ylabel('Gain (dB)')
+        ax.format_coord = lambda x, y: Formatter.fix_minus(f'({x:.3g} Hz, {y:.1f} dB)')
         fig.tight_layout()
         fig.show()
     return f, h_db
