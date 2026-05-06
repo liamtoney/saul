@@ -269,8 +269,9 @@ class Stream(obspy.Stream):
             # Use km y-axis labels
             ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f'{x / 1000:g}'))
             # Cursor hover labels
-            ax.format_xdata = lambda x: FuncFormatter.fix_minus(f'{x:.2f} s')
-            ax.format_ydata = lambda x: f'{x / 1000:.2f} km'
+            ax.format_coord = lambda x, y: FuncFormatter.fix_minus(
+                f'({x:.2f} s, {y / 1000:.2f} km)'
+            )
             # Label the stations
             transform = blended_transform_factory(ax.transAxes, ax.transData)
             for tr in st_plot:
