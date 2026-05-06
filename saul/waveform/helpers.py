@@ -182,6 +182,8 @@ def _plot_availability_df(df, starttime, endtime):
             fontsize=plt.rcParams['font.size'] - 2,
         )
         axs[i].set_yticks([])
+        _coord_date = '%Y-%m-%d %H:%M UTC'
+        axs[i].format_coord = lambda x, y: f'{mdates.num2date(x).strftime(_coord_date)}'
         axs[i].tick_params(axis='x', bottom=False, labelbottom=False)
         for spine in axs[i].spines.values():
             spine.set_visible(False)
