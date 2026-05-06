@@ -14,7 +14,7 @@ import numpy as np
 import obspy
 from lxml.etree import Element, SubElement, tostring
 from matplotlib.cm import get_cmap
-from matplotlib.ticker import Formatter
+from matplotlib.ticker import FuncFormatter
 from matplotlib.transforms import blended_transform_factory
 from obspy.core.util.deprecation_helpers import ObsPyDeprecationWarning
 from obspy.geodetics.base import gps2dist_azimuth
@@ -266,6 +266,11 @@ class Stream(obspy.Stream):
                 )[0]
             fig = st_plot.plot(*args, **kwargs)
             ax = fig.axes[0]  # Get the Axes instance
+            # Use km y-axis labels
+            ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f'{x / 1000:g}'))
+            # Cursor hover labels
+            ax.format_xdata = lambda x: FuncFormatter.fix_minus(f'{x:.2f} s')
+            ax.format_ydata = lambda x: f'{x / 1000:.2f} km'
             # Label the stations
             transform = blended_transform_factory(ax.transAxes, ax.transData)
             for tr in st_plot:
@@ -309,7 +314,7 @@ class Stream(obspy.Stream):
                 f'Time (s) after {reftime.strftime(time_format)} UTC{vred_str}'
             )
             ax.set_ylabel(
-                Formatter.fix_minus(f'Distance (m) from ({src_lat}°, {src_lon}°)')
+                FuncFormatter.fix_minus(f'Distance (km) from ({src_lat}°, {src_lon}°)')
             )
             fig.tight_layout(pad=0.5)
             return fig
