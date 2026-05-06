@@ -296,7 +296,7 @@ class Stream(obspy.Stream):
                 ax.text(
                     xmax,
                     1.02,
-                    f'{wavespeed} m/s',
+                    f'{wavespeed:,g} m/s',
                     color=color,
                     transform=transform,
                     ha='center',
@@ -304,7 +304,7 @@ class Stream(obspy.Stream):
                 )
             reftime = kwargs.get('reftime', min([tr.stats.starttime for tr in st_plot]))
             time_format = '%Y-%m-%d %H:%M:%S'
-            vred_str = '' if vred is None else f', reduced by {vred:g} m/s'
+            vred_str = '' if vred is None else f', reduced by {vred:,g} m/s'
             ax.set_xlabel(
                 f'Time (s) after {reftime.strftime(time_format)} UTC{vred_str}'
             )
