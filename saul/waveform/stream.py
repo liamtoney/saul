@@ -322,7 +322,13 @@ class Stream(obspy.Stream):
         else:
             if 'wavespeed' in kwargs:
                 print('Ignoring `wavespeed` kwarg!')  # Can't use this kwarg here
-            return super().plot(*args, **kwargs)
+            fig = super().plot(*args, **kwargs)
+            _fmt_x = lambda x: mdates.num2date(x).strftime('%Y-%m-%d %H:%M:%S UTC')
+            for ax in fig.axes:
+                ax.format_coord = (
+                    lambda x, y: f'({_fmt_x(x)}, {FuncFormatter.fix_minus(f'{y:.2g}')} unknown units)'
+                )
+            return fig
 
     @staticmethod
     def _time_tuple(t):
