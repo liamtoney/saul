@@ -10,6 +10,7 @@ import numpy as np
 from esi_core.gmprocess.waveform_processing.smoothing.konno_ohmachi import (
     konno_ohmachi_smooth,
 )
+from matplotlib.ticker import Formatter
 from multitaper import mtspec
 from obspy.signal.spectral_estimation import (
     get_idc_infra_hi_noise,
@@ -263,6 +264,10 @@ class PSD:
         ax.set_ylim(db_lim)
         ax.set_xlabel(xlabel)
         ax.set_ylabel(_format_power_label(self.db_ref_val, self.waveform_units))
+        _template = '{:.3g} Hz / {:.2f} s'
+        ax.format_coord = lambda x, y: Formatter.fix_minus(
+            f'({_template.format(*(1 / x, x) if use_period else (x, 1 / x))}, {y:.1f} dB)'
+        )
         fig.tight_layout()
         fig.show()
 
