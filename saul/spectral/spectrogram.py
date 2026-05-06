@@ -9,6 +9,7 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.gridspec import GridSpec
+from matplotlib.ticker import Formatter
 from multitaper import mtspec
 from scipy.signal import spectrogram
 from stockwell import st as _st  # Avoid conflict with ObsPy `st`
@@ -201,12 +202,16 @@ class Spectrogram:
         match self.waveform_units:
             case 'pa':
                 ylabel = 'Pressure (Pa)'
+                yunit = 'Pa'
             case 'm':
                 ylabel = 'Displacement (μm)'
+                yunit = 'μm'
             case 'm/s':
                 ylabel = r'Velocity (μm s$\mathdefault{^{-1}}$)'
+                yunit = 'μm/s'
             case 'm/s**2':
                 ylabel = r'Acceleration (μm s$\mathdefault{^{-2}}$)'
+                yunit = 'μm/s²'
             case _:
                 raise ValueError(f'Invalid units: {self.waveform_units}')
         wf_ax.set_ylabel(ylabel)
@@ -249,6 +254,7 @@ class Spectrogram:
         if use_period:  # Overcome imshow() limitations by defining an axis overlay
             # Set up overlay and scale it properly
             spec_ax_overlay = spec_ax.twinx()
+            spec_ax_overlay.set_zorder(spec_ax.get_zorder() - 1)  # Place below spec
             spec_ax_overlay.set_ylim(1 / fmin, 1 / fmax)
             spec_ax_overlay.set_yscale('log')  # log_y is guaranteed to be True
             # Remove the ticks and labels from the underlying plot
@@ -325,6 +331,17 @@ class Spectrogram:
         elif max_extend and not min_extend:
             height += triangle_height
         cax.set_position([pos.xmin, ymin, pos.width, height])
+        # Cursor formatting
+        _fmt_x = lambda x: mdates.num2date(x).strftime('%Y-%m-%d %H:%M:%S UTC')
+        _template_y = '{:.3g} Hz / {:.2f} s'
+        spec_ax.format_coord = (
+            lambda x, y: f'({_fmt_x(x)}, {Formatter.fix_minus(_template_y.format(y, 1 / y))})'
+        )
+        im.format_cursor_data = lambda data: Formatter.fix_minus(f'{data:.1f} dB')
+        wf_ax.format_coord = (
+            lambda x, y: f'({_fmt_x(x)}, {Formatter.fix_minus(f'{y:.2g}')} {yunit})'
+        )
+        cax.format_coord = lambda x, y: ''  # Disable colorbar cursor info
         fig.show()
 
     def copy(self):
