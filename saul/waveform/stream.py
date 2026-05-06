@@ -4,6 +4,7 @@ Contains the definition of SAUL's :class:`Stream` class.
 
 import subprocess
 import sys
+import warnings
 from datetime import timedelta
 from functools import cache
 from pathlib import Path
@@ -15,6 +16,7 @@ from lxml.etree import Element, SubElement, tostring
 from matplotlib.cm import get_cmap
 from matplotlib.ticker import Formatter
 from matplotlib.transforms import blended_transform_factory
+from obspy.core.util.deprecation_helpers import ObsPyDeprecationWarning
 from obspy.geodetics.base import gps2dist_azimuth
 from obspy.io.kml.core import _rgba_tuple_to_kml_color_code
 from waveform_collection import gather_waveforms, read_local
@@ -73,17 +75,19 @@ class Stream(obspy.Stream):
             print('\033[33m' + '[CACHING ENABLED]' + '\033[0m')
         else:
             gather_func = gather_waveforms
-        st = gather_func(
-            source='IRIS',
-            network=network,
-            station=station,
-            location=location,
-            channel=channel,
-            starttime=starttime,
-            endtime=endtime,
-            merge_fill_value=False,
-            trim_fill_value=False,
-        )
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', category=ObsPyDeprecationWarning)
+            st = gather_func(
+                source='IRIS',
+                network=network,
+                station=station,
+                location=location,
+                channel=channel,
+                starttime=starttime,
+                endtime=endtime,
+                merge_fill_value=False,
+                trim_fill_value=False,
+            )
         st = st.copy() if cache else st  # Ensure we don't modify the cached object
         return cls(traces=st.traces)
 
