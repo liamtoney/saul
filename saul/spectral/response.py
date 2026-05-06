@@ -5,6 +5,7 @@ Calculation of sensor response and corner frequencies, with optional plotting.
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from matplotlib.ticker import Formatter
 from obspy.core.inventory import PolesZerosResponseStage
 
 from saul.waveform.units import _VALID_UNIT_OPTIONS
@@ -244,6 +245,13 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
                 _ax.set_xlim(1 / _MIN_FREQ, 1 / (sampling_rate / 2))
             _ax1.set_xlabel('Period (s)', labelpad=10)
             _ax2.tick_params(labeltop=False)
+            _fmt_x = lambda x: f'{1 / x:.2g} Hz / {x:.2f} s'  # Common x-axis formatter
+            _ax1.format_coord = lambda x, y: Formatter.fix_minus(
+                f'({_fmt_x(x)}, {y:.1f} dB)'
+            )
+            _ax2.format_coord = lambda x, y: Formatter.fix_minus(
+                f'({_fmt_x(x)}, {y:.1f}°)'
+            )
             fig.tight_layout()
             fig.show()
 
