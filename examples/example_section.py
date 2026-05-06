@@ -9,5 +9,5 @@ st.plot(
     src_lat=37.26842,
     src_lon=-112.93468,
     reftime=(2023, 11, 14, 22, 38, 42),
-    wavespeed=2.6,  # [km/s]
+    wavespeed=2_600,  # [m/s]
 )

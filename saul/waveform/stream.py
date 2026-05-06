@@ -234,7 +234,7 @@ class Stream(obspy.Stream):
         Args:
             src_lat (int or float): Source latitude [°]
             src_lon (int or float): Source longitude [°]
-            wavespeed (int or float): Moveout line [km/s] to plot on the record section
+            wavespeed (int or float): Moveout line [m/s] to plot on the record section
 
         Note:
             Can obtain standard :meth:`obspy.core.stream.Stream.plot` behavior by
@@ -248,14 +248,13 @@ class Stream(obspy.Stream):
             kwargs['fig'] = figure()
         if 'src_lat' in kwargs and 'src_lon' in kwargs:
             kwargs['type'] = 'section'
-            for kwarg in 'orientation', 'outfile', 'format', 'handle', 'vred':
+            for kwarg in 'orientation', 'outfile', 'format', 'handle':
                 if kwarg in kwargs:
                     print(f'Ignoring `{kwarg}` kwarg!')  # Since we set these below
             kwargs['orientation'] = 'horizontal'
             kwargs['outfile'] = None  # Disable
             kwargs['format'] = None  # Disable
             kwargs['handle'] = True  # Ensures that the Figure instance is returned
-            kwargs['vred'] = None  # Disable, https://github.com/obspy/obspy/issues/3371
             if 'alpha' not in kwargs:
                 kwargs['alpha'] = 1
             src_lat, src_lon = kwargs.pop('src_lat'), kwargs.pop('src_lon')
@@ -272,18 +271,22 @@ class Stream(obspy.Stream):
             for tr in st_plot:
                 ax.text(
                     1.01,  # Axes space
-                    tr.stats.distance / 1000,  # [km] Data space
+                    tr.stats.distance,  # [m] Data space
                     tr.id,
                     ha='left',
                     va='center',
                     family='monospace',
                     transform=transform,
                 )
+            vred = kwargs.get('vred', None)
             if wavespeed is not None:
                 color = 'tab:red'
-                ymax = ax.get_ylim()[1]  # [km]
+                ymax = ax.get_ylim()[1]  # [m]
+                xmax = ymax / wavespeed  # [s]
+                if vred is not None:
+                    xmax -= ymax / vred  # [s]
                 ax.plot(
-                    [0, ymax / wavespeed],
+                    [0, xmax],
                     [0, ymax],
                     color=color,
                     scalex=False,
@@ -291,9 +294,9 @@ class Stream(obspy.Stream):
                 )
                 transform = blended_transform_factory(ax.transData, ax.transAxes)
                 ax.text(
-                    ymax / wavespeed,
+                    xmax,
                     1.02,
-                    f'{wavespeed} km/s',
+                    f'{wavespeed} m/s',
                     color=color,
                     transform=transform,
                     ha='center',
@@ -301,9 +304,12 @@ class Stream(obspy.Stream):
                 )
             reftime = kwargs.get('reftime', min([tr.stats.starttime for tr in st_plot]))
             time_format = '%Y-%m-%d %H:%M:%S'
-            ax.set_xlabel('Time (s) after {} UTC'.format(reftime.strftime(time_format)))
+            vred_str = '' if vred is None else f', reduced by {vred:g} m/s'
+            ax.set_xlabel(
+                f'Time (s) after {reftime.strftime(time_format)} UTC{vred_str}'
+            )
             ax.set_ylabel(
-                Formatter.fix_minus(f'Distance (km) from ({src_lat}°, {src_lon}°)')
+                Formatter.fix_minus(f'Distance (m) from ({src_lat}°, {src_lon}°)')
             )
             fig.tight_layout(pad=0.5)
             return fig
