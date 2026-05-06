@@ -9,7 +9,6 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.gridspec import GridSpec
-from matplotlib.ticker import Formatter
 from multitaper import mtspec
 from scipy.signal import spectrogram
 from stockwell import st as _st  # Avoid conflict with ObsPy `st`
@@ -335,11 +334,11 @@ class Spectrogram:
         cax.set_position([pos.xmin, ymin, pos.width, height])
         # Cursor formatting
         spec_ax.format_coord = (
-            lambda x, y: f'({_num2date(x)}, {Formatter.fix_minus(_FREQ_TEMPLATE.format(y, 1 / y))})'
+            lambda x, y: f'({_num2date(x)}, {formatter.fix_minus(_FREQ_TEMPLATE.format(y, 1 / y))})'
         )
-        im.format_cursor_data = lambda data: Formatter.fix_minus(f'{data:.1f} dB')
+        im.format_cursor_data = lambda data: formatter.fix_minus(f'{data:.1f} dB')
         wf_ax.format_coord = (
-            lambda x, y: f'({_num2date(x)}, {Formatter.fix_minus(f'{y:.2g}')} {yunit})'
+            lambda x, y: f'({_num2date(x)}, {formatter.fix_minus(f'{y:.2g}')} {yunit})'
         )
         cax.format_coord = lambda x, y: ''  # Disable colorbar cursor info
         fig.show()
