@@ -50,8 +50,9 @@ class PSD:
             :class:`~saul.waveform.stream.Stream`)
         data_kind (str): Input waveform data kind; e.g., ``'infrasound'`` or
             ``'seismic'`` (inferred from channel code)
-        db_ref_val (int or float): dB reference value for PSD (data kind dependent)
-        waveform_units (str): Units of the input waveforms
+        db_ref_val (int, float, or None): dB reference value for PSD (data kind
+            dependent)
+        waveform_units (str or None): Units of the input waveforms
         psd (list): List of PSDs (in dB) calculated from input waveforms; of the form
             ``[(f1, pxx_db1), (f2, pxx_db2), ...]`` given a
             :class:`~saul.waveform.stream.Stream` consisting of
@@ -81,18 +82,18 @@ class PSD:
 
         Args:
             tr_or_st (:class:`~obspy.core.trace.Trace` or :class:`~saul.waveform.stream.Stream`):
-                Input waveforms (response is expected to be removed; see ``units``
-                argument)
+                Input waveforms
             method (str): Either ``'welch'`` **[W]** or ``'multitaper'`` **[M]**
             win_dur (int or float): **[W]** Segment length in seconds. This usually must
                 be tweaked to obtain the cleanest-looking plot and to ensure that the
                 longest-period signals of interest are included
             time_bandwidth_product (float): **[M]** Time-bandwidth product
             number_of_tapers (int): **[M]** Number of tapers to use
-            units (str): Units of the input waveforms; either ``'infer'`` to guess from
-                input response information or a string explicitly defining the units
-                (see ``_VALID_UNIT_OPTIONS`` in :mod:`saul.waveform.units` for supported
-                options) — all input waveforms must have the same units!
+            units (str or None): Units of the input waveforms; either ``'infer'`` to
+                guess from input response information, a string explicitly defining the
+                units (see ``_VALID_UNIT_OPTIONS`` in :mod:`saul.waveform.units` for
+                supported options), or ``None`` for unknown units (e.g., counts) — all
+                input waveforms must have the same units!
         """
         # Pre-processing and checks
         assert method in [
@@ -123,6 +124,8 @@ class PSD:
         self.waveform_units = _validate_provided_vs_inferred_units(
             units, inferred_units_unique[0], self.data_kind
         )
+        if self.waveform_units is None:
+            self.db_ref_val = None  # Reference value is meaningless w/o units!
 
         # KEY: Calculate PSD (in dB relative to self.db_ref_val)
         self.psd = []
@@ -143,9 +146,15 @@ class PSD:
                 f, pxx = mtspec.rspec()
                 f, pxx = f.squeeze(), pxx.squeeze()
             f, pxx = f[1:], pxx[1:]  # Remove DC component
-            # Convert to dB [dB rel. (db_ref_val <db_ref_val_unit>)^2 Hz^-1]
-            pxx_db = 10 * np.log10(pxx / (self.db_ref_val**2))
-            self.psd.append((f, pxx_db))
+            self.psd.append((f, pxx))
+        # Convert to dB [dB rel. (db_ref_val <db_ref_val_unit>)^2 Hz^-1]
+        if self.db_ref_val is None:
+            denominator = max([pxx.max() for _, pxx in self.psd])  # 0 dB for global max
+        else:
+            denominator = self.db_ref_val**2
+        for i, (f, pxx) in enumerate(self.psd):
+            pxx_db = 10 * np.log10(pxx / denominator)
+            self.psd[i] = (f, pxx_db)
 
     def plot(
         self,
@@ -180,6 +189,9 @@ class PSD:
         if log_x:
             ax.set_xscale('log')
         if show_noise_models:
+            if self.waveform_units is None:
+                msg = 'Can\'t show noise models if waveform units are unknown!'
+                raise ValueError(msg)
             match self.data_kind:
                 case 'infrasound':
                     if infra_noise_model == 'ak':

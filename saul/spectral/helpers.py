@@ -218,6 +218,9 @@ def _format_power_label(db_ref_val, waveform_units):
         case 'm/s**2':
             assert db_ref_val == REFERENCE_SEISMIC == 1
             return rf'Power (dB rel. {db_ref_val:g} [m s$\mathdefault{{^{{-2}}}}$]$\mathdefault{{^2}}$ Hz$\mathdefault{{^{{-1}}}}$)'
+        case None:
+            assert db_ref_val is None  # Reference value is meaningless w/o units!
+            return r'Power (dB rel. max. Hz$\mathdefault{{^{{-1}}}}$)'
         case _:
             raise ValueError(f'Invalid units: {waveform_units}')
 
