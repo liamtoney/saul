@@ -79,8 +79,7 @@ class Spectrogram:
 
         Args:
             tr_or_st (:class:`~obspy.core.trace.Trace` or :class:`~saul.waveform.stream.Stream`):
-                Input waveform (response is expected to be removed; see ``units``
-                argument)
+                Input waveform
             method (str): Either ``'scipy'`` **[P]**, ``'multitaper'`` **[M]**, or
                 ``'s_transform'`` **[S]**
             win_dur (int or float): **[P]** **[M]** Segment length in seconds. This
@@ -97,9 +96,9 @@ class Spectrogram:
                 downsampled before the :math:`S` transform is computed (this saves
                 computation time and memory)
             units (str): Units of the input waveform; either ``'infer'`` to guess from
-                input response information or a string explicitly defining the units
+                input response information, a string explicitly defining the units
                 (see ``_VALID_UNIT_OPTIONS`` in :mod:`saul.waveform.units` for supported
-                options)
+                options), or ``None`` for unknown units (e.g., counts)
         """
         # Pre-processing and checks
         msg = 'Method must be either \'scipy\', \'multitaper\', or \'s_transform\''
@@ -127,6 +126,8 @@ class Spectrogram:
         self.waveform_units = _validate_provided_vs_inferred_units(
             units, inferred_units, self.data_kind
         )
+        if self.waveform_units is None:
+            self.db_ref_val = None  # Reference value is meaningless w/o units!
 
         # KEY: Calculate spectrogram (in dB relative to self.db_ref_val)
         match self.method:
@@ -170,7 +171,11 @@ class Spectrogram:
                 sxx = np.abs(_sxx) ** 2  # TODO: Convert to power? What about density?
         f, sxx = f[1:], sxx[1:, :]  # Remove DC component
         # Convert to dB [dB rel. (db_ref_val <db_ref_val_unit>)^2 Hz^-1]
-        sxx_db = 10 * np.log10(sxx / (self.db_ref_val**2))
+        if self.db_ref_val is None:
+            denominator = sxx.max()  # 0 dB is max
+        else:
+            denominator = self.db_ref_val**2
+        sxx_db = 10 * np.log10(sxx / denominator)
         self.spectrogram = (f, t, sxx_db)
 
     def plot(
@@ -196,7 +201,10 @@ class Spectrogram:
         spec_ax = fig.add_subplot(gs[0, 0])
         wf_ax = fig.add_subplot(gs[1, 0], sharex=spec_ax)  # Common time axis
         cax = fig.add_subplot(gs[0, 1])
-        rescale = 1e6 if self.data_kind == 'seismic' else 1  # Use μ prefix for seismic
+        if self.data_kind == 'seismic' and self.waveform_units is not None:
+            rescale = 1e6  # Use μ prefix for seismic, unless we have unknown units
+        else:
+            rescale = 1
         wf_ax.plot(
             self.tr.times('matplotlib'), self.tr.data * rescale, 'black', linewidth=0.5
         )
@@ -213,6 +221,9 @@ class Spectrogram:
             case 'm/s**2':
                 ylabel = r'Acceleration (μm s$\mathdefault{^{-2}}$)'
                 yunit = 'μm/s²'
+            case None:
+                ylabel = 'Amplitude'
+                yunit = 'unknown units'
             case _:
                 raise ValueError(f'Invalid units: {self.waveform_units}')
         wf_ax.set_ylabel(ylabel)

@@ -156,11 +156,14 @@ def _validate_provided_vs_inferred_units(
     provided_units: str, inferred_units: str | None, data_kind: str
 ) -> str:
     """Validate user-provided units against inferred units."""
-    if provided_units == 'infer':
+    if provided_units is None:
+        return None  # Pass through since there are no units to check!
+    elif provided_units == 'infer':
         if not inferred_units:
             msg = (
                 'Could not infer units; please provide them explicitly!'
-                f'\nChoose one of {_VALID_UNIT_OPTIONS}'
+                f'\n\tChoose one of {_VALID_UNIT_OPTIONS},'
+                '\n\tor specify None if units are unknown (e.g., counts).'
             )
             raise ValueError(msg)
         else:
