@@ -50,8 +50,9 @@ class PSD:
             :class:`~saul.waveform.stream.Stream`)
         data_kind (str): Input waveform data kind; e.g., ``'infrasound'`` or
             ``'seismic'`` (inferred from channel code)
-        db_ref_val (int or float): dB reference value for PSD (data kind dependent)
-        waveform_units (str): Units of the input waveforms
+        db_ref_val (int, float, or None): dB reference value for PSD (data kind
+            dependent)
+        waveform_units (str or None): Units of the input waveforms
         psd (list): List of PSDs (in dB) calculated from input waveforms; of the form
             ``[(f1, pxx_db1), (f2, pxx_db2), ...]`` given a
             :class:`~saul.waveform.stream.Stream` consisting of
@@ -88,11 +89,11 @@ class PSD:
                 longest-period signals of interest are included
             time_bandwidth_product (float): **[M]** Time-bandwidth product
             number_of_tapers (int): **[M]** Number of tapers to use
-            units (str): Units of the input waveforms; either ``'infer'`` to guess from
-                input response information, a string explicitly defining the units (see
-                ``_VALID_UNIT_OPTIONS`` in :mod:`saul.waveform.units` for supported
-                options), or ``None`` for unknown units (e.g., counts) — all input
-                waveforms must have the same units!
+            units (str or None): Units of the input waveforms; either ``'infer'`` to
+                guess from input response information, a string explicitly defining the
+                units (see ``_VALID_UNIT_OPTIONS`` in :mod:`saul.waveform.units` for
+                supported options), or ``None`` for unknown units (e.g., counts) — all
+                input waveforms must have the same units!
         """
         # Pre-processing and checks
         assert method in [

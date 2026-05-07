@@ -153,8 +153,8 @@ def get_waveform_units(tr: Trace) -> Tuple[str, str | None]:
 
 
 def _validate_provided_vs_inferred_units(
-    provided_units: str, inferred_units: str | None, data_kind: str
-) -> str:
+    provided_units: str | None, inferred_units: str | None, data_kind: str
+) -> str | None:
     """Validate user-provided units against inferred units."""
     if provided_units is None:
         return None  # Pass through since there are no units to check!

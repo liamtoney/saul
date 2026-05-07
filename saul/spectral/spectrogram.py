@@ -44,8 +44,9 @@ class Spectrogram:
         tr (:class:`~obspy.core.trace.Trace`): Input waveform
         data_kind (str): Input waveform data kind; e.g., ``'infrasound'`` or
             ``'seismic'`` (inferred from channel code)
-        db_ref_val (int or float): dB reference value for PSD (data kind dependent)
-        waveform_units (str): Units of the input waveform
+        db_ref_val (int, float, or None): dB reference value for PSD (data kind
+            dependent)
+        waveform_units (str or None): Units of the input waveform
         spectrogram (tuple): Spectrogram (in dB) calculated from the input waveform; of
             the form ``(f, t, sxx_db)`` where ``f`` and ``t`` are 1D arrays and
             ``sxx_db`` is a 2D array with shape ``(f.size, t.size)``
@@ -95,10 +96,10 @@ class Spectrogram:
                 input signal has a sampling rate higher than this, it will be
                 downsampled before the :math:`S` transform is computed (this saves
                 computation time and memory)
-            units (str): Units of the input waveform; either ``'infer'`` to guess from
-                input response information, a string explicitly defining the units
-                (see ``_VALID_UNIT_OPTIONS`` in :mod:`saul.waveform.units` for supported
-                options), or ``None`` for unknown units (e.g., counts)
+            units (str or None): Units of the input waveform; either ``'infer'`` to
+                guess from input response information, a string explicitly defining the
+                units (see ``_VALID_UNIT_OPTIONS`` in :mod:`saul.waveform.units` for
+                supported options), or ``None`` for unknown units (e.g., counts)
         """
         # Pre-processing and checks
         msg = 'Method must be either \'scipy\', \'multitaper\', or \'s_transform\''
