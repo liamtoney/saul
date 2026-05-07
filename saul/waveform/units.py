@@ -158,7 +158,11 @@ def _validate_provided_vs_inferred_units(
     """Validate user-provided units against inferred units."""
     if provided_units == 'infer':
         if not inferred_units:
-            raise ValueError('Could not infer units; please provide them explicitly!')
+            msg = (
+                'Could not infer units; please provide them explicitly!'
+                f'\nChoose one of {_VALID_UNIT_OPTIONS}'
+            )
+            raise ValueError(msg)
         else:
             validated_units = inferred_units
     else:  # Use explicitly provided units
