@@ -11,9 +11,9 @@ from obspy.core.inventory import PolesZerosResponseStage
 from saul.spectral.helpers import _FREQ_TEMPLATE
 from saul.waveform.units import _VALID_UNIT_OPTIONS
 
-# [Hz] Minimum frequency for response computation (playing it safe here by going lower
-# than the lowest expected corner of 240 s)
-_MIN_FREQ = 1 / 300
+# [Hz] Minimum frequency for response computation (playing it safe here by going much
+# lower than the lowest expected corner of 360 s)
+_MIN_FREQ = 1 / 500
 
 # [dB] The "CORNER_DB_REF dB point", e.g. "–3 dB point" — determines where to measure
 # the corner frequency
@@ -60,13 +60,13 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
         plot (bool): If True, plot the responses and corner frequencies.
 
     Returns:
-        :class:`~pandas.DataFrame`: Table of sensor type and corner frequency
-        information, with columns ``network``, ``station``, ``location``, ``channel``,
-        ``sensor_type``, and ``corner_frequency``
+        :class:`~pandas.DataFrame`: Table of sensor and corner frequency information,
+        with columns ``network``, ``station``, ``location``, ``channel``,
+        ``sensor_info``, and ``corner_frequency``
     """
     # Set up lists to store key info for the DataFrame
     networks, stations, locations, channels = [], [], [], []
-    sensor_types = []
+    sensor_infos = []
     corner_frequencies = []
 
     # Plot, if requested
@@ -160,9 +160,12 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
                 locations.append(location_code_str)
                 channels.append(channel_code)
 
-                # KEY: The sensor type, which can provide clues on response & corners
-                sensor_type = channel_sensor.sensor.type
-                sensor_types.append('' if sensor_type is None else sensor_type)
+                # KEY: Sensor information, which can provide clues on response & corners
+                # (we prefer "type" but fall back to "description" if "type" is empty)
+                sensor_info = (
+                    channel_sensor.sensor.type or channel_sensor.sensor.description
+                )
+                sensor_infos.append('' if sensor_info is None else sensor_info)
 
                 # Check the sensor response stage
                 sensor_stage = channel_sensor.response.response_stages[0]
@@ -213,7 +216,7 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
             station=stations,
             location=locations,
             channel=channels,
-            sensor_type=sensor_types,
+            sensor_info=sensor_infos,
             corner_frequency=corner_frequencies,
         )
     )
