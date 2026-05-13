@@ -72,6 +72,7 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
     # Plot, if requested
     if plot:
         fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True)
+        zorder = 10  # Keep track of zorder so we can pair lines with dots
 
     # Iterate over the inventory
     print('Calculating responses...')
@@ -210,9 +211,17 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
 
                 # Optional plotting
                 if plot:
-                    ax1.semilogx(freqs, db_response)
-                    ax2.semilogx(freqs, np.angle(cpx_response, deg=True), label=tr_id)
-                    ax1.scatter(corner_db_ref_freq, corner_db_ref_value)
+                    ax1.semilogx(freqs, db_response, zorder=zorder)
+                    ax2.semilogx(
+                        freqs,
+                        np.angle(cpx_response, deg=True),
+                        zorder=zorder,
+                        label=tr_id,
+                    )
+                    ax1.scatter(
+                        corner_db_ref_freq, corner_db_ref_value, zorder=zorder + 1
+                    )
+                    zorder += 2  # Increment zorder so line/point pairs are stacked
 
     print('Done')
 
