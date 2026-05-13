@@ -161,9 +161,12 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
                 channels.append(channel_code)
 
                 # KEY: Sensor information, which can provide clues on response & corners
-                # (we prefer "type" but fall back to "description" if "type" is empty)
+                # (we check the following fields, in order of preference: "model",
+                # "type", "description")
                 sensor_info = (
-                    channel_sensor.sensor.type or channel_sensor.sensor.description
+                    channel_sensor.sensor.model
+                    or channel_sensor.sensor.type
+                    or channel_sensor.sensor.description
                 )
                 sensor_infos.append('' if sensor_info is None else sensor_info)
 
