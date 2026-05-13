@@ -144,7 +144,7 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
                         _sensor_stage.stage_gain_frequency
                         == _sensor_stages[0].stage_gain_frequency
                     )
-                    if not same_poles and same_zeros and same_gain and same_frequency:
+                    if not (same_poles and same_zeros and same_gain and same_frequency):
                         plt.close(fig) if plot else None
                         raise ValueError(
                             f'Multiple sensor responses found:\n'
