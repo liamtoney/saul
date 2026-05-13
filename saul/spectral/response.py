@@ -178,10 +178,14 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
                     plt.close(fig) if plot else None
                     raise ValueError(f'Invalid sensor response stage: {tr_id}')
                 ref_freq = sensor_stage.stage_gain_frequency  # [Hz]  # TODO: Correct?
-                if ref_freq > sampling_rate / 2:
+                nyquist = sampling_rate / 2
+                if ref_freq > nyquist:
                     plt.close(fig) if plot else None
                     raise ValueError(
-                        f'Sampling rate too low for reference frequency: {tr_id}'
+                        f'Provided sampling rate Nyquist frequency ({nyquist:g} Hz) '
+                        f'is less than the sensor response frequency ({ref_freq:g} Hz): '
+                        f'{tr_id}\n'
+                        f'💡 Try increasing the provided `sampling_rate`!'
                     )
 
                 # Calculate the response
@@ -235,7 +239,7 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
             ax2.set_ylim(-180, 180)
             ax2.yaxis.set_major_locator(plt.MultipleLocator(90))
             ax2.yaxis.set_minor_locator(plt.MultipleLocator(30))
-            ax2.set_xlim(_MIN_FREQ, sampling_rate / 2)
+            ax2.set_xlim(_MIN_FREQ, nyquist)
             ax1.set_ylabel('Amplitude\n(dB re. val. @ ref. freq.)')
             ax2.set_ylabel('Phase (°)')
             ax2.set_xlabel('Frequency (Hz)')
@@ -250,7 +254,7 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
             _ax2 = ax2.twiny()
             for _ax in _ax1, _ax2:
                 _ax.set_xscale('log')
-                _ax.set_xlim(1 / _MIN_FREQ, 1 / (sampling_rate / 2))
+                _ax.set_xlim(1 / _MIN_FREQ, 1 / nyquist)
             _ax1.set_xlabel('Period (s)', labelpad=10)
             _ax2.tick_params(labeltop=False)
             _ax1.format_coord = lambda x, y: Formatter.fix_minus(
