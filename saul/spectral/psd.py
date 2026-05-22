@@ -251,7 +251,7 @@ class PSD:
                 )
             ax.set_xlim(xlim)
             ax.set_ylim(ylim)
-        legend = ax.legend()
+        legend = ax.legend(draggable=True)
         # For every ID in the legend, use monospace font (ignore noise model label!)
         for label in legend.get_texts()[: len(self.psd)]:
             label.set_family('monospace')
