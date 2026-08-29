@@ -13,7 +13,7 @@ import matplotlib.dates as mdates
 import numpy as np
 import obspy
 from lxml.etree import Element, SubElement, tostring
-from matplotlib.cm import get_cmap
+from matplotlib import colormaps
 from matplotlib.ticker import FuncFormatter
 from matplotlib.transforms import blended_transform_factory
 from obspy.core.util.deprecation_helpers import ObsPyDeprecationWarning
@@ -167,7 +167,7 @@ class Stream(obspy.Stream):
         SubElement(document, 'open').text = '1'
 
         # Style definition
-        cmap = get_cmap('Pastel1')
+        cmap = colormaps['Pastel1']
         for i in range(len(networks)):
             color = _rgba_tuple_to_kml_color_code(cmap(i))
             style = SubElement(document, 'Style')
