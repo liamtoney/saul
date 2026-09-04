@@ -1,3 +1,5 @@
+from importlib.metadata import version
+
 from saul.spectral import (
     PSD,
     Spectrogram,
@@ -7,3 +9,5 @@ from saul.spectral import (
     obspy_filter_response,
 )
 from saul.waveform import Stream, get_availability, get_waveform_units
+
+__version__ = version('saul')
