@@ -1,0 +1,10 @@
+{% extends "!layout.html" %}
+{% block footer %}
+  {{ super() }}
+  <style>
+    /* Show GitHub link on mobile too */
+    .wy-breadcrumbs li.wy-breadcrumbs-aside {
+      display: inline-block;
+    }
+  </style>
+{% endblock %}
