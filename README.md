@@ -78,4 +78,9 @@ run:
 uv sync --all-groups
 ```
 This creates a `.venv/` folder in the repository root with an editable SAUL and all of
-its dependencies — including those for development and documentation — installed.
+its dependencies — including those for development and documentation — installed. You
+can run IPython with SAUL in the same way as described above, but from anywhere:
+```shell
+uv run --project <repository_root> ipython
+```
+Where `<repository_root>` is the path to the root of the SAUL repository.
