@@ -24,7 +24,7 @@ This assumes that you've already
 [installed uv](https://docs.astral.sh/uv/getting-started/installation/), and that
 you've navigated to a project directory of your choosing:
 ```shell
-uv venv
+uv venv --python 3.11
 uv pip install git+https://github.com/liamtoney/saul.git
 ```
 This creates a `.venv/` folder in the project directory with SAUL and its dependencies
