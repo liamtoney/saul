@@ -1,6 +1,6 @@
 [project]
 name = "SAUL"
-version = "2026.9"
+dynamic = ["version"]
 requires-python = ">=3.11,<3.14"
 dependencies = [
     "esi-core",  # https://code.usgs.gov/ghsc/esi/esi-core
@@ -26,8 +26,17 @@ docs = [
 ]
 
 [build-system]
-requires = ["uv_build>=0.12.9,<0.13.0"]
-build-backend = "uv_build"
+requires = ["hatchling", "uv-dynamic-versioning"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/saul"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.black]
 skip-string-normalization = true
