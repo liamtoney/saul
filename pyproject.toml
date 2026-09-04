@@ -12,13 +12,11 @@ dependencies = [
     "waveform_collection @ git+https://github.com/uafgeotools/waveform_collection.git",
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
     "black",
     "isort",
 ]
-
-[dependency-groups]
 docs = [
     "sphinx",
     "sphinx-autobuild",

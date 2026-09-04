@@ -73,7 +73,7 @@ For detailed usage information, see the [API documentation](https://saul.rtfd.io
 To develop SAUL, first clone this repository and navigate to the root directory. Then
 run:
 ```shell
-uv sync --extra dev --group docs
+uv sync --all-groups
 ```
 This creates a `.venv/` folder in the repository root with an editable SAUL and all of
 its dependencies — including those for development and documentation — installed.
