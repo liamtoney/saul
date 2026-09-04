@@ -19,6 +19,10 @@ dev = [
     "black",
     "ipython",
     "isort",
+]
+
+[dependency-groups]
+docs = [
     "sphinx",
     "sphinx-autobuild",
     "sphinx-rtd-theme",
