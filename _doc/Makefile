@@ -18,4 +18,4 @@ help:
 
 # Like `make html` but with live reloading!
 livehtml:
-	sphinx-autobuild "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O) --watch ../saul/ --open-browser --delay 0
+	sphinx-autobuild "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O) --watch ../src/saul/ --open-browser --delay 0
