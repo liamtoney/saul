@@ -1230,6 +1230,10 @@ dev = [
     { name = "black" },
     { name = "ipython" },
     { name = "isort" },
+]
+
+[package.dev-dependencies]
+docs = [
     { name = "sphinx", version = "9.0.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
     { name = "sphinx", version = "9.1.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "sphinx-autobuild" },
@@ -1245,13 +1249,17 @@ requires-dist = [
     { name = "multitaper" },
     { name = "obspy" },
     { name = "pandas" },
-    { name = "sphinx", marker = "extra == 'dev'" },
-    { name = "sphinx-autobuild", marker = "extra == 'dev'" },
-    { name = "sphinx-rtd-theme", marker = "extra == 'dev'" },
     { name = "stockwell" },
     { name = "waveform-collection", git = "https://github.com/uafgeotools/waveform_collection.git" },
 ]
 provides-extras = ["dev"]
+
+[package.metadata.requires-dev]
+docs = [
+    { name = "sphinx" },
+    { name = "sphinx-autobuild" },
+    { name = "sphinx-rtd-theme" },
+]
 
 [[package]]
 name = "scipy"
