@@ -40,20 +40,22 @@ pip install git+https://github.com/liamtoney/saul.git
 ## Using
 
 SAUL works best in an interactive Python console, which is why
-[IPython](https://ipython.org/) is included as a dependency. To launch IPython with SAUL
-available, run:
+[IPython](https://ipython.org/) is included as a dependency. There are multiple options
+for launching IPython with SAUL available. You can run IPython directly:
 ```shell
-uv run --project <target_directory> ipython
+<target_directory>/.venv/bin/ipython
 ```
 Where `<target_directory>` is the path to the directory in which you installed SAUL. If
-you're already in that directory, you can omit the `--project` argument entirely. You
-can also activate the virtual environment and launch IPython directly, via (for
+you're already in that directory, you can also just run:
+```shell
+uv run ipython
+```
+Finally, you can activate the virtual environment and launch IPython directly, via (for
 example):
 ```shell
 source <target_directory>/.venv/bin/activate.fish  # Other shells have different scripts
 ipython
 ```
-We recommend using the `uv run` method, however.
 
 Here's a simple [usage example](examples/example_psd.py) which highlights SAUL's
 object-oriented interface:
