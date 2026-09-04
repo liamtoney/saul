@@ -32,9 +32,6 @@ build-backend = "hatchling.build"
 [tool.hatch.version]
 source = "uv-dynamic-versioning"
 
-[tool.hatch.build.targets.wheel]
-packages = ["src/saul"]
-
 [tool.hatch.metadata]
 allow-direct-references = true
 
