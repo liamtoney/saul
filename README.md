@@ -27,7 +27,7 @@ you've navigated to a project directory of your choosing:
 uv venv
 uv pip install git+https://github.com/liamtoney/saul.git
 ```
-This creates a `.venv/` fodler in the project directory with SAUL and its dependencies
+This creates a `.venv/` folder in the project directory with SAUL and its dependencies
 installed. Activate it with `source .venv/bin/activate`, or prefix commands with
 `uv run`.
 
