@@ -17,18 +17,19 @@ dependencies as much as possible to avoid duplicated effort.
 
 ## Installing
 
-This assumes that you've already
-[installed uv](https://docs.astral.sh/uv/getting-started/installation/), and that
-you've cloned this repository and have navigated to the root directory.
-```shell
-uv sync
-```
-This creates a `.venv` in the repository root with SAUL and its dependencies
-installed. Activate it with `source .venv/bin/activate`, or prefix commands with
-`uv run`.
-
 SAUL is primarily developed on macOS, but it ought to work on Linux — and Windows via
 [Windows Subsystem for Linux (WSL)](https://learn.microsoft.com/en-us/windows/wsl/).
+
+This assumes that you've already
+[installed uv](https://docs.astral.sh/uv/getting-started/installation/), and that
+you've navigated to a project directory of your choosing:
+```shell
+uv venv
+uv pip install git+https://github.com/liamtoney/saul.git
+```
+This creates a `.venv/` fodler in the project directory with SAUL and its dependencies
+installed. Activate it with `source .venv/bin/activate`, or prefix commands with
+`uv run`.
 
 ## Using
 
@@ -49,8 +50,10 @@ For detailed usage information, see the [API documentation](https://saul.rtfd.io
 
 ## Developing
 
-To install the development packages for SAUL, run the following command from the root
-directory of this repository.
+To develop SAUL, first clone this repository and navigate to the root directory. Then
+run:
 ```shell
 uv sync --extra dev --group docs
 ```
+This creates a `.venv/` folder in the repository root with SAUL and all of its
+dependencies — including those for development and documentation — installed.
