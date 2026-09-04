@@ -8,11 +8,8 @@ dependencies = [
     "obspy",
     "pandas",
     "stockwell",  # https://github.com/claudiodsf/stockwell
-    "waveform_collection",
+    "waveform_collection @ git+https://github.com/uafgeotools/waveform_collection.git",
 ]
-
-[tool.uv.sources]
-waveform_collection = { git = "https://github.com/uafgeotools/waveform_collection.git" }
 
 [project.optional-dependencies]
 dev = [
