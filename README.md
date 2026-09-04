@@ -17,29 +17,25 @@ dependencies as much as possible to avoid duplicated effort.
 
 ## Installing
 
-Both of these options assume that you've already
-[installed Miniforge](https://github.com/conda-forge/miniforge?tab=readme-ov-file#install)
-(which provides the commands [`conda`](https://docs.conda.io/en/latest/) and
-[`mamba`](https://mamba.readthedocs.io/en/latest/)), and that you've cloned this
-repository and have navigated to the root directory.
-
-**Option 1:** Create a new environment named `saul`.
-```
-mamba env create --file environment.yml
-```
-
-**Option 2:** Install SAUL into an existing environment of your choosing.
-```
-mamba env update --name <existing_environment> --file environment.yml
-```
-
 SAUL is primarily developed on macOS, but it ought to work on Linux — and Windows via
 [Windows Subsystem for Linux (WSL)](https://learn.microsoft.com/en-us/windows/wsl/).
 
+This assumes that you've already
+[installed uv](https://docs.astral.sh/uv/getting-started/installation/), and that
+you've navigated to a project directory of your choosing:
+```shell
+uv venv --python 3.11
+uv pip install git+https://github.com/liamtoney/saul.git
+```
+This creates a `.venv/` folder in the project directory with SAUL and its dependencies
+installed. Activate it with `source .venv/bin/activate`, or prefix commands with
+`uv run`.
+
 ## Using
 
-Be sure that the environment you've installed SAUL into is activated. Here's a simple
-[usage example](examples/example_psd.py) which highlights SAUL's object-oriented
+Be sure that the environment you've installed SAUL into is activated, or launch Python
+with `uv run python`. Here's a simple [usage example](examples/example_psd.py) which
+highlights SAUL's object-oriented
 interface:
 ```python
 from saul import PSD, Stream
@@ -54,9 +50,10 @@ For detailed usage information, see the [API documentation](https://saul.rtfd.io
 
 ## Developing
 
-To install the development packages for SAUL, run the following command from the root
-directory of this repository, with your environment containing SAUL (see
-[Installing](#installing)) activated.
+To develop SAUL, first clone this repository and navigate to the root directory. Then
+run:
+```shell
+uv sync --extra dev --group docs
 ```
-pip install --requirement requirements.txt
-```
+This creates a `.venv/` folder in the repository root with SAUL and all of its
+dependencies — including those for development and documentation — installed.

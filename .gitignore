@@ -1,4 +1,4 @@
 /_doc/_build/
-/SAUL.egg-info/
+/.venv/
 /.idea/
 .DS_Store
