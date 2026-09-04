@@ -31,6 +31,13 @@ This creates a `.venv/` folder in the project directory with SAUL and its depend
 installed. Activate it with `source .venv/bin/activate`, or prefix commands with
 `uv run`.
 
+If you'd rather install SAUL into an existing, e.g.,
+[`mamba`](https://mamba.readthedocs.io/en/latest/index.html) environment instead of
+using uv, activate that environment and use `pip` directly:
+```shell
+pip install git+https://github.com/liamtoney/saul.git
+```
+
 ## Using
 
 Be sure that the environment you've installed SAUL into is activated, or launch Python
