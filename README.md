@@ -32,8 +32,9 @@ SAUL is primarily developed on macOS, but it ought to work on Linux — and Wind
 
 ## Using
 
-Be sure that the environment you've installed SAUL into is activated. Here's a simple
-[usage example](examples/example_psd.py) which highlights SAUL's object-oriented
+Be sure that the environment you've installed SAUL into is activated, or launch Python
+with `uv run python`. Here's a simple [usage example](examples/example_psd.py) which
+highlights SAUL's object-oriented
 interface:
 ```python
 from saul import PSD, Stream
