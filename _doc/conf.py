@@ -1,11 +1,11 @@
 # Project information ------------------------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-from datetime import datetime
+from importlib.metadata import version
 
 project = 'SAUL'
 author = 'Liam Toney'
-copyright = f'{datetime.now().year}, {author}'
+version = version('saul')
 
 # General configuration ----------------------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -18,11 +18,14 @@ extensions = [
     'sphinx.ext.viewcode',
 ]
 
+templates_path = ['_templates']
+
 # Options for HTML output --------------------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'sphinx_rtd_theme'
 html_theme_options = {'collapse_navigation': False}
+html_show_copyright = False
 
 # Options for various extensions -------------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/#built-in-extensions
