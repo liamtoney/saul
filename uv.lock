@@ -3,10 +3,10 @@ revision = 3
 requires-python = ">=3.11, <3.14"
 resolution-markers = [
     "python_full_version >= '3.12' and sys_platform == 'win32'",
-    "python_full_version < '3.12' and sys_platform == 'win32'",
     "python_full_version >= '3.12' and sys_platform == 'emscripten'",
-    "python_full_version < '3.12' and sys_platform == 'emscripten'",
     "python_full_version >= '3.12' and sys_platform != 'emscripten' and sys_platform != 'win32'",
+    "python_full_version < '3.12' and sys_platform == 'win32'",
+    "python_full_version < '3.12' and sys_platform == 'emscripten'",
     "python_full_version < '3.12' and sys_platform != 'emscripten' and sys_platform != 'win32'",
 ]
 
@@ -1217,6 +1217,7 @@ name = "saul"
 source = { editable = "." }
 dependencies = [
     { name = "esi-core" },
+    { name = "ipython" },
     { name = "multitaper" },
     { name = "obspy" },
     { name = "pandas" },
@@ -1227,7 +1228,6 @@ dependencies = [
 [package.optional-dependencies]
 dev = [
     { name = "black" },
-    { name = "ipython" },
     { name = "isort" },
 ]
 
@@ -1243,7 +1243,7 @@ docs = [
 requires-dist = [
     { name = "black", marker = "extra == 'dev'" },
     { name = "esi-core" },
-    { name = "ipython", marker = "extra == 'dev'" },
+    { name = "ipython" },
     { name = "isort", marker = "extra == 'dev'" },
     { name = "multitaper" },
     { name = "obspy" },

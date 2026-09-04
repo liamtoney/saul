@@ -4,6 +4,7 @@ dynamic = ["version"]
 requires-python = ">=3.11,<3.14"
 dependencies = [
     "esi-core",  # https://code.usgs.gov/ghsc/esi/esi-core
+    "ipython",
     "multitaper",  # https://github.com/gaprieto/multitaper
     "obspy",
     "pandas",
@@ -14,7 +15,6 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "black",
-    "ipython",
     "isort",
 ]
 

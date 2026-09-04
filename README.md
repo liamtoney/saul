@@ -22,14 +22,13 @@ SAUL is primarily developed on macOS, but it ought to work on Linux — and Wind
 
 This assumes that you've already
 [installed uv](https://docs.astral.sh/uv/getting-started/installation/), and that
-you've navigated to a project directory of your choosing:
+you've navigated to a target directory of your choosing:
 ```shell
 uv venv --python 3.11
 uv pip install git+https://github.com/liamtoney/saul.git
 ```
-This creates a `.venv/` folder in the project directory with SAUL and its dependencies
-installed. Activate it with `source .venv/bin/activate`, or prefix commands with
-`uv run`.
+This creates a `.venv/` folder in the target directory with SAUL and its dependencies
+installed.
 
 If you'd rather install SAUL into an existing, e.g.,
 [`mamba`](https://mamba.readthedocs.io/en/latest/index.html) environment instead of
@@ -40,10 +39,24 @@ pip install git+https://github.com/liamtoney/saul.git
 
 ## Using
 
-Be sure that the environment you've installed SAUL into is activated, or launch Python
-with `uv run python`. Here's a simple [usage example](examples/example_psd.py) which
-highlights SAUL's object-oriented
-interface:
+SAUL works best in an interactive Python console, which is why
+[IPython](https://ipython.org/) is included as a dependency. To launch IPython with SAUL
+available, run:
+```shell
+uv run --project <target_directory> ipython
+```
+Where `<target_directory>` is the path to the directory in which you installed SAUL. If
+you're already in that directory, you can omit the `--project` argument entirely. You
+can also activate the virtual environment and launch IPython directly, via (for
+example):
+```shell
+source <target_directory>/.venv/bin/activate.fish  # Other shells have different scripts
+ipython
+```
+We recommend using the `uv run` method, however.
+
+Here's a simple [usage example](examples/example_psd.py) which highlights SAUL's
+object-oriented interface:
 ```python
 from saul import PSD, Stream
 
@@ -62,5 +75,5 @@ run:
 ```shell
 uv sync --extra dev --group docs
 ```
-This creates a `.venv/` folder in the repository root with SAUL and all of its
-dependencies — including those for development and documentation — installed.
+This creates a `.venv/` folder in the repository root with an editable SAUL and all of
+its dependencies — including those for development and documentation — installed.
