@@ -57,8 +57,9 @@ source <target_directory>/.venv/bin/activate.fish  # Other shells have different
 ipython
 ```
 
-Here's a simple [usage example](examples/example_psd.py) which highlights SAUL's
-object-oriented interface:
+Here's a simple
+[usage example](https://github.com/liamtoney/saul/blob/main/examples/example_psd.py)
+which highlights SAUL's object-oriented interface:
 ```python
 from saul import PSD, Stream
 
