@@ -1,4 +1,5 @@
 import fnmatch
+import logging
 import warnings
 from functools import cache
 
@@ -6,6 +7,8 @@ from obspy import Inventory, Stream
 from obspy.clients.fdsn import RoutingClient
 from obspy.clients.fdsn.header import FDSNException
 from obspy.core.util.deprecation_helpers import ObsPyDeprecationWarning
+
+logger = logging.getLogger(__name__)
 
 
 # Lazy-load the RoutingClient so that it is only created when needed
@@ -29,8 +32,8 @@ def _gather_waveforms(network, station, location, channel, starttime, endtime):
             endtime=endtime,
         )
     except FDSNException as e:
-        warnings.warn(f'Error downloading waveforms: {str(e).splitlines()[0]}')
-        st = Stream()  # Just create an empty Stream object
+        logger.error(f'Error downloading waveforms: {str(e).splitlines()[0]}')
+        return Stream()  # Just return an empty Stream object
     st.sort()
     # Check that all requested stations are present in Stream
     requested_stations = set(station.split(','))
@@ -41,12 +44,12 @@ def _gather_waveforms(network, station, location, channel, starttime, endtime):
         # if careful station selection is desired, specify each station explicitly and
         # the below check will then be effective.
         if not fnmatch.filter(downloaded_stations, requested_station):
-            warnings.warn(
+            logger.warning(
                 f'Station {requested_station} not downloaded for this time period.',
             )
     # If the Stream is empty, then we can stop here
     if not st:
-        warnings.warn('No data downloaded.')
+        logger.warning('No valid data gathered.')
         return st
     # Get station information
     try:
@@ -60,9 +63,7 @@ def _gather_waveforms(network, station, location, channel, starttime, endtime):
             level='response',
         )
     except FDSNException as e:
-        warnings.warn(
-            f'Error downloading station information: {str(e).splitlines()[0]}'
-        )
+        logger.error(f'Error downloading station information: {str(e).splitlines()[0]}')
         inv = Inventory()  # Just create an empty Inventory object
     for tr in st:
         try:
@@ -74,6 +75,8 @@ def _gather_waveforms(network, station, location, channel, starttime, endtime):
                 warnings.simplefilter('ignore', category=ObsPyDeprecationWarning)
                 tr.attach_response(inv)  # TODO: Will be deprecated soon...
         except Exception as e:
-            warnings.warn(f'Error attaching metadata for {tr.id}: {e}')
+            logger.error(f'Error attaching metadata for {tr.id}: {e}')
             st.remove(tr)
+    if not st:
+        logger.warning('No valid data gathered.')
     return st
