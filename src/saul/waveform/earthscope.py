@@ -29,7 +29,7 @@ def _gather_waveforms(network, station, location, channel, starttime, endtime):
             endtime=endtime,
         )
     except FDSNException as e:
-        warnings.warn(f'Error downloading waveforms: {e}')
+        warnings.warn(f'Error downloading waveforms: {str(e).splitlines()[0]}')
         st = Stream()  # Just create an empty Stream object
     st.sort()
     # Check that all requested stations are present in Stream
@@ -60,7 +60,9 @@ def _gather_waveforms(network, station, location, channel, starttime, endtime):
             level='response',
         )
     except FDSNException as e:
-        warnings.warn(f'Error downloading station information: {e}')
+        warnings.warn(
+            f'Error downloading station information: {str(e).splitlines()[0]}'
+        )
         inv = Inventory()  # Just create an empty Inventory object
     for tr in st:
         try:
