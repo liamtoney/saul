@@ -9,7 +9,6 @@ dependencies = [
     "obspy",
     "pandas",
     "stockwell",  # https://github.com/claudiodsf/stockwell
-    "waveform_collection @ git+https://github.com/uafgeotools/waveform_collection.git",
 ]
 
 [dependency-groups]
@@ -29,9 +28,6 @@ build-backend = "hatchling.build"
 
 [tool.hatch.version]
 source = "uv-dynamic-versioning"
-
-[tool.hatch.metadata]
-allow-direct-references = true
 
 [tool.black]
 skip-string-normalization = true

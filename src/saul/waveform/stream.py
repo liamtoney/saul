@@ -4,7 +4,6 @@ Contains the definition of SAUL's :class:`Stream` class.
 
 import subprocess
 import sys
-import warnings
 from datetime import timedelta
 from functools import cache
 from pathlib import Path
@@ -16,11 +15,10 @@ from lxml.etree import Element, SubElement, tostring
 from matplotlib import colormaps
 from matplotlib.ticker import FuncFormatter
 from matplotlib.transforms import blended_transform_factory
-from obspy.core.util.deprecation_helpers import ObsPyDeprecationWarning
 from obspy.geodetics.base import gps2dist_azimuth
 from obspy.io.kml.core import _rgba_tuple_to_kml_color_code
-from waveform_collection import gather_waveforms, read_local
 
+from saul.waveform.earthscope import _gather_waveforms
 from saul.waveform.helpers import _num2date, _preprocess_time
 
 
@@ -35,13 +33,12 @@ class Stream(obspy.Stream):
     def from_earthscope(
         cls, network, station, channel, starttime, endtime, location='*', cache=False
     ):
-        """Create a SAUL :class:`Stream` object containing waveforms obtained from EarthScope servers.
+        """Create a SAUL :class:`Stream` object containing waveforms obtained via EarthScope.
 
-        This class method wraps :func:`waveform_collection.server.gather_waveforms` with
-        the ``source`` argument set to ``'IRIS'``. Wildcards (``*``, ``?``) are accepted
-        for the ``network``, ``station``, ``channel``, and ``location`` parameters. The
-        user can optionally choose to cache waveform data to avoid redundant data
-        download for repeated identical requests (see ``cache`` argument).
+        Wildcards (``*``, ``?``) are accepted for the ``network``, ``station``,
+        ``channel``, and ``location`` parameters. The user can optionally choose to
+        cache waveform data to avoid redundant data download for repeated identical
+        requests (see ``cache`` argument).
 
         Warning:
             Caching (see ``cache`` argument), while convenient, is sketchy since data
@@ -58,7 +55,7 @@ class Stream(obspy.Stream):
                 for data request (same format as ``starttime``)
             location (str): SEED location code
             cache (bool): Toggle whether to cache the
-                :func:`~waveform_collection.server.gather_waveforms` function call to
+                :func:`saul.waveform.earthscope._gather_waveforms` function call to
                 avoid downloading data again in subsequent calls
 
         Returns:
@@ -74,72 +71,16 @@ class Stream(obspy.Stream):
             gather_func = cls._gather_waveforms_cache
             print('\033[33m' + '[CACHING ENABLED]' + '\033[0m')
         else:
-            gather_func = gather_waveforms
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore', category=ObsPyDeprecationWarning)
-            st = gather_func(
-                source='IRIS',
-                network=network,
-                station=station,
-                location=location,
-                channel=channel,
-                starttime=starttime,
-                endtime=endtime,
-                merge_fill_value=False,
-                trim_fill_value=False,
-            )
-        st = st.copy() if cache else st  # Ensure we don't modify the cached object
-        return cls(traces=st.traces)
-
-    @classmethod
-    def from_local(
-        cls,
-        data_dir,
-        coord_file,
-        network,
-        station,
-        channel,
-        starttime,
-        endtime,
-        location='*',
-    ):
-        """Create a SAUL :class:`Stream` object containing waveforms obtained from local files.
-
-        This class method wraps :func:`waveform_collection.local.local.read_local`.
-        Wildcards (``*``, ``?``) are accepted for the ``network``, ``station``,
-        ``channel``, and ``location`` parameters.
-
-        Args:
-            data_dir (str): Directory containing miniSEED files
-            coord_file (str): JSON file containing coordinates for local stations (full
-                path required)
-            network (str): SEED network code
-            station (str): SEED station code
-            channel (str): SEED channel code
-            starttime (tuple or :class:`~obspy.core.utcdatetime.UTCDateTime`): Start
-                time for data request; for tuple input the format is integers: ``(year,
-                month, day[, hour[, minute[, second[, microsecond]]])``
-            endtime (tuple or :class:`~obspy.core.utcdatetime.UTCDateTime`): End time
-                for data request (same format as ``starttime``)
-            location (str): SEED location code
-
-        Returns:
-            SAUL :class:`Stream`: Newly-created object with the locally obtained
-            waveforms
-        """
-        assert Path(data_dir).is_dir(), f'Directory {data_dir} doesn\'t exist!'
-        assert Path(coord_file).is_file(), f'File {coord_file} doesn\'t exist!'
-        st = read_local(
-            data_dir=data_dir,
-            coord_file=coord_file,
+            gather_func = _gather_waveforms
+        st = gather_func(
             network=network,
             station=station,
             location=location,
             channel=channel,
-            starttime=_preprocess_time(starttime),
-            endtime=_preprocess_time(endtime),
-            merge=False,
+            starttime=starttime,
+            endtime=endtime,
         )
+        st = st.copy() if cache else st  # Ensure we don't modify the cached object
         return cls(traces=st.traces)
 
     def to_kml(self, filename='saul.Stream.kml', ge=False):
@@ -355,11 +296,11 @@ class Stream(obspy.Stream):
     @staticmethod
     @cache
     def _gather_waveforms_cache(starttime, endtime, **kwargs):
-        """Wrapper around :func:`waveform_collection.server.gather_waveforms`.
+        """Wrapper around :func:`saul.waveform.earthscope._gather_waveforms`.
 
         The input ``starttime`` and ``endtime`` will always be tuples.
         """
-        return gather_waveforms(
+        return _gather_waveforms(
             starttime=_preprocess_time(starttime),
             endtime=_preprocess_time(endtime),
             **kwargs,
