@@ -32,9 +32,17 @@ def _gather_waveforms(network, station, location, channel, starttime, endtime):
             endtime=endtime,
         )
     except FDSNException as e:
-        logger.error(f'Error downloading waveforms: {str(e).splitlines()[0]}')
-        return Stream()  # Just return an empty Stream object
-    st.sort()
+        msg = str(e).splitlines()[0]
+        if '404' in msg:  # "Error 404: No data matched request."
+            st = Stream()
+        else:
+            logger.error(
+                f'Error downloading waveforms — returning empty Stream. Message:\n"{msg}"'
+            )
+            return Stream()
+    if not st:
+        logger.warning('No valid data gathered — returning empty Stream.')
+        return st
     # Check that all requested stations are present in Stream
     requested_stations = set(station.split(','))
     downloaded_stations = set(tr.stats.station for tr in st)
@@ -47,10 +55,6 @@ def _gather_waveforms(network, station, location, channel, starttime, endtime):
             logger.warning(
                 f'Station {requested_station} not downloaded for this time period.',
             )
-    # If the Stream is empty, then we can stop here
-    if not st:
-        logger.warning('No valid data gathered.')
-        return st
     # Get station information
     try:
         inv = client.get_stations(
@@ -63,8 +67,15 @@ def _gather_waveforms(network, station, location, channel, starttime, endtime):
             level='response',
         )
     except FDSNException as e:
-        logger.error(f'Error downloading station information: {str(e).splitlines()[0]}')
-        inv = Inventory()  # Just create an empty Inventory object
+        msg = str(e).splitlines()[0]
+        if '404' in msg:  # "Error 404: No data matched request."
+            inv = Inventory()
+        else:
+            logger.error(
+                f'Error downloading station information — returning empty Stream. Message:\n"{msg}"'
+            )
+            return Stream()
+    st.sort()
     for tr in st:
         try:
             coordinates = inv.get_coordinates(tr.id)
@@ -78,5 +89,5 @@ def _gather_waveforms(network, station, location, channel, starttime, endtime):
             logger.error(f'Error attaching metadata for {tr.id}: {e}')
             st.remove(tr)
     if not st:
-        logger.warning('No valid data gathered.')
+        logger.warning('No valid data gathered — returning empty Stream.')
     return st
