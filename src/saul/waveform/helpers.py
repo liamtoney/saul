@@ -81,9 +81,18 @@ def get_availability(
     logger.info('-------------------------')
     logger.info('GETTING AVAILABILITY INFO')
     logger.info('-------------------------')
-    response = requests.get(_BASE_URL, params=params)
+    try:
+        response = requests.get(_BASE_URL, params=params, timeout=30)
+    except requests.exceptions.RequestException as e:
+        logger.error(f'Error requesting availability info: {e}')
+        return pd.DataFrame()
     if response.status_code == 404:
         logger.warning('No data available for this request!')
+        return pd.DataFrame()
+    if not response.ok:
+        logger.error(
+            f'Availability service returned unexpected status code {response.status_code}'
+        )
         return pd.DataFrame()
     logger.info('Done')
     df = pd.read_table(
