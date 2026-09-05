@@ -3,6 +3,7 @@ Contains the definition of SAUL's :class:`Spectrogram` class.
 """
 
 import copy
+import logging
 from functools import cache
 
 import matplotlib.dates as mdates
@@ -22,6 +23,8 @@ from saul.spectral.helpers import (
 from saul.waveform.helpers import _num2date
 from saul.waveform.stream import Stream
 from saul.waveform.units import _validate_provided_vs_inferred_units, get_waveform_units
+
+logger = logging.getLogger(__name__)
 
 
 class Spectrogram:
@@ -158,7 +161,7 @@ class Spectrogram:
                 t += win_dur / 2  # Make t vector *centered* in each time window
             case 's_transform':
                 if self.tr.stats.sampling_rate > max_fs:
-                    print(f'Downsampling data to {max_fs} Hz for S transform')
+                    logger.warning(f'Downsampling data to {max_fs} Hz for S transform')
                     _tr = self.tr.copy()
                     _tr.filter('lowpass_cheby_2', freq=max_fs / 2)
                     _tr.interpolate(max_fs, method='lanczos', a=20)

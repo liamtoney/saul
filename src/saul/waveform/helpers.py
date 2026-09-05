@@ -4,6 +4,7 @@ assessment, and plotting.
 """
 
 import io
+import logging
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
@@ -11,6 +12,8 @@ import numpy as np
 import pandas as pd
 import requests
 from obspy import UTCDateTime
+
+logger = logging.getLogger(__name__)
 
 # Base URL for NSF SAGE availability web service
 _BASE_URL = 'https://service.iris.edu/fdsnws/availability/1/query'
@@ -75,14 +78,23 @@ def get_availability(
         format='geocsv',
         nodata='404',
     )
-    print('-------------------------')
-    print('GETTING AVAILABILITY INFO')
-    print('-------------------------')
-    response = requests.get(_BASE_URL, params=params)
-    if response.status_code == 404:
-        print('No data available for this request!')
+    logger.info('-------------------------')
+    logger.info('GETTING AVAILABILITY INFO')
+    logger.info('-------------------------')
+    try:
+        response = requests.get(_BASE_URL, params=params, timeout=30)
+    except requests.exceptions.RequestException as e:
+        logger.error(f'Error requesting availability info: {e}')
         return pd.DataFrame()
-    print('Done')
+    if response.status_code == 404:
+        logger.warning('No data available for this request!')
+        return pd.DataFrame()
+    if not response.ok:
+        logger.error(
+            f'Availability service returned unexpected status code {response.status_code}'
+        )
+        return pd.DataFrame()
+    logger.info('Done')
     df = pd.read_table(
         io.StringIO(response.text),
         sep='|',

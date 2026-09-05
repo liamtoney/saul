@@ -2,6 +2,8 @@
 Calculation of sensor response and corner frequencies, with optional plotting.
 """
 
+import logging
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -10,6 +12,8 @@ from obspy.core.inventory import PolesZerosResponseStage
 
 from saul.spectral.helpers import _FREQ_TEMPLATE
 from saul.waveform.units import _VALID_UNIT_OPTIONS
+
+logger = logging.getLogger(__name__)
 
 # [Hz] Minimum frequency for response computation (playing it safe here by going much
 # lower than the lowest expected corner of 360 s)
@@ -75,7 +79,7 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
         zorder = 10  # Keep track of zorder so we can pair lines with dots
 
     # Iterate over the inventory
-    print('Calculating responses...')
+    logger.info('Calculating responses...')
     for network in inventory:
 
         if len(network.stations) == 0:
@@ -223,7 +227,7 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
                     )
                     zorder += 2  # Increment zorder so line/point pairs are stacked
 
-    print('Done')
+    logger.info('Done')
 
     # Make DataFrame with results
     df = pd.DataFrame(
@@ -277,7 +281,7 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
 
     # Warn if DataFrame is empty
     if df.empty:
-        print('No responses found in the inventory!')
+        logger.warning('No responses found in the inventory!')
 
     # Return
     return df
