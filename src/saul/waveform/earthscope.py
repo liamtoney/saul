@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 # Lazy-load the RoutingClient so that it is only created when needed
 @cache
 def _get_client():
-    return RoutingClient('earthscope-federator')
+    return RoutingClient('earthscope-federator', timeout=30)
 
 
 def _gather_waveforms(network, station, location, channel, starttime, endtime):
