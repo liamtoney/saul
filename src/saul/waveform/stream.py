@@ -2,6 +2,7 @@
 Contains the definition of SAUL's :class:`Stream` class.
 """
 
+import logging
 import subprocess
 import sys
 import warnings
@@ -22,6 +23,8 @@ from obspy.io.kml.core import _rgba_tuple_to_kml_color_code
 from waveform_collection import gather_waveforms, read_local
 
 from saul.waveform.helpers import _num2date, _preprocess_time
+
+logger = logging.getLogger(__name__)
 
 
 class Stream(obspy.Stream):
@@ -72,7 +75,7 @@ class Stream(obspy.Stream):
             starttime = cls._time_tuple(starttime)
             endtime = cls._time_tuple(endtime)
             gather_func = cls._gather_waveforms_cache
-            print('\033[33m' + '[CACHING ENABLED]' + '\033[0m')
+            logger.warning('[CACHING ENABLED]')
         else:
             gather_func = gather_waveforms
         with warnings.catch_warnings():
@@ -202,7 +205,7 @@ class Stream(obspy.Stream):
                     )
                 else:
                     SubElement(placemark, 'description').text = 'No coordinates!'
-                    print(f'No coordinates for {tr.id}')
+                    logger.warning(f'No coordinates for {tr.id}')
 
         # Generate KML string and write to file
         kml_string = tostring(
@@ -212,7 +215,7 @@ class Stream(obspy.Stream):
         with filename.open('wb') as f:
             f.write(kml_string)
         assert filename.is_file(), 'Issue saving KML file!'
-        print(f'KML file saved to `{filename}`')
+        logger.info(f'KML file saved to `{filename}`')
 
         # Optionally open file
         if ge:
@@ -250,7 +253,7 @@ class Stream(obspy.Stream):
             kwargs['type'] = 'section'
             for kwarg in 'orientation', 'outfile', 'format', 'handle':
                 if kwarg in kwargs:
-                    print(f'Ignoring `{kwarg}` kwarg!')  # Since we set these below
+                    logger.warning(f'Ignoring `{kwarg}` kwarg!')  # Since we set below
             kwargs['orientation'] = 'horizontal'
             kwargs['outfile'] = None  # Disable
             kwargs['format'] = None  # Disable
@@ -321,7 +324,7 @@ class Stream(obspy.Stream):
             return fig
         else:
             if 'wavespeed' in kwargs:
-                print('Ignoring `wavespeed` kwarg!')  # Can't use this kwarg here
+                logger.warning('Ignoring `wavespeed` kwarg!')  # Can't use this here
             fig = super().plot(*args, **kwargs)
             for ax in fig.axes:
                 ax.format_coord = (
