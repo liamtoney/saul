@@ -22,6 +22,7 @@ def _gather_waveforms(network, station, location, channel, starttime, endtime):
     # Create the client (lazy-loaded)
     client = _get_client()
     # Get waveforms
+    logger.info('Gathering waveforms...')
     try:
         st = client.get_waveforms(
             network=network,
@@ -43,6 +44,7 @@ def _gather_waveforms(network, station, location, channel, starttime, endtime):
     if not st:
         logger.warning('No valid data gathered — returning empty Stream.')
         return st
+    logger.info('Done')
     # Check that all requested stations are present in Stream
     requested_stations = set(station.split(','))
     downloaded_stations = set(tr.stats.station for tr in st)

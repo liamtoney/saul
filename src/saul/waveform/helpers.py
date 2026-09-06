@@ -78,9 +78,7 @@ def get_availability(
         format='geocsv',
         nodata='404',
     )
-    logger.info('-------------------------')
-    logger.info('GETTING AVAILABILITY INFO')
-    logger.info('-------------------------')
+    logger.info('Getting availability info...')
     try:
         response = requests.get(_BASE_URL, params=params, timeout=30)
     except requests.exceptions.RequestException as e:
