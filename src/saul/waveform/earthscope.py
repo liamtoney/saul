@@ -86,7 +86,7 @@ def _gather_waveforms(network, station, location, channel, starttime, endtime):
                 warnings.simplefilter('ignore', category=ObsPyDeprecationWarning)
                 tr.attach_response(inv)  # TODO: Will be deprecated soon...
         except Exception as e:
-            logger.error(f'Error attaching metadata for {tr.id}: {e}')
+            logger.error(f'Error attaching metadata for {tr.id} — removing: {e}')
             st.remove(tr)
     if not st:
         logger.warning('No valid data gathered — returning empty Stream.')

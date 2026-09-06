@@ -91,7 +91,7 @@ def get_availability(
         return pd.DataFrame()
     if not response.ok:
         logger.error(
-            f'Availability service returned unexpected status code {response.status_code}'
+            f'Availability service returned unexpected status code: {response.status_code}'
         )
         return pd.DataFrame()
     logger.info('Done')
