@@ -42,7 +42,6 @@ autodoc_mock_imports = [
     'pandas',
     'scipy',
     'stockwell',
-    'waveform_collection',
 ]
 autodoc_member_order = 'bysource'
 autoclass_content = 'class'
@@ -59,6 +58,5 @@ intersphinx_mapping = dict(
     pandas=('https://pandas.pydata.org/docs/', None),
     python=('https://docs.python.org/3/', None),
     scipy=('https://docs.scipy.org/doc/scipy/', None),
-    waveform_collection=('https://uaf-waveform-collection.readthedocs.io/en/master/', None),
 )
 # fmt: on
