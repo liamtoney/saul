@@ -1,6 +1,6 @@
 # SAUL
 
-[![API documentation status](https://readthedocs.org/projects/saul/badge/?version=latest)](https://saul.rtfd.io/)
+[![API documentation status](https://readthedocs.org/projects/saul/badge/?version=latest)](https://saul.liam.earth/)
 
 **SAUL** is the **S**eismo**A**coustic **U**tilities **L**ibrary. It's my take on the
 collection of tools that I imagine exist, in some form, on every seismoacoustican's
