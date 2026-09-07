@@ -5,7 +5,7 @@ from importlib.metadata import version
 
 project = 'SAUL'
 author = 'Liam Toney'
-version = version('saul')
+version = version('saul-earth')  # Must match the name in `pyproject.toml`
 
 # General configuration ----------------------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
