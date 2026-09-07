@@ -1,5 +1,5 @@
 [project]
-name = "SAUL"
+name = "saul-earth"
 dynamic = ["version"]
 requires-python = ">=3.11,<3.14"
 dependencies = [
@@ -28,6 +28,9 @@ build-backend = "hatchling.build"
 
 [tool.hatch.version]
 source = "uv-dynamic-versioning"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/saul"]
 
 [tool.black]
 skip-string-normalization = true
