@@ -69,7 +69,7 @@ PSD(st, method='multitaper').plot(show_noise_models=True)
 ```
 <img src="_doc/example_psd.png" width=550>
 
-For detailed usage information, see the [API documentation](https://saul.rtfd.io/).
+For detailed usage information, see the [API documentation](https://saul.liam.earth/).
 
 ## Developing
 
