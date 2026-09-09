@@ -5,9 +5,14 @@ requires-python = ">=3.11,<3.14"
 dependencies = [
     "esi-core",  # https://code.usgs.gov/ghsc/esi/esi-core
     "ipython",
+    "lxml",
+    "matplotlib",
     "multitaper",  # https://github.com/gaprieto/multitaper
+    "numpy",
     "obspy",
     "pandas",
+    "requests",
+    "scipy",
     "stockwell",  # https://github.com/claudiodsf/stockwell
 ]
 
