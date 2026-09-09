@@ -32,17 +32,6 @@ html_show_copyright = False
 
 napoleon_numpy_docstring = False  # We are using Google docstring style
 
-autodoc_mock_imports = [
-    'esi_core',
-    'lxml',
-    'matplotlib',
-    'multitaper',
-    'numpy',
-    'obspy',
-    'pandas',
-    'scipy',
-    'stockwell',
-]
 autodoc_member_order = 'bysource'
 autoclass_content = 'class'
 autodoc_class_signature = 'separated'
