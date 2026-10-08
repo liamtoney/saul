@@ -17,10 +17,7 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = [
-    "black",
-    "isort",
-]
+dev = ["ruff"]
 docs = [
     "sphinx",
     "sphinx-autobuild",
@@ -37,8 +34,5 @@ source = "uv-dynamic-versioning"
 [tool.hatch.build.targets.wheel]
 packages = ["src/saul"]
 
-[tool.black]
-skip-string-normalization = true
-
-[tool.isort]
-profile = "black"
+[tool.ruff.format]
+quote-style = "single"
