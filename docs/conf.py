@@ -1,11 +1,11 @@
 # Project information ------------------------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-from importlib.metadata import version
+from importlib import metadata
 
 project = 'SAUL'
 author = 'Liam Toney'
-version = version('saul-earth')  # Must match the name in `pyproject.toml`
+version = metadata.version('saul')  # Must match the name in `pyproject.toml`
 
 # General configuration ----------------------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

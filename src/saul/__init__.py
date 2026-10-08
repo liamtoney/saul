@@ -13,7 +13,7 @@ from saul.spectral import (
 )
 from saul.waveform import Stream, get_availability, get_waveform_units
 
-__version__ = version('saul-earth')  # Must match the name in `pyproject.toml`
+__version__ = version('saul')  # Must match the name in `pyproject.toml`
 
 __all__ = [
     'PSD',

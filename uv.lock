@@ -1102,7 +1102,7 @@ wheels = [
 ]
 
 [[package]]
-name = "saul-earth"
+name = "saul"
 source = { editable = "." }
 dependencies = [
     { name = "esi-core" },
