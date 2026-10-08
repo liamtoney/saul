@@ -9,9 +9,9 @@ with warnings.catch_warnings():
     # formatting in `get_ak_infra_noise()` and `PSD.smooth()`
     warnings.simplefilter('ignore', category=SyntaxWarning)
     from saul.spectral.helpers import (
+        extract_trace_filter_params,
         get_ak_infra_noise,
         obspy_filter_response,
-        extract_trace_filter_params,
     )
     from saul.spectral.psd import PSD
 
