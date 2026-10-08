@@ -121,9 +121,9 @@ class Stream(obspy.Stream):
             SubElement(iconstyle, 'color').text = color
             SubElement(iconstyle, 'scale').text = str(1.3)
             icon = SubElement(iconstyle, 'Icon')
-            SubElement(icon, 'href').text = (
-                'https://maps.google.com/mapfiles/kml/shapes/triangle.png'
-            )
+            SubElement(
+                icon, 'href'
+            ).text = 'https://maps.google.com/mapfiles/kml/shapes/triangle.png'
 
             labelstyle = SubElement(style, 'LabelStyle')
             SubElement(labelstyle, 'color').text = color
@@ -141,9 +141,9 @@ class Stream(obspy.Stream):
                 SubElement(placemark, 'color').text = color
                 if hasattr(tr.stats, 'longitude') and hasattr(tr.stats, 'latitude'):
                     point = SubElement(placemark, 'Point')
-                    SubElement(point, 'coordinates').text = (
-                        f'{tr.stats.longitude:.6f},{tr.stats.latitude:.6f},0'
-                    )
+                    SubElement(
+                        point, 'coordinates'
+                    ).text = f'{tr.stats.longitude:.6f},{tr.stats.latitude:.6f},0'
                 else:
                     SubElement(placemark, 'description').text = 'No coordinates!'
                     logger.warning(f'No coordinates for {tr.id}')
@@ -268,8 +268,8 @@ class Stream(obspy.Stream):
                 logger.warning('Ignoring `wavespeed` kwarg!')  # Can't use this here
             fig = super().plot(*args, **kwargs)
             for ax in fig.axes:
-                ax.format_coord = (
-                    lambda x, y: f'({_num2date(x)}, {FuncFormatter.fix_minus(f"{y:.2g}")} unknown units)'
+                ax.format_coord = lambda x, y: (
+                    f'({_num2date(x)}, {FuncFormatter.fix_minus(f"{y:.2g}")} unknown units)'
                 )
             return fig
 

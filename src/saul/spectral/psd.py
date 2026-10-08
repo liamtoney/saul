@@ -99,7 +99,7 @@ class PSD:
         assert method in [
             'welch',
             'multitaper',
-        ], 'Method must be either \'welch\' or \'multitaper\''
+        ], "Method must be either 'welch' or 'multitaper'"
         self.method = method
         if method == 'welch':
             self.win_dur = win_dur
@@ -182,7 +182,7 @@ class PSD:
         assert infra_noise_model in [
             'ak',
             'idc',
-        ], 'Infrasound noise model must be either \'ak\' or \'idc\''
+        ], "Infrasound noise model must be either 'ak' or 'idc'"
         fig, ax = plt.subplots()
         for tr, (f, pxx_db) in zip(self.st, self.psd):
             ax.plot(1 / f if use_period else f, pxx_db, label=tr.id)
@@ -190,7 +190,7 @@ class PSD:
             ax.set_xscale('log')
         if show_noise_models:
             if self.waveform_units is None:
-                msg = 'Can\'t show noise models if waveform units are unknown!'
+                msg = "Can't show noise models if waveform units are unknown!"
                 raise ValueError(msg)
             match self.data_kind:
                 case 'infrasound':

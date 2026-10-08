@@ -81,12 +81,10 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
     # Iterate over the inventory
     logger.info('Calculating responses...')
     for network in inventory:
-
         if len(network.stations) == 0:
             continue  # No stations in this network
 
         for station in network:
-
             if len(station.channels) == 0:
                 continue  # No channels for this station
 
@@ -96,7 +94,6 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
                 set(channel.location_code for channel in station)
             )
             for location_code in unique_location_codes:
-
                 location = station.select(location=location_code)
 
                 # Use double dash for empty location codes
