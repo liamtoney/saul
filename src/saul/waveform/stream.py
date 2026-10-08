@@ -99,7 +99,7 @@ class Stream(obspy.Stream):
         """
         st_sort = self.copy()  # Work on a copy of the Stream, since we modify it!
         st_sort.merge().sort(keys=['network', 'station', 'location', 'channel'])
-        networks = list(set([tr.stats.network for tr in st_sort]))[::-1]  # Reverse?
+        networks = sorted({tr.stats.network for tr in st_sort}, reverse=True)
 
         # Construct KML file
         kml = Element('kml')

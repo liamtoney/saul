@@ -47,7 +47,7 @@ def _gather_waveforms(network, station, location, channel, starttime, endtime):
     logger.info('Done')
     # Check that all requested stations are present in Stream
     requested_stations = set(station.split(','))
-    downloaded_stations = set(tr.stats.station for tr in st)
+    downloaded_stations = {tr.stats.station for tr in st}
     for requested_station in requested_stations:
         # The below check works with wildcards, but obviously cannot detect if ALL
         # stations corresponding to a given wildcard (e.g., O??K) were downloaded. Thus,
@@ -87,7 +87,7 @@ def _gather_waveforms(network, station, location, channel, starttime, endtime):
             with warnings.catch_warnings():
                 warnings.simplefilter('ignore', category=ObsPyDeprecationWarning)
                 tr.attach_response(inv)  # TODO: Will be deprecated soon...
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 (ObsPy raises bare `Exception` here)
             logger.error(f'Error attaching metadata for {tr.id} — removing: {e}')
             st.remove(tr)
     if not st:

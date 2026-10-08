@@ -1,6 +1,7 @@
 import logging
 import sys
 from importlib.metadata import version
+from typing import ClassVar
 
 from saul.spectral import (
     PSD,
@@ -29,7 +30,7 @@ __all__ = [
 
 # Define colored formatter for logging
 class _ColorFormatter(logging.Formatter):
-    _COLORS = {
+    _COLORS: ClassVar[dict[int, str]] = {
         logging.ERROR: '\033[31m',  # Red
         logging.WARNING: '\033[33m',  # Yellow
     }
