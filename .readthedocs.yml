@@ -9,7 +9,7 @@ build:
       - git fetch --unshallow || true
 
 sphinx:
-  configuration: _doc/conf.py
+  configuration: docs/conf.py
 
 python:
   install:
