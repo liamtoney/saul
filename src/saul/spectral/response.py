@@ -228,14 +228,14 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
 
     # Make DataFrame with results
     df = pd.DataFrame(
-        dict(
-            network=networks,
-            station=stations,
-            location=locations,
-            channel=channels,
-            sensor_info=sensor_infos,
-            corner_frequency=corner_frequencies,
-        )
+        {
+            'network': networks,
+            'station': stations,
+            'location': locations,
+            'channel': channels,
+            'sensor_info': sensor_infos,
+            'corner_frequency': corner_frequencies,
+        }
     )
 
     # Optionally finish the plot

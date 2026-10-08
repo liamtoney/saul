@@ -40,12 +40,12 @@ todo_include_todos = True
 
 # These only need to cover the packages we reference from the docstrings
 # fmt: off
-intersphinx_mapping = dict(
-    multitaper=('https://multitaper.readthedocs.io/en/latest/', None),
-    numpy=('https://numpy.org/doc/stable/', None),
-    obspy=('https://docs.obspy.org/', None),
-    pandas=('https://pandas.pydata.org/docs/', None),
-    python=('https://docs.python.org/3/', None),
-    scipy=('https://docs.scipy.org/doc/scipy/', None),
-)
+intersphinx_mapping = {
+    'multitaper': ('https://multitaper.readthedocs.io/en/latest/', None),
+    'numpy': ('https://numpy.org/doc/stable/', None),
+    'obspy': ('https://docs.obspy.org/', None),
+    'pandas': ('https://pandas.pydata.org/docs/', None),
+    'python': ('https://docs.python.org/3/', None),
+    'scipy': ('https://docs.scipy.org/doc/scipy/', None),
+}
 # fmt: on

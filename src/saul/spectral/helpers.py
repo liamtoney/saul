@@ -184,9 +184,11 @@ def extract_trace_filter_params(tr):
     _, part_options, part_filter_type = string.rstrip(')').split('::')
     options = eval(part_options.split('=')[1])
     filter_type = eval(part_filter_type.split('=')[1])
-    return dict(
-        filter_type=filter_type, sampling_rate=tr.stats.sampling_rate, **options
-    )
+    return {
+        'filter_type': filter_type,
+        'sampling_rate': tr.stats.sampling_rate,
+        **options,
+    }
 
 
 def _get_defaults_for_filter_func(filter_type):

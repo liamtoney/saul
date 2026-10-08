@@ -162,7 +162,8 @@ class Stream(obspy.Stream):
         if ge:
             if sys.platform == 'darwin':  # If we're on macOS
                 subprocess.run(
-                    ['open', '-a', '/Applications/Google Earth Pro.app', filename]
+                    ['open', '-a', '/Applications/Google Earth Pro.app', filename],
+                    check=False,
                 )
             else:
                 raise NotImplementedError('`open_file` currently only works on macOS!')

@@ -67,17 +67,17 @@ def get_availability(
     # Ensure we have UTCDateTime objects to start
     starttime = _preprocess_time(starttime)
     endtime = _preprocess_time(endtime)
-    params = dict(
-        net=network,
-        sta=station,
-        loc=location,
-        cha=channel,
-        start=starttime,
-        end=endtime,
-        merge='samplerate,quality,overlap',
-        format='geocsv',
-        nodata='404',
-    )
+    params = {
+        'net': network,
+        'sta': station,
+        'loc': location,
+        'cha': channel,
+        'start': starttime,
+        'end': endtime,
+        'merge': 'samplerate,quality,overlap',
+        'format': 'geocsv',
+        'nodata': '404',
+    }
     logger.info('Getting availability info...')
     try:
         response = requests.get(_BASE_URL, params=params, timeout=30)
