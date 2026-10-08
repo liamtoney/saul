@@ -284,7 +284,7 @@ class PSD:
         fig.show()
 
     def smooth(self, bandwidth):
-        """Smooth the calculated PSDs via the Konno–Ohmachi method.
+        r"""Smooth the calculated PSDs via the Konno–Ohmachi method.
 
         The Konno–Ohmachi method smooths PSDs using fixed-bandwith windows. The C code
         used by this method is

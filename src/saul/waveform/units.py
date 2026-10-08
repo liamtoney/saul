@@ -4,7 +4,6 @@ various checks and inferences to infer the data kind (e.g., infrasound or seismi
 data physical units (e.g., Pa or m/s) of input waveforms.
 """
 
-from typing import Tuple
 
 from obspy import Trace
 
@@ -29,7 +28,7 @@ def _get_data_kind(tr: Trace) -> str:
     return data_kind
 
 
-def _get_response_output(tr: Trace) -> Tuple[bool, str | None]:
+def _get_response_output(tr: Trace) -> tuple[bool, str | None]:
     """Evaluate a :class:`~obspy.core.trace.Trace`'s response removal history — ``None`` means unknown."""
     # Determine which entries in `tr.stats.processing` are "response" calls
     try:
@@ -80,7 +79,7 @@ def _get_response_units(tr: Trace) -> str | None:
     return response_units
 
 
-def get_waveform_units(tr: Trace) -> Tuple[str, str | None]:
+def get_waveform_units(tr: Trace) -> tuple[str, str | None]:
     """Infer the data kind and physical units of an input waveform.
 
     Args:

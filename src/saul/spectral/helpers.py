@@ -29,7 +29,7 @@ _FREQ_TEMPLATE = '{:.3g} Hz / {:.2f} s'
 
 
 def get_ak_infra_noise():
-    """Returns the Alaska ambient infrasound noise models from Macpherson et al. (2022).
+    r"""Returns the Alaska ambient infrasound noise models from Macpherson et al. (2022).
 
         Macpherson, K. A., Coffey, J. R., Witsil, A. J., Fee, D., Holtkamp, S., Dalton,
         S., McFarlin, H., & West, M. (2022). Ambient infrasound noise, station

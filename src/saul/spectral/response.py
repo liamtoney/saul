@@ -207,7 +207,7 @@ def calculate_responses(inventory, sampling_rate=10, plot=False):
                 corner_db_ref_value = db_response_lower[corner_db_ref_idx]
                 if abs(_CORNER_DB_REF - corner_db_ref_value) > _DB_TOL:
                     plt.close(fig) if plot else None
-                    raise ValueError(f'Corner frequency not found within tolerance!')
+                    raise ValueError('Corner frequency not found within tolerance!')
                 corner_frequencies.append(corner_db_ref_freq)
 
                 # Optional plotting
