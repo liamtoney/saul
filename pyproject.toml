@@ -1,3 +1,7 @@
+[build-system]
+requires = ["hatchling", "uv-dynamic-versioning"]
+build-backend = "hatchling.build"
+
 [project]
 name = "saul"
 dynamic = ["version"]
@@ -17,22 +21,29 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["ruff"]
+tooling = ["poethepoet"]
+lint = ["ruff"]
 docs = [
     "sphinx",
     "sphinx-autobuild",
     "sphinx-rtd-theme",
 ]
 
-[build-system]
-requires = ["hatchling", "uv-dynamic-versioning"]
-build-backend = "hatchling.build"
-
 [tool.hatch.version]
 source = "uv-dynamic-versioning"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/saul"]
+
+[tool.poe.env]
+TARGET_FILES = "src/ examples/ docs/"
+
+[tool.poe.tasks]
+docs = "sphinx-build docs/ docs/_build/ --fail-on-warning"
+_lint = "ruff check ${TARGET_FILES}"
+_format = "ruff format ${TARGET_FILES}"
+format = ["_lint --select I --fix", "_format"]
+check = ["_lint", "_format --check"]
 
 [tool.ruff.format]
 quote-style = "single"

@@ -4,7 +4,6 @@ various checks and inferences to infer the data kind (e.g., infrasound or seismi
 data physical units (e.g., Pa or m/s) of input waveforms.
 """
 
-
 from obspy import Trace
 
 # These are ObsPy's available response outputs (as of ObsPy version 1.4.1)
