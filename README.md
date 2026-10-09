@@ -1,5 +1,6 @@
 # SAUL
 
+[![PyPI version](https://img.shields.io/pypi/v/saul)](https://pypi.org/project/saul/)
 [![API documentation status](https://readthedocs.org/projects/saul/badge/?version=latest)](https://saul.liam.earth/)
 
 **SAUL** is the **S**eismo**A**coustic **U**tilities **L**ibrary. It's my take on the
