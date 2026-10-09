@@ -3,7 +3,6 @@
 
 from importlib import metadata
 
-project = 'SAUL'
 author = 'Liam Toney'
 version = metadata.version('saul')  # Must match the name in `pyproject.toml`
 
