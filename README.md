@@ -25,7 +25,7 @@ This assumes that you've already
 you've navigated to a target directory of your choosing:
 ```shell
 uv venv --python 3.11
-uv pip install git+https://github.com/liamtoney/saul.git
+uv pip install saul
 ```
 This creates a `.venv/` folder in the target directory with SAUL and its dependencies
 installed.
@@ -34,7 +34,7 @@ If you'd rather install SAUL into an existing, e.g.,
 [`mamba`](https://mamba.readthedocs.io/en/latest/index.html) environment instead of
 using uv, activate that environment and use `pip` directly:
 ```shell
-pip install git+https://github.com/liamtoney/saul.git
+pip install saul
 ```
 
 ## Using
