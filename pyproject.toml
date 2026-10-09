@@ -4,6 +4,22 @@ build-backend = "hatchling.build"
 
 [project]
 name = "saul"
+description = "SeismoAcoustic Utilities Library"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE.txt"]
+authors = [
+    { name = "Liam Toney", email = "liam@liam.earth" },
+]
+maintainers = [
+    { name = "Liam Toney", email = "liam@liam.earth" },
+]
+keywords = ["seismology", "infrasound", "obspy"]
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering",
+]
 dynamic = ["version"]
 requires-python = ">=3.11,<3.14"
 dependencies = [
@@ -19,7 +35,6 @@ dependencies = [
     "scipy",
     "stockwell",  # https://github.com/claudiodsf/stockwell
 ]
-
 [dependency-groups]
 tooling = ["poethepoet"]
 lint = ["ruff"]
@@ -29,6 +44,11 @@ docs = [
     "sphinx-rtd-theme",
     "sphinx-copybutton"
 ]
+
+[project.urls]
+Documentation = "https://saul.liam.earth/"
+Source = "https://github.com/liamtoney/saul"
+Issues = "https://github.com/liamtoney/saul/issues"
 
 [tool.hatch.version]
 source = "uv-dynamic-versioning"
