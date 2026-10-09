@@ -16,6 +16,7 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
+    'sphinx_copybutton',
 ]
 
 templates_path = ['_templates']
@@ -29,8 +30,6 @@ html_show_copyright = False
 
 # Options for various extensions -------------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/#built-in-extensions
-
-napoleon_numpy_docstring = False  # We are using Google docstring style
 
 autodoc_member_order = 'bysource'
 autoclass_content = 'class'

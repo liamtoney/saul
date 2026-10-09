@@ -27,6 +27,7 @@ docs = [
     "sphinx",
     "sphinx-autobuild",
     "sphinx-rtd-theme",
+    "sphinx-copybutton"
 ]
 
 [tool.hatch.version]
