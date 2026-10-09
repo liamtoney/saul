@@ -84,4 +84,5 @@ can run IPython with SAUL in the same way as described above, but from anywhere:
 ```shell
 uv run --project <repository_root> ipython
 ```
-Where `<repository_root>` is the path to the root of the SAUL repository.
+Where `<repository_root>` is the path to the root of the SAUL repository. You can view
+the various developer tasks available with `uv run poe`.
