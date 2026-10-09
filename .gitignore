@@ -2,4 +2,5 @@
 /.venv/
 /.idea/
 /.vscode/
+/dist/
 .DS_Store
