@@ -87,3 +87,7 @@ uv run --project <repository_root> ipython
 ```
 Where `<repository_root>` is the path to the root of the SAUL repository. You can view
 the various developer tasks available with `uv run poe`.
+
+SAUL uses the [CalVer](https://calver.org/) versioning convention with the format
+`YY.M.D` (UTC time zone). E.g., SAUL version `26.10.9` was released on October 9th,
+2026 (UTC).
